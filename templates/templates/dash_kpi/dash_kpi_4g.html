@@ -1,0 +1,812 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base_constr_segu::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+    <style>
+    /* CONTENEDORES PRINCIPALES */
+.kpi-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 0px;
+}
+.kpi-panel {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+}
+.kpi-formulario {
+  flex: 1 1 260px;
+  max-width: 280px;
+padding: 15px 40px 15px 20px;
+}
+.kpi-filtros {
+  flex: 2 1 500px;
+  max-width: 650px;
+  position: relative;
+}
+.kpi-filtros h3{ 
+  padding-bottom: 15px;
+}
+/* ESTILOS DE FORMULARIO */
+.kpi-formulario label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  color: #333;
+}
+.kpi-formulario input[type="text"],
+.kpi-formulario input[type="date"],
+.kpi-formulario select {
+  width: 100%;
+  padding: 5px 6px;
+  font-size: 13px;
+  margin-bottom: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.kpi-formulario button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+  background: #007bff;
+  border: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.kpi-formulario button:hover {
+  background: #0056b3;
+}
+
+/* --- ESTILOS SELECT2 PARA KPI --- */
+.select2-kpi .select2-container--default .select2-selection--single {
+  height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.select2-kpi .select2-selection__rendered {
+  line-height: 1.4em !important;
+  font-size: 13px !important;
+  color: #333 !important;
+  padding-left: 8px !important;
+    position: absolute;
+    overflow: hidden !important;
+    max-width: 250px;
+}
+
+/* --- ESTILOS SELECT2 PARA FILTROS DINÁMICOS --- */
+.select2-dinamicos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 10px;
+  max-height: 520px;
+  overflow-y: auto;
+}
+.select2-dinamicos .select2-container--default .select2-selection--multiple {
+  border-radius: 6px;
+  border-color: #d1d1d1;
+  min-height: 38px;
+}
+.select2-dinamicos .select2-selection__rendered {
+  display: flex !important;
+  flex-wrap: wrap;
+  max-height: 104px;
+  overflow-y: auto;
+  margin: 0;
+}
+.select2-dinamicos .select2-selection__choice {
+  background-color: #e4e7ef;
+  color: #313366;
+  border: 1px solid #c1c4cf;
+  font-size: 13px;
+  margin-top: 2px;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* TITULOS FILTROS DINÁMICOS */
+#filtros-dinamicos label {
+	font-weight: 600;
+    font-size: 15px;
+    margin-bottom: -20px;
+    display: block;
+    color: #444;
+}
+#filtros-dinamicos > div {
+  margin-bottom: 14px;
+}
+
+/* PREVENIR SCROLL X INDESEADO POR DROPDOWN */
+body {
+  overflow-x: hidden;
+}
+.select2-dropdown {
+  max-width: 100vw !important;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+.btn-select-all,
+.btn-deselect-all {
+    background: #eee;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 11px;
+    padding: 2px 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-select-all:hover,
+.btn-deselect-all:hover {
+    background: #ddd;
+}
+.sugerencias-autocompletado {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 1000;
+    width: 100%;
+    display: none;
+    max-width: 292px;
+}
+
+.sugerencias-autocompletado div {
+    padding: 6px 10px;
+    cursor: pointer;
+}
+
+.sugerencias-autocompletado div:hover {
+    background-color: #f0f0f0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1200px) {
+  .kpi-container {
+    flex-direction: column;
+  }
+  .kpi-formulario,
+  .kpi-filtros {
+    max-width: 100%;
+  }
+}
+
+</style>
+
+
+<body>
+<header th:replace="layouts/base_constr_segu::header"></header>
+
+<div class="main">
+<div class="container" style="padding-top: 15px;">
+	
+		<!-- <div class="title-main">
+			<h2>Reporte de KPI</h2>
+		</div>-->
+		
+	
+	
+		<div class="kpi-container">
+		  <!-- Panel izquierdo: filtros fijos -->
+		  <div class="kpi-panel kpi-formulario">
+		    <h2>REPORTE DE KPI</h2>
+		    <form id="filterForm">
+		      <label>Fecha inicio:</label>
+		      <input type="date" name="startDate" required>
+		      
+		      <label>Fecha fin:</label>
+		      <input type="date" name="endDate" required>
+		      
+		      <label>Búsqueda por zona:</label>
+				<select id="tipo-zona" style="width: 100%">
+				  <option value="distrito">Distrito</option>
+				  <option value="provincia">Provincia</option>
+				  <option value="departamento">Departamento</option>
+				  <option value="region">Región</option>
+				  <option value="sub_region">Subregión</option>
+				</select>
+				
+				<label>Nombre de zona:</label>
+				<input type="text" id="input-zona" placeholder="Ej. San Isidro" autocomplete="off">
+				<div id="zona-sugerencias" class="sugerencias-autocompletado"></div>
+		      
+		      
+		      <label>Códigos sitio (coma):</label>
+		      <input type="text" name="codigos" required>
+		
+		      <div class="select2-kpi">
+		        <label for="kpi">KPI:</label>
+		        <select id="kpi" name="kpi" class="select-kpi" style="width: 100%"></select>
+		      </div>
+		      
+		      <label>Agregación:</label>
+		      <select name="aggregation" id="select-agregacion">
+		        <option value="avg">Promedio</option>
+		        <option value="sum">Suma</option>
+		      </select>
+		
+		      <label>Agrupar por:</label>
+				<select id="select-agrupacion">
+				  <option value="region">Región</option>
+				  <option value="subRegion">Subregión</option>
+				  <option value="departamento">Departamento</option>
+				  <option value="provincia">Provincia</option>
+				  <option value="clusterName">Cluster</option>
+				  <option value="distrito">Distrito</option>
+				  <option value="codigoSitio">Código Sitio</option>
+				  <option value="enodobName">eNodeB</option>
+				  <option value="sectorName">Sector</option>
+				  <option value="cellname">Cellname</option>
+				  <option value="carrier">Carrier</option>
+				  <!-- <option value="codigoSitio_carrier">Código Sitio + Carrier</option>
+				  <option value="codigoSitio_cellname_carrier">Código Sitio + Cellname + Carrier</option> -->
+				</select>
+
+		
+		      <button type="submit">Actualizar</button>
+		    </form>
+		  </div>
+		
+		  <!-- Panel derecho: filtros dinámicos -->
+		  <div class="kpi-panel kpi-filtros">
+		    <h3>Filtros dinámicos</h3>
+		    <div id="filtros-dinamicos" class="select2-dinamicos"></div>
+		  </div>
+		</div>
+		
+		<!-- Gráfico debajo -->
+		<div id="grafico-contenedor" style="margin-top: 20px;">
+		    <div style="max-width: 90%;">
+		    <canvas id="kpiChart" height="140"></canvas>
+		    <p id="grafico-placeholder" style="text-align:center; color:#888; font-size:14px; margin-top: 10px;">
+		        Aquí se mostrará el gráfico del KPI seleccionado
+		    </p>
+		    </div>
+		    <div id="leyenda-custom" style="
+			    display: flex;
+			    flex-wrap: wrap;
+			    gap: 12px 16px;
+			    margin-top: 10px;
+			    justify-content: center;
+			    font-size: 12px;
+			    color: #333;
+			    max-height: 120px;
+			    overflow-y: auto;
+			  "></div>
+		    
+		</div>
+
+
+
+
+
+</div>
+
+</div>
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+<script>
+let dataOriginal = [];
+let chart = null;
+let ultimoPayload = null;
+
+function generarSelectMultiple(arr, id, labelName) {
+    let contenedor = document.createElement('div');
+    contenedor.classList.add('filtro-item');
+
+    let label = document.createElement('label');
+    label.textContent = labelName;
+
+    let botones = document.createElement('div');
+    botones.style.display = 'flex';
+    botones.style.justifyContent = 'flex-end';
+    botones.style.gap = '4px';
+    botones.style.marginBottom = '5px';
+
+    let btnSelectAll = document.createElement('button');
+    btnSelectAll.textContent = 'Seleccionar todo';
+    btnSelectAll.type = 'button';
+    btnSelectAll.classList.add('btn-select-all');
+    btnSelectAll.onclick = () => {
+        $(`#${id} option`).prop('selected', true);
+        $(`#${id}`).trigger('change');
+    };
+
+    let btnDeselectAll = document.createElement('button');
+    btnDeselectAll.textContent = 'Eliminar selección';
+    btnDeselectAll.type = 'button';
+    btnDeselectAll.classList.add('btn-deselect-all');
+    btnDeselectAll.onclick = () => {
+        $(`#${id} option`).prop('selected', false);
+        $(`#${id}`).trigger('change');
+    };
+
+    botones.appendChild(btnSelectAll);
+    botones.appendChild(btnDeselectAll);
+
+    let select = document.createElement('select');
+    select.id = id;
+    select.multiple = true;
+    select.style.width = '100%';
+
+    arr.forEach(valor => {
+        if (valor === "") return;
+        let opt = document.createElement("option");
+        opt.value = valor;
+        opt.textContent = valor;
+        opt.selected = true;
+        select.appendChild(opt);
+    });
+
+    contenedor.appendChild(label);
+    contenedor.appendChild(botones);
+    contenedor.appendChild(select);
+
+    document.getElementById('filtros-dinamicos').appendChild(contenedor);
+
+    $(`#${id}`).select2({
+        placeholder: labelName,
+        width: 'resolve'
+    });
+
+    $(`#${id}`).on('change', filtrarYGraficar);
+}
+
+
+document.getElementById('filterForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const payload = {
+        startDate: formData.get('startDate'),
+        endDate: formData.get('endDate'),
+        codigos: formData.get('codigos').split(',').map(c => c.trim()).filter(c => c),
+        kpi: formData.get('kpi'),
+        aggregation: formData.get('aggregation')
+    };
+    ultimoPayload = payload;
+    this.querySelector('button[type=submit]').disabled = true;
+    this.querySelector('button[type=submit]').textContent = "Cargando...";
+    const response = await fetch('/api/kpi-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    this.querySelector('button[type=submit]').disabled = false;
+    this.querySelector('button[type=submit]').textContent = "Actualizar";
+    if (!response.ok) { alert('Error al obtener datos'); return; }
+    const data = await response.json();
+    procesarDatos(data);
+});
+
+function procesarDatos(data) {
+    dataOriginal = data;
+    document.getElementById('filtros-dinamicos').innerHTML = '';
+    const regiones = [...new Set(data.map(d => d.region))];
+    const subregiones = [...new Set(data.map(d => d.subRegion))];
+    const departamentos = [...new Set(data.map(d => d.departamento))];
+    const provincias = [...new Set(data.map(d => d.provincia))];
+    const clusters = [...new Set(data.map(d => d.clusterName))];
+    const distritos = [...new Set(data.map(d => d.distrito))];
+    const codigos = [...new Set(data.map(d => d.codigoSitio))];
+    const enodobs = [...new Set(data.map(d => d.enodobName))];
+    const sectores = [...new Set(data.map(d => d.sectorName))];
+    const cellnames = [...new Set(data.map(d => d.cellname))];
+    const carriers = [...new Set(data.map(d => d.carrier))];
+
+    generarSelectMultiple(regiones, 'select-region', 'Región');
+    generarSelectMultiple(subregiones, 'select-subregion', 'Subregión');
+    generarSelectMultiple(departamentos, 'select-departamento', 'Departamento');
+    generarSelectMultiple(provincias, 'select-provincia', 'Provincia');
+    generarSelectMultiple(clusters, 'select-cluster', 'Cluster');
+    generarSelectMultiple(distritos, 'select-distrito', 'Distrito');
+    generarSelectMultiple(codigos, 'select-codigo', 'Código Sitio');
+    generarSelectMultiple(enodobs, 'select-enodob', 'eNodeB');
+    generarSelectMultiple(sectores, 'select-sector', 'Sector');
+    generarSelectMultiple(cellnames, 'select-cellname', 'Cellname');
+    generarSelectMultiple(carriers, 'select-carrier', 'Carrier');
+    filtrarYGraficar();
+}
+
+function filtrarYGraficar() {
+    const regionesSel = $('#select-region').val() || [];
+    const subregionesSel = $('#select-subregion').val() || [];
+    const departamentosSel = $('#select-departamento').val() || [];
+    const provinciasSel = $('#select-provincia').val() || [];
+    const clustersSel = $('#select-cluster').val() || [];
+    const distritosSel = $('#select-distrito').val() || [];
+    const codigosSel = $('#select-codigo').val() || [];
+    const enodobsSel = $('#select-enodob').val() || [];
+    const sectoresSel = $('#select-sector').val() || [];
+    const cellnamesSel = $('#select-cellname').val() || [];
+    const carriersSel = $('#select-carrier').val() || [];
+
+    const filtrada = dataOriginal.filter(d =>
+        regionesSel.includes(d.region) &&
+        subregionesSel.includes(d.subRegion) &&
+        departamentosSel.includes(d.departamento) &&
+        provinciasSel.includes(d.provincia) &&
+        clustersSel.includes(d.clusterName) &&
+        distritosSel.includes(d.distrito) &&
+        codigosSel.includes(d.codigoSitio) &&
+        enodobsSel.includes(d.enodobName) &&
+        sectoresSel.includes(d.sectorName) &&
+        cellnamesSel.includes(d.cellname) &&
+        carriersSel.includes(d.carrier)
+    );
+
+    graficar(filtrada);
+}
+
+function graficar(data) {
+	
+	// Ocultar placeholder si hay datos
+    const placeholder = document.getElementById('grafico-placeholder');
+    if (data.length > 0) {
+        placeholder.style.display = 'none';
+    } else {
+        placeholder.style.display = 'block';
+    }
+    //////
+    
+    const agrupacion = document.getElementById('select-agrupacion').value;
+    const agregacion = document.getElementById('select-agregacion').value;
+
+    const isRatio = data.length > 0 && data[0].numValue !== undefined && data[0].denValue !== undefined;
+
+    function getGroupKey(d) {
+        switch (agrupacion) {
+            case 'region': return d.region;
+            case 'subRegion': return d.subRegion;
+            case 'departamento': return d.departamento;
+            case 'provincia': return d.provincia;
+            case 'clusterName': return d.clusterName;
+            case 'distrito': return d.distrito;
+            case 'codigoSitio': return d.codigoSitio;
+            case 'enodobName': return d.enodobName;
+            case 'sectorName': return d.sectorName;
+            case 'cellname': return d.cellname;
+            case 'carrier': return d.carrier;
+            case 'codigoSitio_carrier': return `${d.codigoSitio} | ${d.carrier}`;
+            case 'codigoSitio_cellname_carrier': default:
+                return `${d.codigoSitio} | ${d.cellname} | ${d.carrier}`;
+        }
+    }
+
+    const grupos = {};
+    data.forEach(d => {
+        const group = getGroupKey(d);
+        const fecha = d.resultTime;
+        if (!grupos[group]) grupos[group] = {};
+        if (!grupos[group][fecha]) grupos[group][fecha] = [];
+        grupos[group][fecha].push(d);
+    });
+
+    const datasets = Object.entries(grupos).map(([key, fechas]) => ({
+        label: key,
+        data: Object.entries(fechas).map(([fecha, valores]) => {
+            let y;
+            if (isRatio) {
+                let totalNum = 0, totalDen = 0;
+                for (const v of valores) {
+                    totalNum += Number(v.numValue ?? 0);
+                    totalDen += Number(v.denValue ?? 0);
+                }
+                y = totalDen === 0 ? null : Number((totalNum / totalDen).toFixed(2));
+            } else {
+                const kpis = valores.map(v => v.kpiValue);
+                y = agregacion === "sum"
+                    ? Number((kpis.reduce((a, b) => a + b, 0)).toFixed(2))
+                    : Number((kpis.reduce((a, b) => a + b, 0) / kpis.length).toFixed(2));
+            }
+            return { x: fecha, y };
+        }),
+        borderWidth: 2,
+        spanGaps: true,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        tension: 0.3
+    }));
+
+    const labels = [...new Set(data.map(d => d.resultTime))].sort();
+
+    if (chart) chart.destroy();
+
+    const kpi = ultimoPayload?.kpi || 'kpi';
+    const labelKpi = kpiLabels[kpi.replace(/_num$/, '')] || kpi;
+
+    chart = new Chart(document.getElementById('kpiChart').getContext('2d'), {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 16,
+                        font: { size: 11 },
+                        filter: function(item) {
+                			return typeof item.index == 'number' && item.index < 30
+                		}
+                    }
+                },
+                tooltip: {
+                    enabled: true,
+                    callbacks: {
+                        label: context => `${context.dataset.label}: ${context.parsed.y?.toFixed(2)}`
+                    }
+                },
+                title: {
+                    display: true,
+                    text: `Indicador: ${labelKpi}`,
+                    font: { size: 18, weight: 'bold' },
+                    color: '#333',
+                    padding: { top: 10, bottom: 10 }
+                }
+            },
+            layout: {
+                padding: { top: 8, right: 10, bottom: 30, left: 5 }
+            },
+            interaction: { mode: 'nearest', intersect: false },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Fecha',
+                        font: { size: 14, weight: '600' },
+                        color: '#555'
+                    },
+                    ticks: {
+                        autoSkip: true,
+                        maxTicksLimit: 18,
+                        maxRotation: 32,
+                        minRotation: 8,
+                        font: { size: 11 }
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: labelKpi,
+                        font: { size: 14, weight: '600' },
+                        color: '#555'
+                    },
+                    ticks: {
+                        font: { size: 11 },
+                        callback: value => Number(value).toFixed(2)
+                    }
+                }
+            }
+        }
+    });
+    
+ // Leyenda personalizada en 4 filas (hasta 30 elementos)
+    const leyendaHTML = datasets
+      .slice(0, 30) // Limita a 30 leyendas
+      .map(ds => `
+        <div style="display: flex; align-items: center; gap: 6px; max-width: 200px;">
+          <span style="
+            display:inline-block;
+            width:12px;
+            height:12px;
+            background:${ds.borderColor || '#333'};
+            border-radius:50%;
+            flex-shrink: 0;
+          "></span>
+          <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            ${ds.label}
+          </span>
+        </div>
+      `)
+      .join('');
+    document.getElementById('leyenda-custom').innerHTML = leyendaHTML;
+
+
+    
+}
+
+document.getElementById('select-agrupacion').addEventListener('change', filtrarYGraficar);
+document.getElementById('select-agregacion').addEventListener('change', filtrarYGraficar);
+
+</script>
+
+
+<script type="text/javascript">
+document.getElementById('input-zona').addEventListener('input', async function () {
+    const termino = this.value.trim();
+    const tipo = document.getElementById('tipo-zona').value;
+
+    if (termino.length < 2) {
+        document.getElementById('zona-sugerencias').style.display = 'none';
+        return;
+    }
+
+    const res = await fetch(`/api/buscar-zona?tipo=${tipo}&termino=${encodeURIComponent(termino)}`);
+    const sugerencias = await res.json();
+
+    const contenedor = document.getElementById('zona-sugerencias');
+    contenedor.innerHTML = '';
+    sugerencias.forEach(item => {
+        const div = document.createElement('div');
+        div.textContent = item;
+        div.onclick = () => {
+            document.getElementById('input-zona').value = item;
+            contenedor.style.display = 'none';
+            buscarCodigosDesdeZona(tipo, item);
+        };
+        contenedor.appendChild(div);
+    });
+    contenedor.style.display = 'block';
+});
+
+async function buscarCodigosDesdeZona(tipo, valor) {
+    const res = await fetch(`/api/obtener-codigos?tipo=${tipo}&valor=${encodeURIComponent(valor)}`);
+    const codigos = await res.json();
+    document.querySelector('input[name="codigos"]').value = codigos.join(',');
+}
+</script>
+
+
+<script>
+// --- KPIs compuestos y no compuestos ---
+const kpisCompuestos = [
+  "acc_rrc", "acc_rab", "acc_signalling", "ret_lte",
+  "vlt_erab_stp_succrate", "avg_dl_prb_usage", "avg_ul_prb_usage",
+  "cell_ul_thrp", "cell_dl_thrp", "user_dl_thrp", "user_ul_thrput",
+  "cqi", "cqi_qpsk", "cqi_16qam", "qam_cqi", "handover"
+];
+
+const kpisNoCompuestos = [
+  "acc_lte", "availability_lte", "traffic_dl_gb", "traffic_ul_gb",
+  "rrc_connc_user_max", "rrc_connc_user_avg", "call_stp_suc_rate",
+  "ps_drop_rate", "csfb_sr", "l_ul_interf_avg", "pdsch_ibler", "pdsch_rbler",
+  "intra_freq_ho_succrate", "inter_freq_ho_succrate", "lte_efficiency_dl",
+  "lte_efficiency_ul", "serv_drop_rate", "irat_to_3g", "l_ra_ta_ue_index0",
+  "l_ra_ta_ue_index1", "l_ra_ta_ue_index2", "l_ra_ta_ue_index3",
+  "l_ra_ta_ue_index4", "l_ra_ta_ue_index5", "l_ra_ta_ue_index6",
+  "l_ra_ta_ue_index7", "l_ra_ta_ue_index8", "l_ra_ta_ue_index9",
+  "l_ra_ta_ue_index10", "l_ra_ta_ue_index11", "rank_1", "rank_2", "rank_3", "rank_4",
+  "pdcp_data_vol_mbit", "pdcp_data_vol_gb", "l_chmeas_pdcch_agglv_1num",
+  "l_chmeas_pdcch_agglv_2num", "l_chmeas_pdcch_agglv_4num", "l_chmeas_pdcch_agglv_8num",
+  "l_chmeas_pdcch_symnum_1", "l_chmeas_pdcch_symnum_2", "l_chmeas_pdcch_symnum_3",
+  "l_chmeas_pdcch_symnum_4", "l_chmeas_cce_dlused", "l_chmeas_cce_ulused",
+  "l_chm_cce_dl_allocfail", "l_chm_cce_ul_allocfail", "rndm_acc_content_based",
+  "rndm_acc_content_free", "msg2", "dl_mac_volume_per_prb"
+];
+
+const allKpis = [...kpisCompuestos, ...kpisNoCompuestos];
+
+// --- Mapeo de nombres amigables ---
+const kpiLabels = {
+  // KPIs compuestos
+  acc_rrc: "Accesibilidad RRC",
+  acc_rab: "Accesibilidad RAB",
+  acc_signalling: "Accesibilidad Signalling",
+  ret_lte: "Retenibilidad LTE",
+  vlt_erab_stp_succrate: "VoLTE E-RAB Setup Success Rate",
+  avg_dl_prb_usage: "Uso Prom. PRB DL",
+  avg_ul_prb_usage: "Uso Prom. PRB UL",
+  cell_ul_thrp: "Throughput UL Celda",
+  cell_dl_thrp: "Throughput DL Celda",
+  user_dl_thrp: "Throughput DL Usuario",
+  user_ul_thrput: "Throughput UL Usuario",
+  cqi: "CQI",
+  cqi_qpsk: "CQI QPSK",
+  cqi_16qam: "CQI 16QAM",
+  qam_cqi: "CQI QAM",
+  handover: "Handover Total",
+
+  // KPIs no compuestos
+  acc_lte: "Accesibilidad LTE",
+  availability_lte: "Disponibilidad LTE",
+  traffic_dl_gb: "Tráfico DL (GB)",
+  traffic_ul_gb: "Tráfico UL (GB)",
+  rrc_connc_user_max: "Máx. Usuarios RRC",
+  rrc_connc_user_avg: "Prom. Usuarios RRC",
+  call_stp_suc_rate: "Call Setup Success Rate",
+  ps_drop_rate: "Tasa de Caídas PS",
+  csfb_sr: "Éxito CSFB",
+  l_ul_interf_avg: "Interferencia UL Prom.",
+  pdsch_ibler: "PDSCH IBLER",
+  pdsch_rbler: "PDSCH RBLER",
+  intra_freq_ho_succrate: "Intra Freq. HO Success Rate",
+  inter_freq_ho_succrate: "Inter Freq. HO Success Rate",
+  lte_efficiency_dl: "Eficiencia LTE DL",
+  lte_efficiency_ul: "Eficiencia LTE UL",
+  serv_drop_rate: "Service Drop Rate",
+  irat_to_3g: "Irat to 3G",
+  l_ra_ta_ue_index0: "RA TA UE Index 0",
+  l_ra_ta_ue_index1: "RA TA UE Index 1",
+  l_ra_ta_ue_index2: "RA TA UE Index 2",
+  l_ra_ta_ue_index3: "RA TA UE Index 3",
+  l_ra_ta_ue_index4: "RA TA UE Index 4",
+  l_ra_ta_ue_index5: "RA TA UE Index 5",
+  l_ra_ta_ue_index6: "RA TA UE Index 6",
+  l_ra_ta_ue_index7: "RA TA UE Index 7",
+  l_ra_ta_ue_index8: "RA TA UE Index 8",
+  l_ra_ta_ue_index9: "RA TA UE Index 9",
+  l_ra_ta_ue_index10: "RA TA UE Index 10",
+  l_ra_ta_ue_index11: "RA TA UE Index 11",
+  rank_1: "Rank 1",
+  rank_2: "Rank 2",
+  rank_3: "Rank 3",
+  rank_4: "Rank 4",
+  pdcp_data_vol_mbit: "PDCP Data Volume (Mbit)",
+  pdcp_data_vol_gb: "PDCP Data Volume (GB)",
+  l_chmeas_pdcch_agglv_1num: "PDCCH Agg. Level 1",
+  l_chmeas_pdcch_agglv_2num: "PDCCH Agg. Level 2",
+  l_chmeas_pdcch_agglv_4num: "PDCCH Agg. Level 4",
+  l_chmeas_pdcch_agglv_8num: "PDCCH Agg. Level 8",
+  l_chmeas_pdcch_symnum_1: "PDCCH Symbol 1",
+  l_chmeas_pdcch_symnum_2: "PDCCH Symbol 2",
+  l_chmeas_pdcch_symnum_3: "PDCCH Symbol 3",
+  l_chmeas_pdcch_symnum_4: "PDCCH Symbol 4",
+  l_chmeas_cce_dlused: "CCE DL Usado",
+  l_chmeas_cce_ulused: "CCE UL Usado",
+  l_chm_cce_dl_allocfail: "Fallo Asignación DL",
+  l_chm_cce_ul_allocfail: "Fallo Asignación UL",
+  rndm_acc_content_based: "Random Access Contention-Based",
+  rndm_acc_content_free: "Random Access Contention-Free",
+  msg2: "MSG2",
+  dl_mac_volume_per_prb: "Volumen MAC DL / PRB"
+};
+
+
+// --- Función para obtener etiqueta amigable ---
+function getKpiLabel(kpiName) {
+  const base = kpiName.replace(/_num$/, "").replace(/_den$/, "");
+  return kpiLabels[base] || kpiName.toUpperCase();
+}
+
+// --- Cargar select de KPIs al iniciar ---
+function initKpiSelect() {
+  const kpiSelect = document.getElementById('kpi');
+  kpiSelect.innerHTML = '';
+  allKpis.forEach(kpi => {
+    const isCompuesto = kpisCompuestos.includes(kpi);
+    const option = document.createElement('option');
+    option.value = isCompuesto ? `${kpi}_num` : kpi;
+    option.textContent = getKpiLabel(kpi);
+    kpiSelect.appendChild(option);
+  });
+
+  // Activar select2
+  $('#kpi').select2({
+    placeholder: 'Selecciona un KPI',
+    allowClear: true,
+    width: 'resolve'
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initKpiSelect);
+</script>
+
+
+</body>
+</html>

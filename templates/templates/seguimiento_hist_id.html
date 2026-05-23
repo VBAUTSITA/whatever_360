@@ -1,0 +1,330 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">         
+<head th:replace="layouts/base::head">
+</head>
+<body>
+<header th:replace="layouts/base::header"></header>
+
+<div class="miga breadcrumb">
+	<div class="container">
+		<a class="btn btn-primary"
+			href="#" onclick='javascript:window.history.back()' role="button">
+			Regresar</a>
+	</div>
+</div>
+
+<div class="main add blocked" style="padding-bottom: 15px;">	
+	<div class="container">
+		<div class="title-main crud">
+			<h2>Detalles del Sitio 					
+				<!-- <span th:object="${seguimiento_hist_id}" th:text="*{cellname}" class="form-control" id="cellname" style="display: inline-block"></span> -->
+				<span th:text="*{seguimiento_hist_id.cellname}" class="form-control" id="cellname" style="display: inline-block"></span>
+			</h2>
+		</div>
+		<form action="#" th:object="${seguimiento_hist_id}" 
+				method="get" class="form">
+			
+			<div class="form_cols">
+				<div class="cols">
+				
+					<div class="form-group">
+						<label for="estado_cambio">ESTADO DE CAMBIO</label>
+						<input readonly="readonly" th:field="*{estado_cambio}" class="form-control" id="estado_cambio">
+						<span class="estado_cambio_user">Por el Usuario <span readonly="readonly" th:text="*{usuario}" id="usuario"></span></span>				
+					</div>
+				</div>
+				
+				<div class="cols">
+					<div class="form-group fecha_cambio">
+								<label class="label_title" for="date_change">ULTIMA FECHA / HORA CAMBIO</label>
+								<label th:text="*{#dates.format(date_change, 'dd-MM-yyyy HH:mm:ss a')}" class="fecha"></label>
+					</div>	
+				</div>
+
+				<div class="cols">
+					
+				</div>
+				
+			</div>
+			
+			<div class="form_cols">
+				<div class="cols">
+				
+					<div class="form-group">
+						<label for="code_site">SITIO</label>
+						<input readonly="readonly" th:field="*{code_site}" class="form-control" id="code_site" required="required"/>
+					</div>
+			
+					<div class="form-group">
+						<label for="site_address">SITE_ADRESS</label>
+						<input readonly="readonly" th:field="*{site_address}" class="form-control" id="site_address" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="cellname">CELLNAME</label>
+						<input readonly="readonly" th:field="*{cellname}" class="form-control" id="cellname" required="required"/>
+					</div>
+			
+					<div class="form-group">
+						<label for="longitud">LONGITUD</label>
+						<input readonly="readonly" th:field="*{longitud}" class="form-control" id="longitud" required="required"/>
+					</div>
+					<div class="form-group">
+						<label for="latitud">LATITUD</label>
+						<input readonly="readonly" th:field="*{latitud}" class="form-control" id="latitud" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="sector">SECTOR</label>
+						<input readonly="readonly" th:field="*{sector}" class="form-control" id="sector" />			
+					</div>
+										
+				</div>
+				
+				<div class="cols">				
+					
+					
+					
+					<div class="form-group">
+						<label for="band">BANDA</label>
+						<input readonly="readonly" th:field="*{band}" class="form-control" id="band" />			
+					</div>
+					
+					<div class="form-group">
+						<label for="tecnologia">TECNOLOGIA</label>
+						<input readonly="readonly" th:field="*{tecnologia}" class="form-control" id="tecnologia" />		
+					</div>	
+					
+				
+					<div class="form-group">
+						<label for="tilt_electric_field">TILT ELECTRICO</label>
+						<input readonly="readonly" th:field="*{tilt_electric_field}" class="form-control" id="tilt_electric_field" />
+					</div>
+					
+					<div class="form-group">
+						<label for="azimuth">AZIMUTH</label>
+						<input readonly="readonly" th:field="*{azimuth}" class="form-control" id="azimuth" />
+					</div>	
+					
+					<div class="form-group">
+						<label for="height">ALTURA</label>
+						<input readonly="readonly" th:field="*{height}" class="form-control" id="height" />
+					</div>
+					
+					<div class="form-group">
+						<label for="tilt_mecanic_field">TILT MECANICO</label>
+						<input readonly="readonly" th:field="*{tilt_mecanic_field}" class="form-control" id="tilt_mecanic_field" />
+					</div>
+					
+				</div>
+				
+				<div class="cols">
+					
+					<div class="form-group">
+						<label for="logic_changes">CAMBIOS LOGICOS</label>
+						<textarea readonly="readonly" th:field="*{logic_changes}" class="form-control" id="logic_changes"></textarea>
+					</div>
+					
+					<div class="form-group">
+						<label for="cambio_coment">COMENTARIO DEL CAMBIO</label>
+						<textarea readonly="readonly" th:field="*{cambio_coment}" class="form-control" id="cambio_coment"></textarea>
+					</div>
+					
+				</div>
+			</div>
+			
+		</form>	
+	</div>	 
+</div>
+		
+
+<div class="main kpi">	
+	<div class="container">
+		<div class="title-main crud">
+			<h2>KPIs del Sitio <span th:text="*{seguimiento_hist_id.tecnologia}"></span></h2>
+		</div>
+		
+		<!-- 
+		<table id="lista_segui" class="table table-striped list_results display" style="width:100%">
+			<thead>
+				<tr>
+					<th scope="row">SITE ID HIST</th>
+					<th scope="row">FECHA</th>
+					<th scope="row">CELLNAME</th>	
+					<th scope="row">TECNOLOGIA</th>		
+					<th scope="row">BE Users_NV</th>	
+				</tr>
+			</thead>
+			<tbody>
+
+						
+					<tr th:each="seguimiento : ${seguimiento_list_kpi_id}">	
+						<td th:text="${seguimiento.site_id_hist }"></td>
+						<td th:text="${#dates.format(seguimiento.result_date, 'dd-MM-yyyy')}"></td>
+						<td th:text="${seguimiento.cellname }"></td>
+						<td th:text="${seguimiento.tecnologia }"></td>
+						<td th:text="${seguimiento.l_traffic_user_avg }"></td>				
+					</tr>
+					
+			</tbody>
+		</table>
+		-->
+		
+		<div class="row-fluid stats-box">
+	       <div class="span5 kpi-table-span">
+				<table id="traffic_table2" class="highchart traffic" data-graph-container-before="1" data-graph-type="line" style="display:none" data-graph-datalabels-enabled="1" data-graph-datalabels-color="blue">
+				  <thead>
+				      <tr>
+				          <th>Fecha</th>
+				          <th>LTE Traffic User AVG</th>		
+				          <th class="data-graph-line-id" data-graph-vline-x="5" data-graph-vline-height="40" data-graph-vline-name="Fecha">Cambio <span th:text="*{seguimiento_hist_id.estado_cambio}"></span></th>		           
+				      </tr>
+				   </thead>
+				   <tbody> 
+				      <tr th:each="seguimiento : ${seguimiento_list_kpi_id}">	
+				          <td th:text="${#dates.format(seguimiento.result_date, 'dd-MM-yyyy')}"></td>
+				          <!--<td th:text="${seguimiento.l_traffic_user_avg }"></td>-->
+					      <td >
+					           <span th:text="${#numbers.formatDecimal(seguimiento.l_traffic_user_avg, 1, 2, 'POINT')}"> </span>
+					      </td>     
+				      </tr>
+				  </tbody>
+				</table>
+				<!-- <a href="#" id="btn-export">Export CSV</a> -->
+			</div>
+			<div class="span5 kpi-table-span">
+				<table id="traffic_table" class="highchart traffic-2" data-graph-container-before="1" data-graph-type="line" style="display:none" data-graph-datalabels-enabled="1" data-graph-datalabels-color="blue">
+				  <thead>
+				      <tr>
+				          <th>Fecha</th>
+				          <th>LTE Traffic User AVG</th>	       
+				          <th class="data-graph-line-id" data-graph-vline-x="5" data-graph-vline-height="125" data-graph-vline-name="Fecha">Cambio <span th:text="*{seguimiento_hist_id.estado_cambio}"></span></th>
+				          <!--<span th:object="${seguimiento_hist_id}" th:text="*{cellname}" class="form-control" id="cellname" style="display: inline-block"></span>-->
+				      </tr>
+				   </thead>
+				   <tbody> 
+				      <tr th:each="seguimiento : ${seguimiento_list_kpi_id}">	
+				          <td th:text="${#dates.format(seguimiento.result_date, 'dd-MM-yyyy')}"></td>
+				          <!--<td th:text="${seguimiento.l_traffic_user_avg }"></td>-->
+					      <td th:value="${#numbers.formatDecimal(seguimiento.l_traffic_user_avg, 1, 2, 'POINT')}">
+					           <!-- <span th:text="${{#numbers.formatDecimal(seguimiento.l_traffic_user_avg, 1, 2, 'POINT')}+ '%'}">% </span> -->
+					           <span th:text="${#numbers.formatDecimal(seguimiento.l_traffic_user_avg, 1, 2, 'POINT')}"> </span>
+					      </td>     
+				      </tr>
+				  </tbody>
+				</table>
+				<!-- <a href="#" id="btn-export">Export CSV</a> -->
+			</div>
+		</div>
+	</div>
+</div>
+		
+<div  th:replace="layouts/base::footer"></div>
+
+<script type="text/javascript" th:src="@{/js/highchart/highcharts.js}"></script>
+<script type="text/javascript" th:src="@{/js/highchart/jquery.highchartTable-min.js}"></script>
+
+<!-- modulos adicionales highcharts -->
+<script type="text/javascript" th:src="@{/js/highchart/modules/no-data-to-display.js}"></script> 
+<script type="text/javascript" th:src="@{/js/highchart/modules/accessibility.js}"></script>
+<script type="text/javascript" th:src="@{/js/highchart/modules/exporting.js}"></script>
+<script type="text/javascript" th:src="@{/js/highchart/modules/export-csv.js}"></script> 
+
+<!-- funciones de cada grafica -->
+<!--  <script type="text/javascript" th:src="@{/js/highchart/funciones-chart.js}"></script> -->
+<script type="text/javascript">
+/*$(document).ready(function() {
+$('table.highchart').highchartTable();  
+});*/
+
+$(document).ready(function(){
+
+$('table.highchart.traffic')
+.bind('highchartTable.beforeRender', function(event, highChartConfig) {
+	highChartConfig.chart.style = {
+				  "height": "400px"
+	};
+  highChartConfig.yAxis = {
+	      title: {
+	    		text : 'Valor en Cantidad'  
+	      }
+	};
+  highChartConfig.yAxis.title.style = {
+  	  "color": "#444",
+  	  "fontSize": "14px",
+  	  "fontWeight": "Bold",
+  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.title = {
+  		  //text: 'Indicador KPI'
+	  	      //text: '<span style="font-weight: bold;">Indicador KPI</span>'
+	  	      text: 'Indicador KPI [[${seguimiento_hist_id.cellname}]]'
+	  	      //text : [${seguimiento_hist_id.cellname()}] 
+  };
+  highChartConfig.title.style = { 
+	    	"fontWeight": "Bold",
+  		"color": "#444",
+  		"fontSize" : "20px"
+  };
+})
+.highchartTable();
+
+});
+
+
+$(document).ready(function(){
+	
+	$('table.highchart.traffic-2')
+	  .bind('highchartTable.beforeRender', function(event, highChartConfig) {
+		highChartConfig.chart.style = {
+				  "height": "400px"
+		};
+		highChartConfig.plotOptions = {
+	            /*series: {
+	                borderWidth: 0,
+	                dataLabels: {
+	                    enabled: true,
+	                    format: '{point.y:.1f}%'
+	                }
+	            }	*/
+		};
+	    highChartConfig.yAxis = {
+	  	      title: {
+	  	    		text : 'Porcentaje %'  
+	  	      },
+	  	      labels: {
+                  enabled: true,
+                  //format: '{value:,.1f}%' --> 1f es 1 decimal
+                  //format: '{value:,.2f}%' --> 2f es 2 decimal
+                  format: '{value:,.0f}%'
+            },
+            max: '110'
+	  	};
+	    highChartConfig.yAxis.title.style = {
+	    	  "color": "#444",
+	    	  "fontSize": "14px",
+	    	  "fontWeight": "700",
+	    	  "fontFamily": "Verdana"
+	    };
+	    highChartConfig.title = {
+		  	      //text: '<span style="font-weight: bold;">Traffic User Avg</span>'
+		  	      text: 'Traffic User Avg [[${seguimiento_hist_id.cellname}]]'
+		};
+	    highChartConfig.title.style = { 
+		    	"fontWeight": "Bold",
+	    		"color": "#444",
+	    		"fontSize" : "20px"
+	    };
+	  })
+	  .highchartTable();
+	
+});
+</script> 
+
+<!--  -->
+</body>
+</html>

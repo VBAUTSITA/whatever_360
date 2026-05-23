@@ -1,0 +1,190 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<body>
+
+<header th:replace="layouts/base_baseline::header"></header>
+
+
+<div class="main maestro_baseline">
+	<div class="container">
+		
+		<div class="title-main">
+			<h2 style="text-transform: initial;font-size: 20px;font-family: 'Verdana';">
+			EDITAR PARAMETRO DEL BASELINE "CLASEMO: 
+			<medium th:text="${entidad.claseMo}"></medium>" / "ORDEN: <medium th:text="${entidad.orden}"></medium>" 
+			</h2>
+			<!-- <button class="btn" id="downloadCSV">Descargar CSV</button> -->
+		</div>
+		
+		
+		<div id="successAlert" style="display: none;">Fue actualizado exitosamente</div>
+		<div id="errorAlert" style="display: none; color: red;"></div>
+		
+		<div id="successAlert_bs" th:if="${exitobaseline}" style="color: green;">
+			<p th:text="${exitobaseline}"></p>
+		</div>
+		<div class="row-fluid stats-box">
+
+           
+			<form id="editEntidadForm">
+		
+		
+              <div class="span6">	    
+				<input type="hidden" id="entidadId" name="id" th:value="${entidad.id}" />
+				
+				<label for="orden">Orden:</label>
+				<input type="text" id="orden" name="orden" th:value="${entidad.orden}" required />
+				<!-- 
+				<label for="levelBs">Level Bs:</label>
+				<input type="text" id="levelBs" name="levelBs" th:value="${entidad.levelBs}" required />-->
+					<label for="orden">Orden:</label>
+					<select th:value="${entidad.levelBs}" id="levelBs" >
+						<option value="ENODEB" th:selected="${entidad.levelBs == 'ENODEB'}">ENODEB</option>
+						<option value="CELDA" th:selected="${entidad.levelBs == 'CELDA'}">CELDA</option>
+					</select>			
+			
+					<label for="claseMo">claseMo:</label>
+					<input type="text" th:value="${entidad.claseMo}" id="claseMo" />
+					
+				<label for="parametroId">parametroId:</label>
+					<input type="text" th:value="${entidad.parametroId}" id="parametroId" />	
+					
+				<label for="parameterName">parameterName:</label>
+					<input type="text" th:value="${entidad.parameterName}" id="parameterName" />	
+					
+				<label for="subParametro">subParametro:</label>
+					<input type="text" th:value="${entidad.subParametro}" id="subParametro" />
+					
+				<label for="condicional">condicional:</label>
+					<input type="text" th:value="${entidad.condicional}" id="condicional" />
+					
+				<label for="bandAll">bandAll:</label>
+					<input type="text" th:value="${entidad.bandAll}" id="bandAll" class="bnd_all bnd_all"/>
+					
+			</div>
+			<div class="span6">	
+					
+					
+				<label for="band210MHz">band210MHz:</label>
+					<input type="text" th:value="${entidad.band210MHz}" id="band210MHz" class="bnd_bll"/>
+					
+				<label for="band215MHz">band215MHz:</label>
+					<input type="text" th:value="${entidad.band215MHz}" id="band215MHz" class="bnd_bll"/>
+					
+				<label for="band2815MHz">band2815MHz:</label>
+					<input type="text" th:value="${entidad.band2815MHz}" id="band2815MHz" class="bnd_bll"/>
+					
+				<label for="band710MHz">band710MHz:</label>
+					<input type="text" th:value="${entidad.band710MHz}" id="band710MHz" class="bnd_bll"/>
+				
+				<label for="band715MHz">band715MHz:</label>
+					<input type="text" th:value="${entidad.band715MHz}" id="band715MHz" class="bnd_bll"/>
+				
+				<label for="band720MHz">band720MHz:</label>
+					<input type="text" th:value="${entidad.band720MHz}" id="band720MHz" class="bnd_bll"/>
+					
+				<label for="scriptBs">scriptBs:</label>
+					<!-- <textarea th:value="${entidad.scriptBs}" id="scriptBs">
+					</textarea>-->
+					<textarea th:field="${entidad.scriptBs}" id="scriptBs"></textarea>
+					
+					<div>	
+					<button type="submit">Actualizar</button>
+					</div>
+				
+				</div>
+		
+		<!-- Otros campos... -->
+	
+		
+		</form>
+	</div>
+		
+	</div>
+</div>
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+
+<script>
+$(document).ready(function() {
+// Manejar el evento de submit del formulario de actualización
+$("#editEntidadForm").submit(function(event) {
+event.preventDefault();
+
+// Capturar los valores del formulario
+const id = $("#entidadId").val();
+const orden = $("#orden").val();
+const levelBs = $("#levelBs").val();
+const claseMo = $("#claseMo").val();
+const parametroId = $("#parametroId").val();
+const parameterName = $("#parameterName").val();
+const subParametro = $("#subParametro").val();
+const condicional = $("#condicional").val();
+const bandAll = $("#bandAll").val();
+const band210MHz = $("#band210MHz").val();
+const band215MHz = $("#band215MHz").val();
+const band2815MHz = $("#band2815MHz").val();
+const band710MHz = $("#band710MHz").val();
+const band715MHz = $("#band715MHz").val();
+const band720MHz = $("#band720MHz").val();
+const scriptBs = $("#scriptBs").val();
+// Enviar datos a través de AJAX
+$.ajax({
+url: '/baseline-admin/update',
+type: 'POST',
+data: JSON.stringify({
+id: id,
+orden: orden,
+levelBs: levelBs,
+claseMo: claseMo,
+parametroId: parametroId,
+parameterName: parameterName,
+subParametro: subParametro,
+condicional: condicional,
+bandAll: bandAll,
+band210MHz: band210MHz,
+band215MHz: band215MHz,
+band2815MHz: band2815MHz,
+band710MHz: band710MHz,
+band715MHz: band715MHz,
+band720MHz: band720MHz,
+scriptBs: scriptBs
+}),
+contentType: 'application/json; charset=utf-8',
+dataType: 'json',
+success: function(result) {
+console.log("AJAX success:", result);
+if (result.success) {
+$("#successAlert").show().delay(2000).fadeOut();
+// Redirigir a la página principal o actualizar la vista
+window.location.href = "/baseline-admin";
+} else if (result.error) {
+$("#errorAlert").text(result.error).show().delay(2000).fadeOut();
+}
+},
+error: function(xhr) {
+console.error("AJAX error:", xhr);
+$("#errorAlert").text("Failed to update entidad: " + xhr.responseText).show().delay(2000).fadeOut();
+}
+});
+});
+});
+</script>
+
+
+</body>
+</html>

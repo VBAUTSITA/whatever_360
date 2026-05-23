@@ -1,0 +1,546 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head th:replace="layouts/base::head"></head>
+
+<body>
+<header th:replace="layouts/base::header"></header>
+
+<div class="main">
+<div class="container">
+
+    <div class="title-main">
+        <h2>Integración Book RRU —
+            <span th:text="${general.siteName}"></span>
+            (<span th:text="${general.siteCode}"></span>)
+        </h2>
+        <small class="text-muted">
+            DataField ID: <strong th:text="${general.idDataField}"></strong>
+            &nbsp;|&nbsp; eNodeB: <strong th:text="${general.site4g}"></strong>
+            &nbsp;|&nbsp; TAC: <strong th:text="${general.tac}"></strong>
+        </small>
+    </div>
+
+    <!-- No Book General record yet -->
+    <div th:if="${bookGeneral == null}" class="alert alert-warning mt-3">
+        Este DataField aún no tiene un registro Book RRU en la base de datos.
+        Completa el paso 2.5 en el portal DataFill original primero.
+    </div>
+
+    <div th:if="${bookGeneral != null}">
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             DATOS BOOK RRU (read-only header from DF4G_BOOK_GENERAL)
+        ══════════════════════════════════════════════════════════════════ -->
+        <div class="card mt-3 mb-4">
+            <div class="card-header bg-danger text-white">
+                <strong>Datos Book RRU (base)</strong>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">ADDRESS BOOK RRU</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.siteAddressBook}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">BASEBANDEQMID</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.basebandeqmid}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">SECTOR ID</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.sectorId}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">SECTOREQMID</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.sectoreqmid}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">¿Cascada base?</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.cascada == 1 ? 'Sí' : 'No'}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             PARTE 1 — TARJETERÍA  (ADD BRD + ADD BASEBANDEQM)
+        ══════════════════════════════════════════════════════════════════ -->
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <strong>1. TARJETERÍA (Baseband Cards)</strong>
+                <span class="badge bg-light text-dark"
+                      th:text="${#lists.size(tarjetas)} + ' tarjeta(s)'"></span>
+            </div>
+            <div class="card-body">
+
+                <table class="table table-sm table-bordered mb-3">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>SLOT</th>
+                            <th>BBWS</th>
+                            <th>Script generado</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody_tarjetas">
+                        <tr th:each="t : ${tarjetas}" th:id="'trow_' + ${t.idBookTarjeta}">
+                            <td th:text="${t.slot}"></td>
+                            <td th:text="${t.bbws}"></td>
+                            <td class="text-muted small font-monospace"
+                                th:text="'ADD BRD:SN=' + ${t.slot} + ',BT=UBBP,BBWS=' + ${t.bbws} + ',...'">
+                            </td>
+                            <td>
+                                <button class="btn btn-danger btn-sm"
+                                        th:onclick="'eliminarTarjeta(' + ${t.idBookTarjeta} + ')'">
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(tarjetas)}">
+                            <td colspan="4" class="text-center text-muted">
+                                No hay tarjetas. Agregar abajo.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Add tarjeta form -->
+                <div class="row g-2 align-items-end"
+                     th:if="${#lists.size(tarjetas) < 6}">
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">SLOT</label>
+                        <select id="inp_slot" class="form-select">
+                            <option value="0" th:unless="${#lists.contains(tarjetas.![slot], 0)}">0</option>
+                            <option value="1" th:unless="${#lists.contains(tarjetas.![slot], 1)}">1</option>
+                            <option value="2" th:unless="${#lists.contains(tarjetas.![slot], 2)}">2</option>
+                            <option value="3" th:unless="${#lists.contains(tarjetas.![slot], 3)}">3</option>
+                            <option value="4" th:unless="${#lists.contains(tarjetas.![slot], 4)}">4</option>
+                            <option value="5" th:unless="${#lists.contains(tarjetas.![slot], 5)}">5</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">BBWS</label>
+                        <select id="inp_bbws" class="form-select">
+                            <option value="LTE_FDD-1">LTE_FDD-1</option>
+                            <option value="LTE_FDD-2">LTE_FDD-2</option>
+                            <option value="LTE_TDD-1">LTE_TDD-1</option>
+                            <option value="NR_FDD-1">NR_FDD-1</option>
+                            <option value="NR_TDD-1">NR_TDD-1</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" onclick="agregarTarjeta()">
+                            + Agregar Tarjeta
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <div id="msg_tarjeta" class="text-danger small"></div>
+                    </div>
+                </div>
+                <div class="alert alert-info mt-2 py-1 small"
+                     th:if="${#lists.size(tarjetas) >= 6}">
+                    Máximo de 6 slots alcanzado (0–5).
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             PARTE 2 — RADIO  (ADD RRUCHAIN + ADD RRU)
+        ══════════════════════════════════════════════════════════════════ -->
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <strong>2. RADIO (RRUs)</strong>
+                <span class="badge bg-light text-dark"
+                      th:text="${#lists.size(rrus)} + ' RRU(s)'"></span>
+            </div>
+            <div class="card-body">
+
+                <table class="table table-sm table-bordered mb-3">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>TIPO</th>
+                            <th>SRN</th>
+                            <th>RCN</th>
+                            <th>PS</th>
+                            <th>RN / Cellname</th>
+                            <th>RX/TX</th>
+                            <th>Cascada</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody_rrus">
+                        <tr th:each="r : ${rrus}" th:id="'rrow_' + ${r.idBookRru}">
+                            <td>
+                                <span th:if="${r.tipo == 'BOOK'}"
+                                      class="badge bg-primary">BOOK</span>
+                                <span th:if="${r.tipo == 'EASY_MACRO'}"
+                                      class="badge bg-warning text-dark">EASY MACRO</span>
+                            </td>
+                            <td th:text="${r.srn}"></td>
+                            <td th:text="${r.rcn}"></td>
+                            <td th:text="${r.ps}"></td>
+                            <td th:text="${r.rnCellname}"></td>
+                            <td th:text="${r.rxnum} + 'T' + ${r.txnum} + 'R'"></td>
+                            <td th:text="${r.cascada == 1 ? 'Sí' : 'No'}"></td>
+                            <td>
+                                <button class="btn btn-danger btn-sm"
+                                        th:onclick="'eliminarRru(' + ${r.idBookRru} + ')'">
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(rrus)}">
+                            <td colspan="8" class="text-center text-muted">
+                                No hay RRUs configuradas. Agregar abajo.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Add RRU form -->
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">TIPO</label>
+                        <select id="rru_tipo" class="form-select"
+                                onchange="toggleCascadaFields()">
+                            <option value="BOOK">BOOK (RT=MRRU)</option>
+                            <option value="EASY_MACRO">EASY MACRO (RT=AIRU)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label fw-bold">SRN</label>
+                        <input type="number" id="rru_srn" class="form-control" min="0"/>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label fw-bold">RCN</label>
+                        <input type="number" id="rru_rcn" class="form-control" min="0"/>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label fw-bold">PS</label>
+                        <select id="rru_ps" class="form-select">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">RN Cellname</label>
+                        <input type="text" id="rru_rn" class="form-control"
+                               placeholder="ej: LIL02066C1_Aeropuerto"/>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label fw-bold">RXNUM</label>
+                        <select id="rru_rxnum" class="form-select">
+                            <option value="4">4</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label fw-bold">TXNUM</label>
+                        <select id="rru_txnum" class="form-select">
+                            <option value="4">4</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Cascada toggle row -->
+                <div class="row g-2 align-items-end mt-2">
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">¿Requiere Cascada?</label>
+                        <select id="rru_cascada" class="form-select"
+                                onchange="toggleCascadaFields()">
+                            <option value="0">No</option>
+                            <option value="1">Sí</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1" id="div_hsn" style="display:none;">
+                        <label class="form-label fw-bold">HSN</label>
+                        <input type="number" id="rru_hsn" class="form-control" min="0"/>
+                    </div>
+                    <div class="col-md-1" id="div_hpn" style="display:none;">
+                        <label class="form-label fw-bold">HPN</label>
+                        <input type="number" id="rru_hpn" class="form-control" min="0"/>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" onclick="agregarRru()">
+                            + Agregar RRU
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <div id="msg_rru" class="text-danger small"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             PARTE 3 — VÍNCULO  (ADD EUCELLSECTOREQM)
+             Links LOCALCELLID (from Step 2 cells) to BASEBANDEQMID + SECTOREQMID
+        ══════════════════════════════════════════════════════════════════ -->
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <strong>3. VÍNCULO — Celda / Tarjeta / Radio (ADD EUCELLSECTOREQM)</strong>
+                <span class="badge bg-light text-dark"
+                      th:text="${#lists.size(vinculos)} + ' vínculo(s)'"></span>
+            </div>
+            <div class="card-body">
+
+                <div class="alert alert-info py-2 small mb-3">
+                    <strong>¿Qué hace esta sección?</strong>
+                    Asocia cada celda lógica (LOCALCELLID) con la tarjeta baseband
+                    (BASEBANDEQMID) y el grupo de puertos de antena (SECTOREQMID).
+                    Sin este vínculo, la celda existe en software pero no tiene
+                    radio físico asignado y nunca saldrá al aire.
+                </div>
+
+                <table class="table table-sm table-bordered mb-3">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>LOCALCELLID</th>
+                            <th>Carrier / Sector</th>
+                            <th>BASEBANDEQMID</th>
+                            <th>SECTOREQMID</th>
+                            <th>Comando generado</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody_vinculos">
+                        <tr th:each="v : ${vinculos}" th:id="'vrow_' + ${v.idVinculo}">
+                            <td th:text="${v.localcellid}"></td>
+                            <td class="text-muted small">
+                                <!-- carrier+sector not stored in vinculo, shown from dropdown match -->
+                                —
+                            </td>
+                            <td th:text="${v.basebandeqmid}"></td>
+                            <td th:text="${v.sectoreqmid}"></td>
+                            <td class="font-monospace small text-muted"
+                                th:text="'ADD EUCELLSECTOREQM:LOCALCELLID=' + ${v.localcellid}
+                                         + ',BASEBANDEQMID=' + ${v.basebandeqmid}
+                                         + ',SECTOREQMID=' + ${v.sectoreqmid} + ';'">
+                            </td>
+                            <td>
+                                <button class="btn btn-danger btn-sm"
+                                        th:onclick="'eliminarVinculo(' + ${v.idVinculo} + ')'">
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(vinculos)}">
+                            <td colspan="6" class="text-center text-muted">
+                                No hay vínculos configurados. Agregar abajo.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Add vínculo form -->
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">LOCALCELLID (celda del Step 2)</label>
+                        <select id="vin_lcid" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            <option th:each="lc : ${localcellids}"
+                                    th:value="${lc.localcellid}"
+                                    th:text="${lc.label}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">BASEBANDEQMID</label>
+                        <input type="number" id="vin_bbeid" class="form-control"
+                               th:value="${bookGeneral.basebandeqmid}"
+                               min="0"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">SECTOREQMID</label>
+                        <input type="number" id="vin_seqmid" class="form-control"
+                               th:value="${bookGeneral.sectoreqmid}"
+                               min="0"/>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" onclick="agregarVinculo()">
+                            + Agregar Vínculo
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <div id="msg_vinculo" class="text-danger small"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             EXPORT BUTTON
+        ══════════════════════════════════════════════════════════════════ -->
+        <div class="d-flex justify-content-between mt-2 mb-5">
+            <a th:href="@{/datafill/list}" class="btn btn-secondary">← Volver</a>
+            <a class="btn btn-success px-4"
+               th:href="@{'/datafill/' + ${general.idDataField} + '/exportBookRRU'}"
+               target="_blank">
+                TXT Book RRU
+            </a>
+        </div>
+
+    </div><!-- th:if bookGeneral != null -->
+
+</div><!-- container -->
+</div><!-- main -->
+
+<!-- Hidden fields for JS -->
+<input type="hidden" id="idDataField"   th:value="${general.idDataField}"/>
+<input type="hidden" id="idBookGeneral" th:if="${bookGeneral != null}"
+       th:value="${bookGeneral.idBookGeneral}"/>
+
+<div th:replace="layouts/base::footer"></div>
+
+<script>
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+
+function getDF()  { return document.getElementById('idDataField').value; }
+function getBG()  { return document.getElementById('idBookGeneral').value; }
+
+function postFetch(url, body, msgElementId, onSuccess) {
+    var msg = document.getElementById(msgElementId);
+    msg.textContent = '';
+    fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: body
+    })
+    .then(function(r) {
+        if (r.ok) { onSuccess(); }
+        else { return r.text().then(function(t) { msg.textContent = t; }); }
+    })
+    .catch(function(e) { msg.textContent = 'Error de conexión: ' + e; });
+}
+
+// ── PARTE 1 — TARJETA ────────────────────────────────────────────────────────
+
+function agregarTarjeta() {
+    var slot = document.getElementById('inp_slot').value;
+    var bbws = document.getElementById('inp_bbws').value;
+    postFetch(
+        '/datafill/' + getDF() + '/bookrru/tarjeta/add',
+        'idBookGeneral=' + getBG() + '&slot=' + slot + '&bbws=' + encodeURIComponent(bbws),
+        'msg_tarjeta',
+        function() { window.location.reload(); }
+    );
+}
+
+function eliminarTarjeta(id) {
+    if (!confirm('¿Eliminar esta tarjeta?')) return;
+    postFetch(
+        '/datafill/bookrru/tarjeta/' + id + '/delete',
+        '',
+        'msg_tarjeta',
+        function() { window.location.reload(); }
+    );
+}
+
+// ── PARTE 2 — RADIO (RRU) ────────────────────────────────────────────────────
+
+function toggleCascadaFields() {
+    var cascada = document.getElementById('rru_cascada').value;
+    var show    = cascada === '1';
+    document.getElementById('div_hsn').style.display = show ? '' : 'none';
+    document.getElementById('div_hpn').style.display = show ? '' : 'none';
+}
+
+function agregarRru() {
+    var tipo    = document.getElementById('rru_tipo').value;
+    var srn     = document.getElementById('rru_srn').value;
+    var rcn     = document.getElementById('rru_rcn').value;
+    var ps      = document.getElementById('rru_ps').value;
+    var rn      = document.getElementById('rru_rn').value;
+    var rxnum   = document.getElementById('rru_rxnum').value;
+    var txnum   = document.getElementById('rru_txnum').value;
+    var cascada = document.getElementById('rru_cascada').value;
+    var hsn     = document.getElementById('rru_hsn').value || '';
+    var hpn     = document.getElementById('rru_hpn').value || '';
+
+    if (!srn || !rcn) {
+        document.getElementById('msg_rru').textContent = 'SRN y RCN son obligatorios.';
+        return;
+    }
+    if (cascada === '1' && (!hsn || !hpn)) {
+        document.getElementById('msg_rru').textContent =
+            'Con cascada activa, HSN y HPN son obligatorios.';
+        return;
+    }
+
+    var body = 'idBookGeneral=' + getBG() +
+               '&tipo=' + encodeURIComponent(tipo) +
+               '&srn=' + srn + '&rcn=' + rcn + '&ps=' + ps +
+               '&rnCellname=' + encodeURIComponent(rn) +
+               '&rxnum=' + rxnum + '&txnum=' + txnum +
+               '&cascada=' + cascada;
+    if (hsn) body += '&hsn=' + hsn;
+    if (hpn) body += '&hpn=' + hpn;
+
+    postFetch(
+        '/datafill/' + getDF() + '/bookrru/rru/add',
+        body,
+        'msg_rru',
+        function() { window.location.reload(); }
+    );
+}
+
+function eliminarRru(id) {
+    if (!confirm('¿Eliminar esta RRU?')) return;
+    postFetch(
+        '/datafill/bookrru/rru/' + id + '/delete',
+        '',
+        'msg_rru',
+        function() { window.location.reload(); }
+    );
+}
+
+// ── PARTE 3 — VÍNCULO ────────────────────────────────────────────────────────
+
+function agregarVinculo() {
+    var lcid    = document.getElementById('vin_lcid').value;
+    var bbeid   = document.getElementById('vin_bbeid').value;
+    var seqmid  = document.getElementById('vin_seqmid').value;
+    var msg     = document.getElementById('msg_vinculo');
+
+    if (!lcid) { msg.textContent = 'Seleccione un LOCALCELLID.'; return; }
+    if (!bbeid || !seqmid) {
+        msg.textContent = 'BASEBANDEQMID y SECTOREQMID son obligatorios.'; return;
+    }
+
+    postFetch(
+        '/datafill/' + getDF() + '/bookrru/vinculo/add',
+        'idBookGeneral=' + getBG() +
+        '&localcellid=' + lcid +
+        '&basebandeqmid=' + bbeid +
+        '&sectoreqmid=' + seqmid,
+        'msg_vinculo',
+        function() { window.location.reload(); }
+    );
+}
+
+function eliminarVinculo(id) {
+    if (!confirm('¿Eliminar este vínculo?')) return;
+    postFetch(
+        '/datafill/bookrru/vinculo/' + id + '/delete',
+        '',
+        'msg_vinculo',
+        function() { window.location.reload(); }
+    );
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">      
+<head th:replace="layouts/base::head">
+</head>
+
+<body>
+
+
+<div class="error-page">
+	<div class="container">
+		<h2>Cuenta creada. Pendiente de activación.</h2>
+		<img style="max-width: 100px;" src="../static/images/antena.png" th:src="@{/images/check.jpg}"/>
+		<p>Se revisará su registro por el administrador</p>
+		<p>Para mayor información puede comunicarse enviando un correo <span style="color: red;font-weight: 700;">victor.bautista@claro.com.pe</span></p>
+		<a class="btn btn-primary" href="#" 
+			th:href="@{'/login'}" role="button">
+			Regresar al Login</a>
+	</div>
+</div>
+		
+<div  th:replace="layouts/base::footer"></div>
+
+
+
+
+</body>
+</html>

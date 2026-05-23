@@ -1,0 +1,77 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+
+<body>
+
+<header th:replace="layouts/base_baseline::header"></header>
+
+
+<div class="main maestro_baseline">
+	<div class="container">
+		<a class="btn btn-primary" href="#" 
+			th:href="@{'/baseline-admin'}" role="button">
+			Regresar</a>
+		<div class="title-main">
+			<h2 style="text-transform: initial;font-size: 27px;font-family: 'Verdana';margin-top: 25px;">
+			BASELINE 4G FDD SRAN
+			</h2>
+		</div>
+		
+		<button id="executeSqlButton" onclick="return confirmarCargaSql(this)">Cargar Baseline al portal de Usuarios</button>
+		
+		
+			
+	</div>
+</div>
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+<!-- <script>
+function confirmarCargaSql() {
+	  // Display a confirmation dialog to the user
+	  const confirmacion = confirm(`¿Estás seguro de Ejecutar La carga de datos del baseline?`);
+
+	  // If the user confirms, proceed with the action
+	  if (confirmacion) {
+	    return true; // Allow the form submission
+	  }
+
+	  // If the user cancels, prevent the form submission
+	  return false; // Block the form submission
+	}
+</script>-->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	  $('#executeSqlButton').click(function(event) {
+	    const confirmation = confirm('¿Estás seguro de ejecutar la carga de datos del baseline? Esta acción podría modificar la base de datos.');
+
+	    if (confirmation) {
+	      $.get('/baseline-admin/carga-baseline-usuarios/execute-sql', function(response) {
+	        alert(response);
+	      });
+	    } else {
+	      // User canceled the action
+	      event.preventDefault(); // Prevent default button action (optional)
+	    }
+	  });
+	});
+</script>
+</body>
+</html>

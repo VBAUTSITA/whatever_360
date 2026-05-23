@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<body>
+<header th:replace="layouts/base_reportes::header"></header>
+<div id="background_libreria"></div>
+<div class="main main_libreria_cat reportes_cat">
+	<div class="container">
+		
+		<div class="title-main archivo">
+			<h2 style="text-align: center;font-size: 25px;">
+				REPORTES DE RADIO_
+			</h2>
+		</div>
+		
+		<div class="libreria_categorias">	
+		
+			<div class="row-fluid stats-box">
+			
+				<div class="span3">	
+					
+					<div class="box">
+						<div class="box_contain">
+							<a href="#" th:href="@{/reportes/data-4}">
+							<div class="box_img">
+								<img src="../static/images/ico-libreria-cat-0.png" th:src="@{/images/ico-libreria-cat-0.png}"/>
+							</div>		
+							<div class="box_content">
+								<span class="url_link">
+								REPORTE 2G
+								</span>
+							</div>
+							</a>
+						</div>
+					</div>
+					
+				</div>
+				
+	           <div class="span3">	
+					
+					<div class="box">
+						<div class="box_contain">
+							<a href="#" th:href="@{/reportes/data-2}">
+							<div class="box_img">
+								<img src="../static/images/ico-libreria-cat-1.png" th:src="@{/images/ico-libreria-cat-1.png}"/>
+							</div>		
+							<div class="box_content">
+								<span class="url_link">
+								REPORTE 3G
+								</span>
+							</div>
+							</a>
+						</div>
+					</div>
+					
+				</div>
+				
+				<div class="span3">	
+					
+					<div class="box">
+						<div class="box_contain">
+							<a href="#" th:href="@{/reportes/data-1}">
+							<div class="box_img">
+								<img src="../static/images/ico-libreria-cat-2.png" th:src="@{/images/ico-libreria-cat-2.png}"/>
+							</div>		
+							<div class="box_content">
+								<span class="url_link">
+								REPORTE 4G
+								</span>
+							</div>
+							</a>
+						</div>
+					</div>
+					
+				</div>
+				
+				<div class="span3">	
+					
+					<div class="box">
+						<div class="box_contain">
+							<a href="#" th:href="@{/reportes/data-3}">
+							<div class="box_img">
+								<img src="../static/images/ico-libreria-cat-2.png" th:src="@{/images/ico-libreria-cat-2.png}"/>
+							</div>		
+							<div class="box_content">
+								<span class="url_link">
+								REPORTE 5G
+								</span>
+							</div>
+							</a>
+						</div>
+					</div>
+					
+				</div>
+				
+				
+			</div>
+			
+		
+		</div>
+	</div>
+</div>
+	
+		
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/bcrypt/tools.js}"></script>
+<script type="text/javascript" th:src="@{/js/bcrypt/bcrypt.js}"></script>
+<script type="text/javascript" th:src="@{/js/bcrypt/tools-impl.js}"></script>
+
+
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+</body>
+</html>

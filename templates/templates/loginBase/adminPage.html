@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+   <head>
+      <title th:utext="${title}"></title>
+   	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   </head>
+   <body>
+      <!-- Include _menu.html -->
+       <th:block th:include="loginBase/_menu"></th:block>
+       
+      <h2>Pagina Admin</h2>
+      <h3>Bienvenido :
+         <span th:utext="${#request.userPrincipal.name}"></span>
+      </h3>
+      <b>Esta es una pagina protegida!</b>  
+       
+      <br/><br/>
+       
+      <div th:if="${userInfo != null}" th:utext="${userInfo}"></div>
+       
+   </body>
+    
+</html>

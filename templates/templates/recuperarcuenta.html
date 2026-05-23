@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">      
+<head th:replace="layouts/base::head">
+</head>
+
+<body class="login-page">
+
+      <!-- Include _menu.html -->
+       <!-- <th:block th:include="loginBase/_menu"></th:block> -->     
+        
+      <div class="box-login">   
+		<div class="container">
+			<div class="box_register">
+				<div class="box_center">
+					
+					<div class="recuperar">
+					Enviar un correo a <br>
+					<span>	victor.bautista@claro.com.pe </span><br>
+					Solicitando el cambio de contraseña <br>o recuperación de cuenta
+					</div>
+					
+					<a class="btn btn-primary" href="#" 
+					th:href="@{'/interferencia/list/'}" role="button">
+					Regresar</a>
+			
+				</div>							
+			</div>
+		</div>
+		
+					
+      </div> 
+		
+<div  th:replace="layouts/base::footer"></div>
+<!--<script language="JavaScript" type="text/javascript">
+        setTimeout("window.history.go(-1)",0);
+</script>-->
+</body>
+</html>

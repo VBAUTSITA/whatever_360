@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head th:replace="layouts/base::head">
+    <title>Error</title>
+</head>
+
+<body>
+<header th:replace="layouts/base::header"></header>
+
+<div class="main">
+<div class="container mt-5">
+    <div class="alert alert-danger">
+        <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
+        <p th:text="${error}">Ocurrió un error.</p>
+    </div>
+    <a href="/datafill/list" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a la lista
+    </a>
+</div>
+</div>
+
+<footer th:replace="layouts/base::footer"></footer>
+</body>
+</html>

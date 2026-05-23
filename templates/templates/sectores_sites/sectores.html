@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<style>
+</style>
+<body>
+<header th:replace="layouts/base_constr_segu::header"></header>
+
+
+<div class="main">
+	<div class="container">
+		
+		<div class="title-main">
+			<h2>Sectores de [[${prioridad}]]</h2>
+		</div>	
+		
+		<!--<ul class="list-group">
+		<li class="list-group-item" th:each="s : ${sectores}" th:text="${s}"></li>
+		</ul>
+		-->
+		
+		<table class="table table-striped table-condensed">
+		<thead>
+		<tr>
+		<th>Sectores</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr th:each="s : ${sectores}">
+		<td th:text="${s}"></td>
+		</tr>
+		</tbody>
+		</table>
+		
+	</div>
+
+</div>
+
+
+
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+
+
+
+
+</body>
+</html>

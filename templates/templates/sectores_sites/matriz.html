@@ -1,0 +1,116 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<style>
+tbody.tbody_url a{
+	color: #000;
+}
+tbody.tbody_url a:hover{
+	color: #da272c;
+}
+</style>
+<body>
+<header th:replace="layouts/base_constr_segu::header"></header>
+
+
+<div class="main">
+	<div class="container">
+		
+		<div class="title-main">
+			<h2>Matriz (Prioridad × Tipo Sitio Nuevo)</h2>
+		</div>	
+		
+		<table class="table table-bordered table-condensed">
+		<thead>
+		<tr>
+			<th style="font-size: 17px; font-weight: 900;padding: 10px 0px 10px 12px;">SECTORES<br><span style="font-size: 15px; font-weight: 600;">Actualización semanal</span></th>
+			<th style="border-left-color: transparent;"></th>
+			<th style="border-left-color: transparent;"></th>
+			<th style="border-left-color: transparent;"></th>
+			<th style="font-size: 17px; font-weight: 900;padding: 10px 0px 10px 12px;">SITIOS NUEVOS</th>
+		</tr>
+		<tr style="font-size: 13px;font-weight: 900;font-family: 'Roboto'">
+		  <th>PRIORIDAD SECTOR</th>
+		  <th># Sectores</th>
+		  <th>Con Proyecto</th> 
+		  <th>Sin Proyecto</th> <!-- NUEVO -->
+		  <th th:each="t : ${tipos}" th:text="${t}"></th>
+		</tr>
+		</thead>
+		<tbody class="tbody_url">
+		<tr th:each="p : ${prioridades}">
+		<td th:text="${p}"></td>
+		<!-- Columna real de sectores; vacío para 8-Cobertura -->
+		<td th:with="val=${sectoresReal != null and sectoresReal.containsKey(p) ? sectoresReal.get(p) : 0}">
+		  <span th:if="${p == '8-Cobertura'}"></span>
+		  <a th:if="${p != '8-Cobertura'}"
+		     th:href="@{'/sectores-sites-nuevos/sectores'(prioridad=${p})}"
+		     th:text="${val}"></a>
+		</td>
+		<!-- NUEVO: Sectores Asignados (clickeable); vacío para 8-Cobertura -->
+		<td th:with="val=${sectoresAsignados != null and sectoresAsignados.containsKey(p) ? sectoresAsignados.get(p) : 0}">
+		  <span th:if="${p == '8-Cobertura'}"></span>
+		  <span th:if="${p != '8-Cobertura' and val == 0}" th:text="${val}"></span>
+		  <a th:if="${p != '8-Cobertura' and val > 0}"
+		     th:href="@{'/sectores-sites-nuevos/asignados'(prioridad=${p})}"
+		     th:text="${val}"></a>
+		</td>		
+		
+		<!-- NUEVO: Sectores No asignados (clickeable); vacío para 8-Cobertura -->
+		<td th:with="val=${sectoresNoAsignados != null and sectoresNoAsignados.containsKey(p) ? sectoresNoAsignados.get(p) : 0}">
+		  <span th:if="${p == '8-Cobertura'}"></span>
+		  <span th:if="${p != '8-Cobertura' and val == 0}" th:text="${val}"></span>
+		  <a th:if="${p != '8-Cobertura' and val > 0}"
+		     th:href="@{'/sectores-sites-nuevos/no-asignados'(prioridad=${p})}"
+		     th:text="${val}"></a>
+		</td>
+
+
+		<!-- Celdas de sitios nuevos por tipo -->
+		<td th:each="t : ${tipos}" th:with="row=${matriz != null ? matriz.get(p) : null}">
+		  <a th:href="@{'/sectores-sites-nuevos/detalle'(prioridad=${p}, tipoSitio=${t})}"
+		     th:text="${row != null and row.containsKey(t) ? row.get(t) : 0}"></a>
+		</td>
+		</tr>
+		</tbody>
+		</table>
+
+	</div>
+
+</div>
+
+
+
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+  const prioridades  = /*[[${prioridades}]]*/ [];
+  const tipos        = /*[[${tipos}]]*/ [];
+  const sectoresReal = /*[[${sectoresReal}]]*/ {};
+  const matriz       = /*[[${matriz}]]*/ {};
+  console.log("prioridades:", prioridades);
+  console.log("tipos:", tipos);
+  console.log("sectoresReal:", sectoresReal);
+  console.log("matriz:", matriz);
+/*]]>*/
+</script>
+
+
+
+
+
+</body>
+</html>

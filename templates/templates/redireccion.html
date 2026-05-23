@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">      
+<head th:replace="layouts/base::head">
+</head>
+
+<body>
+<header th:replace="layouts/base::header"></header>
+
+<div class="redirigir guardar">
+	<div class="container">
+		<div style="padding-bottom: 31px;">
+		<h2>Se actualizó correctamente!</h2>
+		<br>
+			<input onclick='javascript:window.history.back()' value='Modificar nuevamente' type='button' class="btn btn-secondary"/>
+			<br><br>
+			<a href="#" th:href="@{/interferencia/list}" class="btn btn-secondary">Regresar a la lista de INTERFERENCIAS</a>
+		</div>
+	</div>
+</div>
+	
+		
+<div  th:replace="layouts/base::footer"></div>
+<!--<script language="JavaScript" type="text/javascript">
+        setTimeout("window.history.go(-1)",0);
+</script>-->
+</body>
+</html>

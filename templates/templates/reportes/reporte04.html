@@ -1,0 +1,244 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<style>
+#download-button{
+	position: absolute;
+    top: 55px;
+    right: 350px;
+    background-color: #5cb85c;
+    border: 2px solid #3aab3a;
+    padding: 5px 15px 5px 15px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    width: auto;
+    display: inline-block;
+    height: auto;
+    border-radius: 7px;
+    margin-bottom: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 9;
+}
+</style>
+<body>
+<header th:replace="layouts/base_reportes::header"></header>
+
+<div class="main">
+	<div class="container">
+	
+		<div class="title-main">
+			<h2>Reporte de Datos 2G</h2>
+		</div>
+		
+<button id="download-button">Descargar Todos los Datos</button>		
+
+<table id="lista_interferencia" class="table table-striped table-bordered list_results" style="width:100%">
+<thead>
+<tr>
+<th>BSC_NAME</th>
+<th>MBTS_NAME</th>
+<th>BTSNAME</th>
+<th>SITE_NAME</th>
+<th>SITE_ADDRESS</th>
+<th>SEGMENT_NAME</th>
+<th>CELLID</th>
+<th>CELLNAME</th>
+<th>CI</th>
+<th>LAC</th>
+<th>RAC</th>
+<th>TRXID</th>
+<th>TRXNAME</th>
+<th>FREQ</th>
+<th>TRXNO</th>
+<th>IDTYPE</th>
+<th>ISMAINBCCH</th>
+<th>ISTMPTRX</th>
+<th>GTRXGROUPID</th>
+<th>TCH_TOTAL</th>
+<th>PDTCH_TOTAL</th>
+<th>MCC</th>
+<th>MNC</th>
+<th>NCC</th>
+<th>BCC</th>
+<th>EXTTP</th>
+<th>IUOTP</th>
+<th>FLEXMAIO</th>
+<th>CSVSP</th>
+<th>CSDSP</th>
+<th>PSHPSP</th>
+<th>PSLPSVP</th>
+<th>BSPBCCHBLKS</th>
+<th>BSPAGBLKSRES</th>
+<th>BSPRACHBLKS</th>
+<th>TYPE</th>
+<th>OPNAME</th>
+<th>VIPCELL</th>
+<th>MOCNCMCELL</th>
+<th>HYBHIFREQBANDSUPPORT</th>
+<th>GLOCELLID</th>
+<th>NSEI</th>
+<th>BVCI</th>
+<th>SYSDESC</th>
+<th>SYSCONTACT</th>
+<th>SYSLOCATION</th>
+<th>SYSSERVICES</th>
+<th>ACTSTATUS</th>
+<th>ADMSTAT</th>
+<th>DISTRITO</th>
+<th>PROVINCIA</th>
+<th>DEPARTAMENTO</th>
+<th>SUB_REGION</th>
+<th>CLUSTER_NAME</th>
+<th>DIRECCION</th>
+<th>MODELO_RRU</th>
+<th>MANUFACTURERDATA</th>
+<th>UBIGEO_INEI</th>
+<th>JEFATURA_RADIO</th>
+<th>AZIMUTH</th>
+<th>HEIGHT</th>
+<th>LATITUD</th>
+<th>LONGITUD</th>
+<th>ELECTRICAL_TILT</th>
+<th>MECHANICAL_TILT</th>
+<th>GBTS_POWER_TYPE</th>
+<th>EGBTS_POWER_TYPE</th>
+<th>MODELO_ANTENA</th>
+<th>MODELO_RRU_A_REPORTAR</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+
+</div>
+
+</div>
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#lista_interferencia').DataTable({
+	serverSide: true,
+	ajax: {
+	url: '/web-tracker/reportes/data/reporte04',
+	type: 'GET',
+	data: function(d) {
+	return {
+	draw: d.draw,
+	page: Math.floor(d.start / d.length),
+	size: d.length,
+	search: d.search.value
+	};
+	},
+	dataSrc: function(json) {
+	console.log("Datos recibidos:", json);
+	return json.data;
+	},
+	beforeSend: function(xhr, settings) {
+	console.log("Solicitud enviada:", settings.url);
+	}
+	},
+	columns: [
+		{ "data": "bsc_name" },
+		{ "data": "mbts_name" },
+		{ "data": "btsname" },
+		{ "data": "site_name" },
+		{ "data": "site_address" },
+		{ "data": "segment_name" },
+		{ "data": "cellid" },
+		{ "data": "cellname" },
+		{ "data": "ci" },
+		{ "data": "lac" },
+		{ "data": "rac" },
+		{ "data": "trxid" },
+		{ "data": "trxname" },
+		{ "data": "freq" },
+		{ "data": "trxno" },
+		{ "data": "idtype" },
+		{ "data": "ismainbcch" },
+		{ "data": "istmptrx" },
+		{ "data": "gtrxgroupid" },
+		{ "data": "tch_total" },
+		{ "data": "pdtch_total" },
+		{ "data": "mcc" },
+		{ "data": "mnc" },
+		{ "data": "ncc" },
+		{ "data": "bcc" },
+		{ "data": "exttp" },
+		{ "data": "iuotp" },
+		{ "data": "flexmaio" },
+		{ "data": "csvsp" },
+		{ "data": "csdsp" },
+		{ "data": "pshpsp" },
+		{ "data": "pslpsvp" },
+		{ "data": "bspbcchblks" },
+		{ "data": "bspagblksres" },
+		{ "data": "bsprachblks" },
+		{ "data": "type" },
+		{ "data": "opname" },
+		{ "data": "vipcell" },
+		{ "data": "mocncmcell" },
+		{ "data": "hybhifreqbandsupport" },
+		{ "data": "glocellid" },
+		{ "data": "nsei" },
+		{ "data": "bvci" },
+		{ "data": "sysdesc" },
+		{ "data": "syscontact" },
+		{ "data": "syslocation" },
+		{ "data": "sysservices" },
+		{ "data": "admstat" },
+		{ "data": "distrito" },
+		{ "data": "provincia" },
+		{ "data": "departamento" },
+		{ "data": "sub_region" },
+		{ "data": "cluster_name" },
+		{ "data": "actstatus" },
+		{ "data": "direccion" },
+		{ "data": "modelo_rru" },
+		{ "data": "manufacturerdata" },
+		{ "data": "ubigeo_inei" },
+		{ "data": "jefatura_radio" },
+		{ "data": "azimuth" },
+		{ "data": "height" },
+		{ "data": "latitud" },
+		{ "data": "longitud" },
+		{ "data": "electrical_tilt" },
+		{ "data": "mechanical_tilt" },
+		{ "data": "gbts_power_type" },
+		{ "data": "egbts_power_type" },
+		{ "data": "modelo_antena" },
+		{ "data": "modelo_rru_a_reportar" }
+		],
+		processing: true,
+		serverSide: true,
+		paging: true,
+		searching: true,
+		scrollX: true
+		});
+		});
+</script>
+
+<script type="text/javascript">
+document.getElementById("download-button").addEventListener("click", function(){
+	window.location.href = "/web-tracker/reportes/export04";
+	alert('Iniciará en unos segundos la descarga');
+	});
+</script>
+</body>
+</html>

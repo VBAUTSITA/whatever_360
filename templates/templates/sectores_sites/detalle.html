@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<style>
+</style>
+<body>
+<header th:replace="layouts/base_constr_segu::header"></header>
+
+
+<div class="main">
+	<div class="container">
+		
+		<div class="title-main">
+			<h2>Detalle de [[${prioridad}]] / [[${tipoSitio}]]</h2>
+		</div>	
+		
+		<table class="table table-striped table-condensed">
+		<thead>
+		<tr>
+		<th>Jefatura</th>
+		<th>MBTS</th>
+		<th>Dirección</th>
+		<th>Sector</th>
+		<th>Prioridad</th>
+		<th>Tipo Sitio</th>
+		<th>Solución Req</th>
+		<th>Observación</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr th:each="d : ${detalle}">
+		<td th:text="${d.jefatura}"></td>
+		<td th:text="${d.mbtsName}"></td>
+		<td th:text="${d.adress}"></td>
+		<td th:text="${d.sector}"></td>
+		<td th:text="${d.prioridadSector}"></td>
+		<td th:text="${d.tipoSitio}"></td>
+		<td th:text="${d.solucionReq}"></td>
+		<td th:text="${d.observacion}"></td>
+		</tr>
+		</tbody>
+		</table>
+
+	</div>
+
+</div>
+
+
+
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+
+
+
+
+</body>
+</html>

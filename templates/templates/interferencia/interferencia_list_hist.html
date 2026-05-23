@@ -1,0 +1,164 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">         
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<body>
+<header th:replace="layouts/base_interferencia::header"></header>
+
+<div class="miga breadcrumb">
+	<div class="container">
+		<a class="btn btn-primary" href="#" 
+			th:href="@{'/interferencia/list/'}" role="button">
+			Regresar</a>
+	</div>
+</div>
+
+<div class="main">
+	<div class="container">
+	
+		<div class="title-main">
+			<h2>Histórico de Cambios - Global</h2>
+		</div>	
+		
+			<div class="box-lista-seguimiento">			
+					<table id="lista_segui" class="table table-striped table-bordered list_results" style="width:100%">
+						<thead>
+							<tr>
+								<th>SITIO</th>
+								<th>SITE ADDRESS</th>
+								<th>BANDA AFECTADA</th> 
+								<th>RUTA ARCHIVO</th>
+								<th>SUB REGION</th>
+								<th>DEPARTAMENTO</th> 
+								<th>DISTRITO</th>
+								<th>CELDAS AFECTADAS</th> 
+								<th>RESPONSABLE CACERIA</th> 
+								<th>NUMERO CRQ</th>
+								<th>FECHA DE ENVIO CRQ</th>
+								<th>SEMANA ENVIO CRQ</th> 
+								<th>PRIORIDAD CELDAS</th>
+								<th>PRIORIDAD NIVEL INTERFERENCIA</th> 
+								<th>FECHA RECEPCION REPORT OYM</th> 
+								<th>SEMANA RECEPCION REPORT OYM</th>
+								<th>TIPO DE FUENTE INTERFERENCIA</th>
+								<th>DETALLE FUENTE DE INFERFERENCIA</th>
+								<th>DIRECCION DE INFERFERENCIA</th>
+								<th>NIVEL DE INFERFERENCIA</th>
+								<th>COORDENADAS DE INFERFERENCIA</th>
+								<th>FECHA CORRECTIVO HFC</th>
+								<!--<th>AREA NOTIFICACION</th>-->
+								<th>FECHA NOTIFICACION</th>
+								<th>FECHA VISITA OYM</th>
+								<th>ESTATUS AREA</th>
+								<th>RESPONSABLE AREA</th>
+								<th>CARTA DENUNCIA</th>
+								<th>CARGO MTC</th>
+								<th>FECHA SOLUCION MTC</th>
+								<th>FECHA DE CESE</th>
+								<th>DETALLES DE INTERFERENCIA</th>
+								<th>FECHA HISTORIAL</th>
+								<th>USUARIO</th>
+								<th>HISTORIAL</th>
+							</tr>
+						</thead>
+						<tbody>
+									
+								<tr th:each="interferencia : ${interferencia_list_hist}">					
+									<td th:text="${interferencia.code_site }"></td>
+									<td th:text="${interferencia.name_site }"></td>
+									<td th:text="${interferencia.banda_afectada }"></td>
+									<td th:text="${interferencia.ruta_archivo }"></td>
+									<td th:text="${interferencia.sub_region }"></td>
+									<td th:text="${interferencia.departamento }"></td>
+									<td th:text="${interferencia.distrito }"></td>
+									<td th:text="${interferencia.celdas_afectadas }"></td>
+									<td th:text="${interferencia.responsable_caza }"></td>
+									<td th:text="${interferencia.crq_number }"></td>
+									<td th:text="${interferencia.date_crq_envio }"></td>
+									<td th:text="${interferencia.week_crq_envio }"></td>
+									<td th:text="${interferencia.priorid_celdas }"></td>
+									<td th:text="${interferencia.priorid_nivel_interfer }"></td>
+									<td th:text="${interferencia.fecha_recepcion_report_oym }"></td>
+									<td th:text="${interferencia.week_recepcion_report_oym }"></td>
+									<td th:text="${interferencia.tipo_fuente }"></td>
+									<td th:text="${interferencia.direccion_interferencia }"></td>
+									<td th:text="${interferencia.nivel_interferencia }"></td>
+									<td th:text="${interferencia.coordenadas_interferencia }"></td>
+									<td th:text="${interferencia.area_notificacion }"></td>
+									<td th:text="${interferencia.date_notification }"></td>
+									<td th:text="${interferencia.visit_oym }"></td>
+									<td th:text="${interferencia.estatus_area }"></td>
+									<td th:text="${interferencia.responsable_area}"></td>
+									<td th:text="${interferencia.carta_denuncia }"></td>
+									<td th:text="${interferencia.cargo_mtc }"></td>
+									<td th:text="${interferencia.fecha_solucion_mtc }"></td>
+									<td th:text="${interferencia.fecha_de_cese }"></td>
+									<td th:text="${interferencia.detalles_interferencia }"></td>
+									<td th:text="${interferencia.fecha }"></td>
+									<td th:text="${interferencia.usuario_interferencia }"></td>
+									<td style="width: 62px;">
+										<a class="btn btn-primary" href="#" 
+												th:href="@{'/interferencia/hist/id/'+${interferencia.inter_id_hist}}" role="button">
+												Ver más</a>
+									</td>
+			
+								</tr>
+						</tbody>
+					</table>
+			</div>
+		<div class="kpi-sitio">
+		
+		</div>	
+	</div>
+</div>
+		
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+<script>
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#lista_segui tfoot th').each( function () {
+        var title = $(this).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+ 
+    // DataTable
+    var table = $('#lista_segui').DataTable({
+    	"pageLength": 25,
+    	"aaSorting": [],
+    	dom: 'Bfrtip',
+        buttons: ['copy','csv'],
+        scrollY:        "400px",
+        scrollX:        true,
+        scrollCollapse: true,
+        fixedColumns:  true	  
+    });
+ 
+    // Apply the search
+    table.columns().every( function () {
+        var that = this;
+ 
+        $( 'input', this.footer() ).on( 'keyup change clear', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+    } );
+} );
+</script>
+
+
+</body>
+</html>

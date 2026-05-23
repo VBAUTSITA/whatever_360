@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layouts/base::head"></head>
+<link rel="stylesheet" th:href="@{/css/coopilot.css}"/>
+<link rel="stylesheet" th:href="@{/css/libreria_comentarios.css}"/>
+<body>
+
+<header th:replace="layouts/base_libreria::header"></header>
+
+
+<div class="main">
+<section class="explorer">
+<div class="container">
+
+    <!-- ── FILE HEADER ───────────────────────────────────── -->
+    <div class="coment-file-header">
+        <div class="file-eyebrow">// Biblioteca de Archivos — Comentarios</div>
+        <h2 th:text="${archivo.nombre_archivo_libreria}">Nombre del Archivo</h2>
+        <div class="file-meta">
+            <a class="btn-download"
+               th:href="@{/archivador/descargar/{categoria}/{id}(
+                   categoria=${archivo.categoria_libreria},
+                   id=${archivo.id_libreria})}">
+                   
+                   <svg xmlns="http://www.w3.org/2000/svg"
+				     width="24" height="24"
+				     viewBox="0 0 24 24"
+				     fill="none"
+				     stroke="currentColor"
+				     stroke-width="2.5"
+				     stroke-linecap="round"
+				     stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Descargar
+            </a>
+        </div>
+        
+   
+	
+	</div>
+	
+	</section>
+	
+    <!-- ── COMMENTS LIST ─────────────────────────────────── -->
+    <section class="explorer">
+    <div class="section-label">
+        Comentarios
+        <span class="comment-count-badge"
+              th:text="${#lists.size(comentarios)}">0</span>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-comments"
+         th:if="${#lists.isEmpty(comentarios)}">
+        <span class="empty-icon">💬</span>
+        Sin comentarios aún — sé el primero
+    </div>
+
+    <!-- Comment cards -->
+    <div th:each="comentario : ${comentarios}" class="comment-card">
+
+        <div class="comment-meta">
+            <!-- Avatar: first letter of username -->
+            <div class="comment-avatar"
+                 th:text="${#strings.substring(comentario.nombreCompleto, 0, 1)}">U</div>
+            <span class="comment-author" th:text="${comentario.nombreCompleto}">Usuario</span>
+            <span class="comment-date"
+                  th:text="${#dates.format(comentario.fechaCreacion,'dd/MM/yyyy HH:mm')}">
+                01/01/2025 00:00
+            </span>
+        </div>
+
+        <div class="comment-body" th:text="${comentario.comentarioTexto}"></div>
+
+        <!-- Reply toggle button -->
+        <button class="btn-reply-toggle"
+                onclick="this.nextElementSibling.classList.toggle('open')">
+            ↩ Responder
+        </button>
+
+        <!-- Inline reply form -->
+        <div class="reply-form-wrapper">
+            <form th:action="@{/archivador/libreria/{id}/comentario(id=${archivo.id_libreria})}"
+                  method="post">
+                <input type="hidden" name="parentId" th:value="${comentario.idComentario}">
+                <textarea class="coment-input"
+                          name="texto"
+                          required
+                          placeholder="Escribe tu respuesta..."></textarea>
+                <button class="btn-submit" type="submit">
+                    Enviar Respuesta
+                </button>
+            </form>
+        </div>
+
+        <!-- Replies -->
+        <div class="replies-wrapper"
+             th:if="${not #lists.isEmpty(comentario.replies)}">
+            <div th:each="reply : ${comentario.replies}" class="reply-card">
+                <div class="reply-meta">
+                    <div class="reply-avatar"
+                         th:text="${#strings.substring(reply.nombreCompleto, 0, 1)}">U</div>
+                    <span class="reply-author" th:text="${reply.nombreCompleto}">Usuario</span>
+                    <span class="reply-date"
+                          th:text="${#dates.format(reply.fechaCreacion,'dd/MM/yyyy HH:mm')}">
+                    </span>
+                </div>
+                <div class="reply-body" th:text="${reply.comentarioTexto}"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="coment-divider">
+
+    <!-- ── NEW COMMENT PANEL ──────────────────────────────── -->
+    <div class="new-comment-panel">
+        <h3>Nuevo Comentario</h3>
+        <form th:action="@{/archivador/libreria/{id}/comentario(id=${archivo.id_libreria})}"
+              method="post">
+            <textarea class="coment-input"
+                      name="texto"
+                      required
+                      placeholder="Escribe tu comentario..."></textarea>
+            <button class="btn-submit" type="submit">
+                Enviar Comentario
+            </button>
+        </form>
+    </div>
+
+</div>
+</div>
+	</section>
+
+
+
+<div th:replace="layouts/base::footer"></div>
+
+</body>
+</html>

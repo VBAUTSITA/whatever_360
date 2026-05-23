@@ -1,0 +1,182 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+
+<body>
+
+<header th:replace="layouts/base_baseline::header"></header>
+
+
+<div class="main maestro_baseline">
+	<div class="container">
+		
+		<div class="title-main">
+			<h2 style="text-transform: initial;font-size: 27px;font-family: 'Verdana';">
+			BASELINE 4G FDD SRAN
+			</h2>
+		</div>
+		
+		
+	
+	<div class="box-lista-seguimiento">			
+		<table id="lista_segui" class="table table-striped table-bordered list_results" style="width:100%">
+		<thead>
+			<tr>
+			<!-- <th>ID</th> -->
+				<th scope="row">ORDEN</th>
+				<th scope="row">LEVEL_BS</th>
+				<th scope="row">CLASE_MO</th>
+				<th scope="row">PARAMETRO_ID</th>
+				<th scope="row">PARAMETER_NAME</th>
+				<th scope="row">SUB_PARAMETRO</th>
+				<th scope="row">CONDICIONAL</th>
+				<th scope="row">BAND_ALL</th>
+				<th scope="row">BAND2_10MHZ</th>
+				<th scope="row">BAND2_15MHZ</th>
+				<th scope="row">BAND28_15MHZ</th>
+				<th scope="row">BAND7_10MHZ</th>
+				<th scope="row">BAND7_15MHZ</th>
+				<th scope="row">BAND7_20MHZ</th>
+				<th scope="row">SCRIPT_BS</th>
+			</tr>
+		</thead>
+		<tbody>	
+			<tr th:each="baselineuser : ${formatouserbaseline}">
+				<!-- <td th:text="${baselineuser.id}"></td> -->
+				<td>					
+					<p th:text="${baselineuser.orden}"></p>
+				</td>
+				<td>						
+					<p th:text="${baselineuser.levelBs}"></p>			
+				</td>
+				<td>					
+					<p th:text="${baselineuser.claseMo}"></p>
+				</td>
+				<td>						
+					<p th:text="${baselineuser.parametroId}"></p>			
+				</td>
+				<td>					
+					<p th:text="${baselineuser.parameterName}"></p>				
+				</td>
+				<td>					
+					<p th:text="${baselineuser.subParametro}"></p>
+				</td>
+				<td>					
+					<p th:text="${baselineuser.condicional}"></p>
+				</td>
+				<td>						
+					<p th:text="${baselineuser.bandAll}"></p>			
+				</td>
+				<td>					
+					<p th:text="${baselineuser.band210MHz}"></p>
+				</td>
+				<td>					
+					<p th:text="${baselineuser.band215MHz}"></p>
+				</td>
+				<td>					
+					<p th:text="${baselineuser.band2815MHz}"></p>
+				</td>
+				<td>					
+					<p th:text="${baselineuser.band710MHz}"></p>
+				</td>
+				<td>					
+					<p th:text="${baselineuser.band715MHz}"></p>
+				</td>
+				<td>					
+					<p th:text="${baselineuser.band720MHz}"></p>
+				</td>
+				<td>					
+					<p th:text="${baselineuser.scriptBs}"></p>
+				</td>
+
+			</tr>
+		</tbody>
+		<tfoot style="display: none;">
+	            <tr>
+					<th scope="row">ORDEN</th>
+					<th scope="row">LEVEL_BS</th>
+					<th scope="row">CLASE_MO</th>
+					<th scope="row">PARAMETRO_ID</th>
+					<th scope="row">PARAMETER_NAME</th>
+					<th scope="row">SUB_PARAMETRO</th>
+					<th scope="row">CONDICIONAL</th>
+					<th scope="row">BAND_ALL</th>
+					<th scope="row">BAND2_10MHZ</th>
+					<th scope="row">BAND2_15MHZ</th>
+					<th scope="row">BAND28_15MHZ</th>
+					<th scope="row">BAND7_10MHZ</th>
+					<th scope="row">BAND7_15MHZ</th>
+					<th scope="row">BAND7_20MHZ</th>
+					<th scope="row">SCRIPT_BS</th>
+	            </tr>
+	        </tfoot>	
+		</table>
+	</div>
+
+	</div>
+</div>
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+
+<script>
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#lista_segui tfoot th').each( function () {
+        var title = $(this).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+ 
+    // DataTable
+    var table = $('#lista_segui').DataTable({
+    	"aaSorting": [],
+    	dom: 'Bfrtip',
+    	  buttons: [
+    		    'copy',
+    		    {
+    		      extend: 'csv',
+    		      title: 'baseline-4gfdd-formato' // Set the desired filename
+    		    }
+    		  ],
+        scrollY:        "400px",
+        scrollX:        true,
+        scrollCollapse: true,
+        fixedColumns:  true	  
+    });
+
+ 
+    // Apply the search
+    table.columns().every( function () {
+        var that = this;
+ 
+        $( 'input', this.footer() ).on( 'keyup change clear', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+    } ); 
+    
+    
+
+    
+} );
+</script>
+
+</body>
+</html>

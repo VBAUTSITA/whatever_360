@@ -1,0 +1,511 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base_inventariostock::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+
+<body>
+
+<header th:replace="layouts/base_inventariostock::header"></header>
+
+
+<div class="main maestro_baseline">
+	<div class="container">
+		
+		<div class="title-main">
+			<h2 style="text-transform: initial;font-size: 27px;font-family: 'Verdana';">
+			INVENTARIO MATERIALES
+				<br><span>DATOS DE STOCK</span>
+			</h2>
+			<a href="#" id="id_popup_bs">AGREGAR INVENTARIO</a>
+			
+			
+			<!-- <button class="btn" id="downloadCSV">Descargar CSV</button>-->
+		</div>
+		
+		
+		<div id="successAlert" style="display: none;">Fue actualizado exitosamente</div>
+		<div id="errorAlert" style="display: none; color: red;"></div>
+		
+		<div id="successAlert_bs" th:if="${exitoInventarioStock}" style="color: green;">
+			<p th:text="${exitoInventarioStock}"></p>
+		</div>
+	<!-- 
+	<div id="tabla_dl" style="display:none;">			
+		<table id="lista_segui_dl">
+		<thead>
+			<tr>
+				<th scope="row">ORDEN</th>
+				<th scope="row">LEVEL_BS</th>
+				<th scope="row">CLASE_MO</th>
+				<th scope="row">PARAMETRO_ID</th>
+				<th scope="row">PARAMETER_NAME</th>
+				<th scope="row">SUB_PARAMETRO</th>
+				<th scope="row">CONDICIONAL</th>
+				<th scope="row">BAND_ALL</th>
+				<th scope="row">BAND2_10MHZ</th>
+				<th scope="row">BAND2_15MHZ</th>
+				<th scope="row">BAND28_15MHZ</th>
+				<th scope="row">BAND7_10MHZ</th>
+				<th scope="row">BAND7_15MHZ</th>
+				<th scope="row">BAND7_20MHZ</th>
+				<th scope="row">SCRIPT_BS</th>
+				<th scope="row">Fecha actualizada</th>
+			</tr>
+		</thead>
+		<tbody>	
+			<tr th:each="entidad : ${baseline}">
+				<td th:text="${entidad.orden}"></td>
+				<td th:text="${entidad.levelBs}"></td>
+				<td th:text="${entidad.claseMo}"></td>
+				<td th:text="${entidad.parametroId}"></td>
+				<td th:text="${entidad.parameterName}"></td>
+				<td th:text="${entidad.subParametro}"></td>
+				<td th:text="${entidad.condicional}"></td>
+				<td th:text="${entidad.bandAll}"></td>
+				<td th:text="${entidad.band210MHz}"></td>
+				<td th:text="${entidad.band215MHz}"></td>
+				<td th:text="${entidad.band2815MHz}"></td>
+				<td th:text="${entidad.band710MHz}"></td>
+				<td th:text="${entidad.band715MHz}"></td>
+				<td th:text="${entidad.band720MHz}"></td>
+				<td th:text="${entidad.scriptBs}"></td>
+				<td th:text="${#dates.format(entidad.fechaActualizada, 'dd/MM/yyyy hh:mm:ss')}"></td>
+			</tr>
+		</tbody>
+		</table>
+	</div> -->
+	<!-- 
+	<div class="box-lista-seguimiento">			
+		<table id="lista_segui" class="table table-striped table-bordered list_results t_maestro_bs" style="width:100%">
+		<thead>
+			<tr>
+				<th scope="row">ORDEN</th>
+				<th scope="row">LEVEL_BS</th>
+				<th scope="row">CLASE_MO</th>
+				<th scope="row">PARAMETRO_ID</th>
+				<th scope="row">PARAMETER_NAME</th>
+				<th scope="row">SUB_PARAMETRO</th>
+				<th scope="row">CONDICIONAL</th>
+				<th scope="row">BAND_ALL</th>
+				<th scope="row">BAND2_10MHZ</th>
+				<th scope="row">BAND2_15MHZ</th>
+				<th scope="row">BAND28_15MHZ</th>
+				<th scope="row">BAND7_10MHZ</th>
+				<th scope="row">BAND7_15MHZ</th>
+				<th scope="row">BAND7_20MHZ</th>
+				<th scope="row">SCRIPT_BS</th>
+				<th scope="row">FECHA ACTUALIZACIÓN</th>
+				<th scope="row">ACCIONES</th>
+			</tr>
+		</thead>
+		<tbody>	
+			<tr th:each="entidad : ${baseline}">
+				<td th:text="${entidad.id}"></td>
+				<td>
+					<input type="text" th:value="${entidad.orden}" th:id="'orden-' + ${entidad.id}" />
+					<p th:text="${entidad.orden}"></p>
+				</td>
+				<td>					
+					<!-- <input type="text" th:value="${entidad.levelBs}" th:id="'levelBs-' + ${entidad.id}" /> 
+					<select th:value="${entidad.levelBs}" th:id="'levelBs-' + ${entidad.id}" >
+						<option value="ENODEB" th:selected="${entidad.levelBs == 'ENODEB'}">ENODEB</option>
+						<option value="CELDA" th:selected="${entidad.levelBs == 'CELDA'}">CELDA</option>
+					</select>
+					<p th:text="${entidad.levelBs}"></p>			
+				</td>
+				<td>
+					<input type="text" th:value="${entidad.claseMo}" th:id="'claseMo-' + ${entidad.id}" />
+					<p th:text="${entidad.claseMo}"></p>
+				</td>
+				<td>
+					<input type="text" th:value="${entidad.parametroId}" th:id="'parametroId-' + ${entidad.id}" />	
+					<p th:text="${entidad.parametroId}"></p>			
+				</td>
+				<td>
+					<input type="text" th:value="${entidad.parameterName}" th:id="'parameterName-' + ${entidad.id}" />	
+					<p th:text="${entidad.parameterName}"></p>				
+				</td>
+				<td>
+					<input type="text" th:value="${entidad.subParametro}" th:id="'subParametro-' + ${entidad.id}" />
+					<p th:text="${entidad.subParametro}"></p>
+				</td>
+				<td>
+					<input type="text" th:value="${entidad.condicional}" th:id="'condicional-' + ${entidad.id}" />
+					<p th:text="${entidad.condicional}"></p>
+				</td>
+				<td>
+					<input type="text" th:value="${entidad.bandAll}" th:id="'bandAll-' + ${entidad.id}" />	
+					<p th:text="${entidad.bandAll}"></p>			
+				</td>
+				<td>
+					<input type="text" th:value="${entidad.band210MHz}" th:id="'band210MHz-' + ${entidad.id}" />
+					<p th:text="${entidad.band210MHz}"></p>
+				</td>
+				<td>
+					<input type="text" th:value="${entidad.band215MHz}" th:id="'band215MHz-' + ${entidad.id}" />
+					<p th:text="${entidad.band215MHz}"></p>
+				</td>
+				<td>
+					<input type="text" th:value="${entidad.band2815MHz}" th:id="'band2815MHz-' + ${entidad.id}" />
+					<p th:text="${entidad.band2815MHz}"></p>
+				</td>
+				<td>
+					<input type="text" th:value="${entidad.band710MHz}" th:id="'band710MHz-' + ${entidad.id}" />
+					<p th:text="${entidad.band710MHz}"></p>
+				</td>
+				<td>
+					<input type="text" th:value="${entidad.band715MHz}" th:id="'band715MHz-' + ${entidad.id}" />
+					<p th:text="${entidad.band715MHz}"></p>
+				</td>
+				<td>
+					<input type="text" th:value="${entidad.band720MHz}" th:id="'band720MHz-' + ${entidad.id}" />
+					<p th:text="${entidad.band720MHz}"></p>
+				</td>
+				<td>
+					 <input type="text" th:value="${entidad.scriptBs}" th:id="'scriptBs-' + ${entidad.id}" />
+					<p th:text="${entidad.scriptBs}"></p>
+				</td>
+				<td th:text="${#dates.format(entidad.fechaActualizada, 'dd/MM/yyyy hh:mm:ss')}"></td>
+				<td>				
+					<button th:attr="data-id=${entidad.id}" class="update-button">ACTUALIZAR</button> 
+					<button th:data-id="${entidad.id}" class="update-button">ACTUALIZAR test</button>			 		
+					<button th:data-id="${entidad.id}" class="edit-button">EDITAR</button> 
+					<a class="btn update-button" th:href="@{/baseline-admin/edit/{id}(id=${entidad.id})}">EDITAR </a>
+					<a class="btn delet_bt" th:href="@{/baseline-admin/delete/{id}(id=${entidad.id})}" onclick="return confirmarEliminacion(this)">ELIMINAR</a>
+				</td>
+			</tr>
+		</tbody>
+		<tfoot style="display: none;">
+	            <tr>
+	            	<th scope="row">ID</th>
+					<th scope="row">ORDEN</th>
+					<th scope="row">LEVEL_BS</th>
+					<th scope="row">CLASE_MO</th>
+					<th scope="row">PARAMETRO_ID</th>
+					<th scope="row">PARAMETER_NAME</th>
+					<th scope="row">SUB_PARAMETRO</th>
+					<th scope="row">CONDICIONAL</th>
+					<th scope="row">BAND_ALL</th>
+					<th scope="row">BAND2_10MHZ</th>
+					<th scope="row">BAND2_15MHZ</th>
+					<th scope="row">BAND28_15MHZ</th>
+					<th scope="row">BAND7_10MHZ</th>
+					<th scope="row">BAND7_15MHZ</th>
+					<th scope="row">BAND7_20MHZ</th>
+					<th scope="row">SCRIPT_BS</th>
+					<th scope="row">FECHA ACTUALIZACIÓN</th>
+					<th scope="row">ACCIONES</th>
+	            </tr>
+	        </tfoot>	
+		</table>
+	</div>-->
+	
+	<div class="box-lista-seguimiento">
+		<table id="lista_segui" class="table table-striped table-bordered list_results t_maestro_bs" style="width:100%">
+		<thead>
+			<tr>
+			 	<!-- <th>ID</th> -->
+					<th scope="row">CENTRO</th>
+					<th scope="row">ALMACEN</th>
+					<th scope="row">NOMBRE_CENTRO</th>
+					<th scope="row">DENOMINACION_ALMCN</th>
+					<th scope="row">MATERIAL</th>
+					<th scope="row">LOTE</th>
+					<th scope="row">DESCRIP_MATERIAL</th>
+					<th scope="row">LIBRE_UTILIZACION</th>
+					<th scope="row">ENTREGAS_LIBERADAS</th>
+					<th scope="row">CANT_PEDIDO_TRANSLADO</th>
+					<th scope="row">CANT_RESERVADA</th>
+					<th scope="row">STOCK_DISPONIBLE</th>
+					<th scope="row">STOCK_REAL</th>
+					<th scope="row">STOCK_BLOQUEADO</th>
+					<th scope="row">CONTROL_CALIDAD</th>
+					<th scope="row">STOCK_TRANSITO</th>
+					<th scope="row">STOCK_TOTAL</th>
+					<th scope="row">REGION</th>
+					<th scope="row">FECHA_HORA</th>
+					<th scope="row">SEMANA</th>
+					<th scope="row">ACCIONES</th>
+			</tr>
+		</thead>
+		<tbody>	
+			<tr th:each="inventario : ${inventarioStock}">
+				<!--<td th:text="${entidad.id}"></td> -->
+				<td>
+									
+					<p th:text="${inventario.centro}"></p>
+				</td>
+				<td>			
+					<p th:text="${inventario.almacen}"></p>			
+				</td>
+				<td>
+					
+					<p th:text="${inventario.nombre_centro}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.denominacion_almcn}"></p>			
+				</td>
+				<td>
+					
+					<p th:text="${inventario.material}"></p>				
+				</td>
+				<td>
+					
+					<p th:text="${inventario.lote}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.descrip_material}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.libre_utilizacion}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.entregas_liberadas}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.cant_pedido_translado}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.cant_reservada}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.stock_disponible}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.stock_real}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.stock_bloqueado}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.control_calidad}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.stock_transito}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.stock_total}"></p>
+				</td>
+				<td>
+					
+					<p th:text="${inventario.region}"></p>
+				</td>
+				<td th:text="${#dates.format(inventario.fecha_hora, 'dd/MM/yyyy hh:mm:ss')}">
+				</td>
+				<td>
+					
+					<p th:text="${inventario.semana}"></p>
+				</td>
+				
+				<td>				
+					
+					<a class="btn update-button" th:href="@{/inventario-admin/edit/{id}(id=${inventario.id})}">EDITAR </a>
+					<a class="btn delet_bt" th:href="@{/inventario-admin/delete/{id}(id=${inventario.id})}" onclick="return confirmarEliminacion(this)">ELIMINAR</a>
+				</td>
+			</tr>
+		</tbody>
+		<tfoot style="display: none;">
+	            <tr>
+	            	<!-- <th scope="row">ID</th> -->
+					<th scope="row">CENTRO</th>
+					<th scope="row">ALMACEN</th>
+					<th scope="row">NOMBRE_CENTRO</th>
+					<th scope="row">DENOMINACION_ALMCN</th>
+					<th scope="row">MATERIAL</th>
+					<th scope="row">LOTE</th>
+					<th scope="row">DESCRIP_MATERIAL</th>
+					<th scope="row">LIBRE_UTILIZACION</th>
+					<th scope="row">ENTREGAS_LIBERADAS</th>
+					<th scope="row">CANT_PEDIDO_TRANSLADO</th>
+					<th scope="row">CANT_RESERVADA</th>
+					<th scope="row">STOCK_DISPONIBLE</th>
+					<th scope="row">STOCK_REAL</th>
+					<th scope="row">STOCK_BLOQUEADO</th>
+					<th scope="row">CONTROL_CALIDAD</th>
+					<th scope="row">STOCK_TRANSITO</th>
+					<th scope="row">STOCK_TOTAL</th>
+					<th scope="row">REGION</th>
+					<th scope="row">FECHA_HORA</th>
+					<th scope="row">SEMANA</th>
+					<th scope="row">ACCIONES</th>
+	            </tr>
+	        </tfoot>	
+		</table>
+	</div>
+	
+		<div class="formulario_baseline">
+			<h1 style="margin-top: 25px;text-decoration:underline;font-size: 25px;">Carga Stock de Inventario desde CSV</h1>
+			<p>Tomar en cuenta que al cargar los nuevos datos de forma masiva, 
+			borra todos los actuales. Así que como seguridad, descargar primero y recién cargar los nuevos datos.</p>
+			<form th:action="@{/inventario-admin/loadCsv}" method="post" enctype="multipart/form-data">
+			<input type="file" name="file" accept=".csv" required />
+			<button type="submit" onclick="return confirmarCargaSql(this)">Cargar CSV</button>
+			</form>
+			
+			<h2>Ejemplo de Formato CSV</h2>
+			<div class="content">
+			<p>Aqui podras descargar el archivo ejemplo para usar la herramienta. 
+			<br>IMPORTANTE: Tomar en cuenta que no se suben las cabeceras.</p> 
+			</div>		
+			<a class="dlink" th:href="@{/files/carga_datos_inventario_stock.csv}">Descargar Archivo csv</a>
+			
+		</div>
+
+		 
+		
+	</div>
+</div>
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+
+<script>
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#lista_segui tfoot th').each( function () {
+        var title = $(this).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+ 
+    // DataTable
+    var table = $('#lista_segui').DataTable({
+    	"aaSorting": [],
+    	dom: 'Bfrtip',
+        buttons: ['copy','csv'],
+        scrollY:        "400px",
+        scrollX:        true,
+        scrollCollapse: true,
+        fixedColumns:  true	  
+    });
+
+ 
+    // Apply the search
+    table.columns().every( function () {
+        var that = this;
+ 
+        $( 'input', this.footer() ).on( 'keyup change clear', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+    } ); 
+    
+    
+
+    
+} );
+</script>
+
+<script>
+	$(document).ready(function() {
+		
+		// Manejar el evento click del botón de edición
+		$(".edit-button").on("click", function() {
+		const id = $(this).data("id");
+		console.log("Edit button clicked, ID:", id);
+		window.location.href = "/inventario-admin/edit/" + id;
+		});
+			
+		
+		
+});
+	
+</script>
+<script>
+$(document).ready(function() {
+	
+const openPopupButton = document.getElementById('id_popup_bs');
+const closePopupButton = document.getElementById('id_popup_bs_close');
+const popup = document.getElementById('pop_up_add');
+
+openPopupButton.addEventListener('click', function(event) {
+  event.preventDefault(); // Prevent the default link behavior (opening a new page)
+  popup.style.display = 'block'; // Show the popup
+});
+
+
+closePopupButton.addEventListener('click', function(event) {
+	  event.preventDefault(); // Prevent the default link behavior (opening a new page)
+	  popup.style.display = 'none'; // Show the popup
+	});
+
+});
+</script>
+<script>
+    const successAlert_bs = document.getElementById('successAlert_bs');
+
+    // Check if the successAlert is displayed
+    if (successAlert_bs.style.display !== 'none') {
+        // Set a timeout to hide the alert after 1 second (1000 milliseconds)
+        setTimeout(function() {
+        	successAlert_bs.style.display = 'none';
+        }, 1500);
+    }
+</script>
+
+
+<script>
+//confirmacion delete
+function confirmarEliminacion(enlace) {
+	  // Obtener el ID del archivo a eliminar
+	  const idArchivo = enlace.getAttribute("href").split("/").pop();
+
+	  // Mostrar un mensaje de confirmación al usuario
+	  //const confirmacion = confirm(`¿Estás seguro de eliminar el archivo con ID ${idArchivo}?`);
+	  const confirmacion = confirm(`¿Estás seguro de eliminar el ?`);
+
+	  // Si el usuario confirma, permitir la navegación al enlace
+	  if (confirmacion) {
+	    return true;
+	  }
+
+	  // Si el usuario no confirma, cancelar la acción y evitar la navegación
+	  return false;
+	}
+</script>
+
+
+
+<script>
+function confirmarCargaSql() {
+	  // Display a confirmation dialog to the user
+	  const confirmacion = confirm(`¿Estás seguro de borrar los datos actuales y cargar estos nuevos datos de forma masiva?`);
+
+	  // If the user confirms, proceed with the action
+	  if (confirmacion) {
+	    return true; // Allow the form submission
+	  }
+
+	  // If the user cancels, prevent the form submission
+	  return false; // Block the form submission
+	}
+</script>
+</body>
+</html>

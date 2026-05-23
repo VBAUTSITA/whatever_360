@@ -1,0 +1,121 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">         
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<body>
+<header th:replace="layouts/base::header"></header>
+
+<div class="miga breadcrumb">
+	<div class="container">
+		<a class="btn btn-primary" href="#" 
+			th:href="@{'/seguimiento/list/'}" role="button">
+			Regresar</a>
+	</div>
+</div>
+
+<div class="main">
+	<div class="container">
+	
+		<div class="title-main">
+			<h2>Histórico de Cambios - Global</h2>
+		</div>	
+		
+	<div class="box-lista-seguimiento">			
+		<table id="lista_segui" class="table table-striped table-bordered list_results" style="width:100%">
+			<thead>
+				<tr>
+					<th>SITIO</th>
+					<th>CELLNAME</th>
+					<th>SECTOR</th>
+					<th>BANDA</th>
+					<th>TECNOLOGIA</th>					
+					<th>TILT_ELECTRICO</th>
+					<th>AZIMUTH</th>
+					<th>ALTURA</th>
+					<th>TILT_MECANICO</th>
+					<th>CAMBIOS_LOGICOS</th>
+					<th>ULTIMA_FECHA</th>
+					<th>USUARIO</th>
+					<th>ESTADO_CAMBIO</th>
+					<th>DETALLES</th>
+				</tr>
+			</thead>
+			<tbody>
+						
+					<tr th:each="seguimiento : ${seguimiento_list_hist}">					
+						<td th:text="${seguimiento.code_site }"></td>
+						<td th:text="${seguimiento.cellname }"></td>
+						<td th:text="${seguimiento.sector }"></td>
+						<td th:text="${seguimiento.band }"></td>
+						<td th:text="${seguimiento.tecnologia }"></td>					
+						<td th:text="${seguimiento.tilt_electric_field }"></td>
+						<td th:text="${seguimiento.azimuth }"></td>
+						<td th:text="${seguimiento.height }"></td>
+						<td th:text="${seguimiento.tilt_mecanic_field }"></td>
+						<td><div th:text="${seguimiento.logic_changes }" class="limit_height"></div></td>
+						<td th:text="${seguimiento.fecha}"></td>
+						<td th:text="${seguimiento.usuario }"></td>
+						<td th:text="${seguimiento.estado_cambio }"></td>
+						<td style="width: 62px;">
+							<a class="btn btn-primary" href="#" 
+									th:href="@{'/seguimiento/hist/id/'+${#strings.toLowerCase(seguimiento.tecnologia)}+'/'+${seguimiento.site_id_hist}}" role="button">
+									Ver más</a>
+						</td>
+
+					</tr>
+			</tbody>
+		</table>
+		
+		</div>	
+	</div>
+</div>
+		
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+<script>
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#lista_segui tfoot th').each( function () {
+        var title = $(this).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+ 
+    // DataTable
+    var table = $('#lista_segui').DataTable({
+    	"aaSorting": [],
+    	dom: 'Bfrtip',
+        buttons: ['copy','csv'],
+        scrollY:        "400px",
+        scrollX:        true,
+        scrollCollapse: true,
+        fixedColumns:  true	  
+    });
+
+ 
+    // Apply the search
+    table.columns().every( function () {
+        var that = this;
+ 
+        $( 'input', this.footer() ).on( 'keyup change clear', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+    } );
+} );
+</script>
+</body>
+</html>

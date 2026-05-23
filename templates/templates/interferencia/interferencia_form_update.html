@@ -1,0 +1,365 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      
+<head th:replace="layouts/base::head">
+</head>
+<body>
+<header th:replace="layouts/base_interferencia::header"></header>
+
+<div class="miga breadcrumb">
+	<div class="container">
+		<a class="btn btn-primary" href="#" 
+			th:href="@{'/interferencia/list/'}" role="button">
+			Regresar</a>
+	</div>
+</div>
+
+<div class="main">	
+	<div class="container">
+		<div class="title-main crud">
+			<h2>Actualizar Caso de Interferencia Nro
+				<div style="display: inline-block" th:object="${interferenciaFormUpdate}" 
+				method="get">		
+						<span th:text="*{nro_caso}" class="form-control" id="nro_caso"></span>
+				</div>	
+			</h2>
+		</div>
+		<span style="font-size: 15px;color: red;font-weight: bold;background-color: #efff00;margin-bottom: 15px;display: inline-block;">llenar campos con (*)</span>
+		<form action="#" th:object="${interferenciaFormUpdate}" th:action="@{/interferencia/actualiza}" 
+				method="post" class="form">
+			
+			<div class="form_cols" style="max-width: 1170px;">
+				<div class="cols" style="width: 100%;">
+					<div class="form-group" style="display: none;">
+						<!-- <label for="site_code">Sitio ID</label> -->
+						<input type="hidden" th:field="*{inter_id}" class="form-control" id="inter_id" />
+					</div>	
+					<div class="form-group">		
+						<label for="nro_caso">NRO CASO</label>
+						<input  readonly="readonly" th:field="*{nro_caso}" class="form-control" id="nro_caso" />
+
+					</div>
+				</div>
+			</div>	
+			
+			<div class="form_cols" style="max-width: 1170px;">
+				<div class="cols">	
+					
+					<div class="form-group">
+						<label for="site_code">SITIO (*)</label>
+						<input readonly="readonly" th:field="${interferenciaFormUpdate.site_code}" class="form-control" id="site_code" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="name_site">SITE ADDRESS (*)</label>
+						<input th:field="*{name_site}" class="form-control" id="name_site" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="banda_afectada">BANDA AFECTADA (*)</label>
+						<select th:field="*{banda_afectada}" class="form-control" id="banda_afectada" required="required">				    
+						        <option selected="selected" value="450 MHz">450 MHz</option>
+						        <option value="700 MHz">700 MHz</option>
+						        <option value="850 MHz">850 MHz</option>
+						        <option value="900 MHz">900 MHz</option>
+						        <option value="1900 MHz 3G">1900 MHz 3G</option>
+						        <option value="1900 MHz 4G">1900 MHz 4G</option>
+						        <option value="2600 MHz">2600 MHz</option>
+						        <option value="3.5 GHz">3.5 GHz</option>				    
+						</select>				
+					</div>
+					
+					<!-- <div class="form-group">
+						<label for="responsable_caza">RESPONSABLE CACERIA</label>
+						<input th:field="*{responsable_caza}" class="form-control" id="responsable_caza" required="required"/>
+					</div>-->
+					<div class="form-group">
+						<label for="responsable_caza">RESPONSABLE CACERIA (*)</label>
+						<select th:field="*{responsable_caza}" class="form-control" id="responsable_caza" required="required">				    
+						        <option selected="selected" value="OyM Contrata">OyM Contrata</option>
+						        <option value="OyM Claro">OyM Claro</option>
+						        <option value="OLO">OLO</option>
+						        <option value="RF Claro">RF Claro</option>			    
+						</select>				
+					</div>
+					
+					<div class="form-group">
+						<label for="celdas_afectadas">CELDAS AFECTADAS (*)</label>
+						<input th:field="*{celdas_afectadas}" class="form-control" id="celdas_afectadas"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="ruta_archivo">RUTA ARCHIVO</label>
+						<input th:field="*{ruta_archivo}" class="form-control" id="ruta_archivo" required="required"/>
+					</div>
+									
+					<!-- <div class="form-group">
+						<label for="sub_region">SUB REGION</label>
+						<input th:field="*{sub_region}" class="form-control" id="sub_region" required="required"/>
+					</div>-->
+					<div class="form-group">
+						<label for="sub_region">SUB REGION</label>
+						<select th:field="*{sub_region}" class="form-control" id="sub_region" required="required">	
+								<option selected="selected" value=""></option>			    
+						        <option value="LIMA NORTE">LIMA NORTE</option>
+						        <option value="LIMA SUR">LIMA SUR</option>
+						        <option value="LIMA ESTE">LIMA ESTE</option>
+						        <option value="LIMA OESTE">LIMA OESTE</option>
+						        <option value="NORTE">NORTE</option>
+						        <option value="SUR">SUR</option>	
+						        <option value="CENTRO">CENTRO</option>	    
+						</select>				
+					</div>
+					
+					<div class="form-group">
+						<label for="departamento">DEPARTAMENTO</label>
+						<input th:field="*{departamento}" class="form-control" id="departamento" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="cluster_name">CLUSTER</label>
+						<input th:field="*{cluster_name}" class="form-control" id="cluster_name" >
+					</div>
+					
+					<div class="form-group">
+						<label for="distrito">DISTRITO</label>
+						<input th:field="*{distrito}" class="form-control" id="distrito" />
+					</div>
+															
+					<div class="form-group">
+						<label for="responsable_area">RESPONSABLE AREA</label>
+						<input th:field="*{responsable_area}" class="form-control" id="responsable_area" />
+					</div>
+					
+					<div class="form-group">
+						<label for="direccion_interferencia">DIRECCION DE INFERFERENCIA (*) <span style="font-size: 11px;color: red;">(Av., cuadra, lote, etc)</span></label>
+						<input th:field="*{direccion_interferencia}" class="form-control" id="direccion_interferencia" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="nivel_interferencia">NIVEL DE INFERFERENCIA (*) <span style="font-size: 11px;color: red;">(en dBm, ejm: -101 dBm)</span></label>
+						<input th:field="*{nivel_interferencia}" class="form-control" id="nivel_interferencia" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="coordenadas_interferencia">COORDENADAS DE INFERFERENCIA (*) <br><span style="font-size: 11px;color: red;">(Donde se encuentra la interferencia)</span></label>
+						<input th:field="*{coordenadas_interferencia}" class="form-control" id="coordenadas_interferencia" required="required"/>
+					</div>
+					
+				</div>
+				
+				<div class="cols">	
+				
+					<!-- <div class="form-group">
+						<label for="estatus_area">ESTATUS AREA</label>
+						<input th:field="*{estatus_area}" class="form-control" id="estatus_area" />
+					</div>-->
+					<div class="form-group">
+						<label for="estatus_area">ESTATUS AREA (*)</label>
+						<select th:field="*{estatus_area}" class="form-control" id="estatus_area" required="required">	
+						        <option selected="selected" value="OyM">OyM</option>
+						        <option value="Legal_MTC">Legal_MTC</option>	
+						        <option value="OPTI">OPTI</option>
+						        <option value="HFC_Claro">HFC Claro</option>
+						        <option value="SOLUCIONADO">SOLUCIONADO</option>
+						</select>				
+					</div>
+					
+					<div class="form-group">
+						<label for="subestatus">SUBESTATUS (*)</label>
+						<select th:field="*{subestatus}" class="form-control" id="subestatus" required="required">				    
+						        <option selected="selected" value="CACERIA">CACERIA</option>
+						        <option value="CESADO">CESADO</option>		    
+						        <option value="HFC">HFC</option>
+						        <option value="LEGAL">LEGAL</option>
+						        <option value="Monitoreo">Monitoreo</option>
+						        <option value="PEND RPTA MTC">PEND RPTA MTC</option>
+						        <option value="SOLUCIONADO">SOLUCIONADO</option>
+						</select>				
+					</div>
+
+					<!--<div class="form-group">
+						<label for="responsable_area">RESPONSABLE AREA (*)</label>
+						<select th:field="*{responsable_area}" class="form-control" id="responsable_area" required="required">				    
+						        <option selected="selected" value="CACERIA">CACERIA</option>
+						        <option value="CESADO">CESADO</option>		    
+						        <option value="HFC">HFC</option>
+						        <option value="LEGAL">LEGAL</option>
+						        <option value="Monitoreo">Monitoreo</option>
+						        <option value="PEND RPTA MTC">PEND RPTA MTC</option>
+						        <option value="SOLUCIONADO">SOLUCIONADO</option>
+						</select>				
+					</div>-->
+				
+					<div class="form-group">
+						<label for="crq_number">NUMERO CRQ(*)</label>
+						<input th:field="*{crq_number}" class="form-control" id="crq_number" />
+					</div>
+					
+					<div class="form-group">
+						<label for="date_crq_envio">FECHA DE ENVIO CRQ <span style="font-size: 11px;color: red;">formato (dd/mm/aaaa)</span></label>
+						<!-- <input th:field="*{date_crq_envio}" class="form-control" id="date_crq_envio" /> -->
+						<input data-toggle="datepicker" th:field="*{date_crq_envio}" class="form-control" id="date_crq_envio" value="*{date_crq_envio}" placeholder="dd/mm/yyyy" style="width: auto;">
+					</div>
+					
+					<!-- <div class="form-group">
+						<label for="week_crq_envio">SEMANA DE ENVIO CRQ</label>
+						<input th:field="*{week_crq_envio}" class="form-control" id="week_crq_envio" />
+					</div>-->
+										
+					<!-- <div class="form-group">
+						<label for="priorid_celdas">PRIORIDAD POR CELDAS (*)</label>
+						<input th:field="*{priorid_celdas}" class="form-control" id="priorid_celdas" />
+					</div>-->
+					<div class="form-group">
+						<label for="priorid_celdas">PRIORIDAD POR CELDAS (*)</label>
+						<select th:field="*{priorid_celdas}" class="form-control" id="priorid_celdas">				    
+						        <option selected="selected" value="NA">NA</option>
+						        <option value="0">0</option>
+						        <option value="1">1</option>
+						        <option value="2">2</option>						        			    
+						</select>				
+					</div>
+					<!--<div class="form-group">
+						<label for="priorid_nivel_interfer">PRIORIDAD POR NIVEL INTERFERENCIA (*)</label>
+						<input th:field="*{priorid_nivel_interfer}" class="form-control" id="priorid_nivel_interfer" />
+					</div>-->
+					<div class="form-group">
+						<label for="priorid_nivel_interfer">PRIORIDAD POR NIVEL INTERFERENCIA (*)</label>
+						<select th:field="*{priorid_nivel_interfer}" class="form-control" id="priorid_nivel_interfer">				    
+						        <option selected="selected" value="NA">NA</option>
+						        <option value="0">0</option>
+						        <option value="1">1</option>
+						        <option value="2">2</option>						        			    
+						</select>				
+					</div>
+					
+					<img src="../static/images/prioridad_interferencia_3g.jpg" th:src="@{/images/prioridad_interferencia_3g.jpg}" style="display: inline-block;" />	
+					<img src="../static/images/prioridad_interferencia_4g.jpg" th:src="@{/images/prioridad_interferencia_4g.jpg}" style="display: inline-block;" />								
+		
+					<div class="form-group">
+						<label for="visit_oym">FECHA VISITA OYM <span style="font-size: 11px;color: red;">formato (dd/mm/aaaa)</span></label>
+						<!-- <input th:field="*{visit_oym}" class="form-control" id="visit_oym" /> -->
+						<input data-toggle="datepicker" th:field="*{visit_oym}" class="form-control" id="visit_oym" value="*{visit_oym}" placeholder="dd/mm/yyyy" style="width: auto;">
+					</div>	
+					
+										
+					<div class="form-group">
+						<label for="fecha_recepcion_report_oym">FECHA RECEPCION REPORT OYM <span style="font-size: 11px;color: red;">formato (dd/mm/aaaa)</span></label>
+						<!-- <input th:field="*{fecha_recepcion_report_oym}" class="form-control" id="fecha_recepcion_report_oym" /> -->
+						<input data-toggle="datepicker" th:field="*{fecha_recepcion_report_oym}" class="form-control" id="fecha_recepcion_report_oym" value="*{fecha_recepcion_report_oym}" placeholder="dd/mm/yyyy" style="width: auto;">
+					</div>
+					
+					<!--<div class="form-group">
+						<label for="week_recepcion_report_oym">SEMANA RECEPCION REPORT OYM</label>
+						<input th:field="*{week_recepcion_report_oym}" class="form-control" id="week_recepcion_report_oym" />
+					</div>	-->
+					
+				</div>
+				<div class="cols">	
+					
+					<div class="form-group">
+						<label for="carta_denuncia">CARTA DENUNCIA<span style="color: red;">(LLENAR POR LEGAL)</span></label>
+						<input th:field="*{carta_denuncia}" class="form-control" id="carta_denuncia" />
+					</div>
+					
+					<!--<div class="form-group">
+						<label for="tipo_fuente">TIPO DE FUENTE INTERFERENCIA</label>
+						<input th:field="*{tipo_fuente}" class="form-control" id="tipo_fuente" />
+					</div>-->
+					
+					<div class="form-group">
+						<label for="tipo_fuente">TIPO DE FUENTE INTERFERENCIA</label>
+						<select th:field="*{tipo_fuente}" class="form-control" id="tipo_fuente">
+						        <option value="MACRO">MACRO</option>
+						        <option value="CABLERA">CABLERA</option>	
+								<option value="PENAL">PENAL</option>
+								<option value="HFC Claro">HFC Claro</option>							        			    
+						</select>				
+					</div>
+					
+					
+					<div class="form-group">
+						<label for="area_notificacion">DETALLE FUENTE DE INFERFERENCIA <br><span style="color: red;">(MACRO: repetidor,panel publicitario,wifi)<br>(CABLERA: movistar,cablemas,detallar nombre)</span></label>
+						<input th:field="*{area_notificacion}" class="form-control" id="area_notificacion" />
+					</div>
+					
+					<div class="form-group">
+						<label for="fecha_correctivo_hfc">FECHA CORRECTIVO HFC <span style="font-size: 11px;color: red;">(dd/mm/aaaa)</span><span style="color: red;">(LLENAR POR HFC)</span></label>
+						<!-- <input th:field="*{fecha_correctivo_hfc}" class="form-control" id="fecha_correctivo_hfc" /> -->
+						<input data-toggle="datepicker" th:field="*{fecha_correctivo_hfc}" class="form-control" id="fecha_correctivo_hfc" value="*{fecha_correctivo_hfc}" placeholder="dd/mm/yyyy" style="width: auto;">
+					</div>
+			
+					<!--<div class="form-group">
+						<label for="area_notificacion">AREA NOTIFICACION</label>
+						<input th:field="*{area_notificacion}" class="form-control" id="area_notificacion" />
+					</div>-->
+					
+					<div class="form-group">
+						<label for="date_notification">FECHA NOTIFICACION <span style="font-size: 11px;color: red;">(dd/mm/aaaa)</span></label>
+						<!-- <input th:field="*{date_notification}" class="form-control" id="date_notification" /> -->
+						<input data-toggle="datepicker" th:field="*{date_notification}" class="form-control" id="date_notification" value="*{date_notification}" placeholder="dd/mm/yyyy" style="width: auto;">
+					</div>
+					
+					<div class="form-group">
+						<label for="cargo_mtc">CARGO MTC</label>
+						<input th:field="*{cargo_mtc}" class="form-control" id="cargo_mtc" />
+					</div>
+					
+					<div class="form-group">
+						<label for="fecha_rpta_mtc">FECHA RPTA MTC<span style="font-size: 11px;color: red;">formato (dd/mm/aaaa)</span></label>
+						<!-- <input th:field="*{fecha_rpta_mtc}" class="form-control" id="fecha_rpta_mtc" /> -->
+						<input data-toggle="datepicker" th:field="*{fecha_rpta_mtc}" class="form-control" id="fecha_rpta_mtc" value="*{fecha_rpta_mtc}" placeholder="dd/mm/yyyy" style="width: auto;">
+					</div>
+					
+					<div class="form-group">
+						<label for="fecha_solucion_mtc">FECHA SOLUCION MTC <span style="font-size: 11px;color: red;">formato (dd/mm/aaaa)</span></label>
+						<!-- <input th:field="*{fecha_solucion_mtc}" class="form-control" id="fecha_solucion_mtc" /> -->
+						<input data-toggle="datepicker" th:field="*{fecha_solucion_mtc}" class="form-control" id="fecha_solucion_mtc" value="*{fecha_solucion_mtc}" placeholder="dd/mm/yyyy" style="width: auto;">
+					</div>
+					
+					<div class="form-group">
+						<label for="fecha_de_cese">FECHA DE CESE <span style="font-size: 11px;color: red;">formato (dd/mm/aaaa)</span></label>
+						<!-- <input th:field="*{fecha_de_cese}" class="form-control" id="fecha_de_cese" /> -->
+						<input data-toggle="datepicker" th:field="*{fecha_de_cese}" class="form-control" id="fecha_de_cese" value="*{fecha_de_cese}" placeholder="dd/mm/yyyy" style="width: auto;">
+					</div>
+					
+					<div class="form-group">
+						<label for="detalles_interferencia">DETALLES DE INTERFERENCIA</label>
+						<textarea th:field="*{detalles_interferencia}" class="form-control" id="detalles_interferencia" style="height: 17px;"></textarea>
+					</div>	
+					
+					<div class="form-group">
+						<label for="fecha_registro_site">FECHA REGISTRO DE SITE </label>
+						<input readonly="readonly" th:field="*{fecha_registro_site}" class="form-control" id="fecha_registro_site" />
+					</div>			
+			
+			</div>	
+		</div>		
+			<!-- <div class="form-group">
+				<label for="date_change">ULTIMA FECHA / HORA CAMBIO</label>
+				<input th:field="*{date_change}" class="form-control" id="date_change" />
+			</div>-->
+			
+			<div class="form-group usuario_keep">
+				<label for="usuario_interferencia">USUARIO</label>
+				<select th:field="*{usuario_interferencia}" class="form-control" id="usuario_interferencia">				    
+				        <option selected="selected" th:value="${#request.userPrincipal.name}">
+				        	<span th:utext="${#request.userPrincipal.name}"></span>	
+				        </option>			    
+				</select>	
+				<!-- <input th:field="*{usuario}" class="form-control" id="usuario" required="required" />
+				<span th:utext="${#request.userPrincipal.name}"></span>		 -->						
+			</div>
+	
+			<button type="submit" class="btn btn-primary">ACTUALIZAR</button>
+		</form>	
+	</div>
+</div>
+		
+<div  th:replace="layouts/base::footer"></div>
+
+</body>
+</html>

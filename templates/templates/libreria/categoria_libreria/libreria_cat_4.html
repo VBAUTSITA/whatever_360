@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<head th:replace="layouts/base::head"></head>
+
+<link th:href="@{/css/jquery.dataTables.min.css}" rel="stylesheet">
+
+<body>
+
+<header th:replace="layouts/base_libreria::header"></header>
+
+<div class="main">
+    <div class="container">
+
+        <div class="title-main archivo">
+            <h2>
+                CARGA MASIVA DE ARCHIVOS
+                <img th:src="@{/images/icono-archivo.png}"/>
+            </h2>
+        </div>
+
+        <div class="formulario_capas">
+
+            <!-- ✅ MASSIVE UPLOAD FORM -->
+            <form method="post"
+                  enctype="multipart/form-data"
+                  th:action="@{/archivador-massive/upload}">
+
+                <!-- MULTIPLE FILE INPUT -->
+                <input type="file" name="archivos" id="archivos" multiple required>
+                <span>Máx. 200MB por archivo, 1GB carga total</span>
+
+                <!-- USUARIO -->
+                <select name="usuario" id="usuario" style="display:none;">
+                    <option th:value="${#request.userPrincipal.name}"
+                            th:text="${#request.userPrincipal.name}" selected>
+                    </option>
+                </select>
+
+                <!-- CATEGORIA -->
+                <select name="categoria" id="categoria" required style="width:280px;">
+                    <option value="">Elegir Categoría</option>
+                    <option value="revisado_coi_4g">REVISADO_COI_4G</option>
+                    <option value="coi_4g">COI_4G</option>
+                    <option value="revisado_coi_5g">REVISADO_COI_5G</option>
+                    <option value="coi_5g">COI_5G</option>
+                    <option value="otros">Otros</option>
+                </select>
+
+                <!-- FECHA -->
+                <input type="hidden"
+                       name="fecha"
+                       th:value="${#dates.format(#dates.createNow(),'dd/MM/yyyy HH:mm:ss')}">
+
+                <br><br>
+
+                <button type="submit">Subir Archivos</button>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+<div th:replace="layouts/base::footer"></div>
+
+<!-- VALIDACIÓN MULTI-FILE -->
+<script>
+const maxSize = 200000000;
+const input = document.getElementById("archivos");
+
+input.addEventListener("change", function () {
+    if (!this.files.length) return;
+
+    for (const file of this.files) {
+        if (file.size > maxSize) {
+            alert(`El archivo "${file.name}" supera los 200MB`);
+            this.value = "";
+            return;
+        }
+    }
+});
+</script>
+
+</body>
+</html>

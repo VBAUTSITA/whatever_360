@@ -1,0 +1,587 @@
+<!-- <!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<style>
+#loading-text{
+position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    top: 5px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 24px;
+    text-shadow: 3px 2px 1px #717171;
+    color: #fff;
+    background-color: rgb(0 0 0 / 62%);
+    width: 500px;
+    height: auto;
+    padding: 20px 10px 20px 10px;
+    top: 208px;
+    border-radius: 27px;
+}
+#loading-text span{
+	font-size: 15px;
+}
+#download-button{
+	position: absolute;
+    top: 55px;
+    right: 350px;
+    background-color: #5cb85c;
+    border: 2px solid #3aab3a;
+    padding: 5px 15px 5px 15px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    width: auto;
+    display: inline-block;
+    height: auto;
+    border-radius: 7px;
+    margin-bottom: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 9;
+}
+</style>
+<body>
+<header th:replace="layouts/base_reportes::header"></header>
+
+<div class="main">
+	<div class="container">
+	
+		<div class="title-main">
+			<h2>Reporte de Datos 4G</h2>
+		</div>
+		
+<button id="download-button">Descargar Todos los Datos</button>		
+
+<div id="loading-text" style="display: none;">Cargando datos, por favor espere... <br><span>Tambien, puedes descargar la información</span></div>
+
+
+<table id="lista_interferencia" class="table table-striped table-bordered list_results" style="width:100%">
+<thead>
+<tr>
+<th>ENODOB_NAME</th>
+<th>ENODOB_ADDRESS</th>
+<th>SECTOR_NAME</th>
+<th>CELDA_ID</th>
+<th>ENODEBID</th>
+<th>CELLID</th>
+<th>DEPARTAMENTO</th>
+<th>PROVINCIA</th>
+<th>DISTRITO</th>
+<th>SUB_REGION</th>
+<th>TAC</th>
+<th>LOCALCELLID</th>
+<th>OBJID</th>
+<th>ADDITIONALSPECTRUMEMISSION</th>
+<th>AIRCELLFLAG</th>
+<th>CELLACTIVESTATE</th>
+<th>CELLADMINSTATE</th>
+<th>CELLNAME</th>
+<th>CELLRADIUS</th>
+<th>CELLSPECIFICOFFSET</th>
+<th>CPRICOMPRESSION</th>
+<th>CRSPORTNUM</th>
+<th>CSGIND</th>
+<th>CUSTOMIZEDBANDWIDTHCFGIND</th>
+<th>DLBANDWIDTH</th>
+<th>DLCYCLICPREFIX</th>
+<th>DLEARFCN</th>
+<th>EMERGENCYAREAIDCFGIND</th>
+<th>ENODOB</th>
+<th>FDDTDDIND</th>
+<th>FREQBAND</th>
+<th>HIGHSPEEDFLAG</th>
+<th>MULTIRRUCELLFLAG</th>
+<th>PHYCELLID</th>
+<th>PREAMBLEFMT</th>
+<th>QOFFSETFREQ</th>
+<th>ROOTSEQUENCEIDX</th>
+<th>TXRXMODE</th>
+<th>UEPOWERMAXCFGIND</th>
+<th>ULBANDWIDTH</th>
+<th>ULCYCLICPREFIX</th>
+<th>ULEARFCNCFGIND</th>
+<th>WORKMODE</th>
+<th>USERLABEL</th>
+<th>EUCELLSTANDBYMODE</th>
+<th>SPECIALSUBFRAMEPATTERNS</th>
+<th>SUBFRAMEASSIGNMENT</th>
+<th>CNOPSHARINGGROUPID</th>
+<th>CSIRSPERIOD</th>
+<th>FREQPRIORITYFORANR</th>
+<th>INTRAFREQANRIND</th>
+<th>CRSPORTMAP</th>
+<th>MBTS_NAME</th>
+<th>CLUSTER_NAME</th>
+<th>LATITUD</th>
+<th>LONGITUD</th>
+<th>RRU</th>
+<th>MANUFACTURERDATA</th>
+<th>DIRECCION</th>
+<th>GUMMEI_PRIMARIO</th>
+<th>IP_PRIMARIO</th>
+<th>MME_USN_PRIMARIO</th>
+<th>GUMMEI_SECUNDARIO</th>
+<th>IP_SECUNDARIO</th>
+<th>MME_USN_SECUNDARIO</th>
+<th>REFERENCESIGNALPWR</th>
+<th>LTECELLINDEX</th>
+<th>UBIGEO_INEI</th>
+<th>JEFATURA_RADIO</th>
+<th>AZIMUTH</th>
+<th>HEIGHT</th>
+<th>MODELO_ANTENA</th>
+<th>MODELO_RRU_A_REPORTAR</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+
+</div>
+
+</div>
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	// Mostrar el texto de carga
+	$('#loading-text').show();
+	
+	// Marca de tiempo al iniciar la solicitud
+	var startTime = Date.now();	
+	
+	var offset = 0;
+
+	function loadTableData() {
+	$.ajax({
+	url: "/reportes/data/reporte01",
+	type: "GET",
+	data: { offset: offset },
+	complete: function() {
+		// Marca de tiempo al completar la solicitud
+		var endTime = Date.now();
+		var timeTaken = endTime - startTime;
+		console.log("Tiempo de carga de datos: " + timeTaken + "ms");
+		},
+	success: function(data) {
+	if (data.length > 0) {
+	// Añadir datos a la tabla
+	$('#lista_interferencia').DataTable().rows.add(data).draw();
+
+	// Actualizar el offset para la siguiente carga
+	offset += 10000;
+
+	// Continuar cargando el siguiente lote
+	loadTableData();
+	} else {
+		// Ocultar el texto de carga cuando todos los datos hayan sido cargados
+		$('#loading-text').hide();
+		}
+	},
+	error: function(xhr, error, thrown) {
+	console.error("Error al cargar los datos:", error, thrown);
+	// Ocultar el texto de carga en caso de error
+	$('#loading-text').hide();
+	}
+	});
+	}
+
+	// Inicializar DataTable
+	$('#lista_interferencia').DataTable({
+	columns: [
+		{ "data": "enodob_name" },
+		{ "data": "enodob_address" },
+		{ "data": "sector_name" },
+		{ "data": "celda_id" },
+		{ "data": "enodebid" },
+		{ "data": "cellid" },
+		{ "data": "departamento" },
+		{ "data": "provincia" },
+		{ "data": "distrito" },
+		{ "data": "sub_region" },
+		{ "data": "tac" },
+		{ "data": "localcellid" },
+		{ "data": "objid" },
+		{ "data": "additionalspectrumemission" },
+		{ "data": "aircellflag" },
+		{ "data": "cellactivestate" },
+		{ "data": "celladminstate" },
+		{ "data": "cellname" },
+		{ "data": "cellradius" },
+		{ "data": "cellspecificoffset" },
+		{ "data": "cpricompression" },
+		{ "data": "crsportnum" },
+		{ "data": "csgind" },
+		{ "data": "customizedbandwidthcfgind" },
+		{ "data": "dlbandwidth" },
+		{ "data": "dlcyclicprefix" },
+		{ "data": "dlearfcn" },
+		{ "data": "emergencyareaidcfgind" },
+		{ "data": "enodob" },
+		{ "data": "fddtddind" },
+		{ "data": "freqband" },
+		{ "data": "highspeedflag" },
+		{ "data": "multirrucellflag" },
+		{ "data": "phycellid" },
+		{ "data": "preamblefmt" },
+		{ "data": "qoffsetfreq" },
+		{ "data": "rootsequenceidx" },
+		{ "data": "txrxmode" },
+		{ "data": "uepowermaxcfgind" },
+		{ "data": "ulbandwidth" },
+		{ "data": "ulcyclicprefix" },
+		{ "data": "ulearfcncfgind" },
+		{ "data": "workmode" },
+		{ "data": "userlabel" },
+		{ "data": "eucellstandbymode" },
+		{ "data": "specialsubframepatterns" },
+		{ "data": "subframeassignment" },
+		{ "data": "cnopsharinggroupid" },
+		{ "data": "csirsperiod" },
+		{ "data": "freqpriorityforanr" },
+		{ "data": "intrafreqanrind" },
+		{ "data": "crsportmap" },
+		{ "data": "mbts_name" },
+		{ "data": "cluster_name" },
+		{ "data": "latitud" },
+		{ "data": "longitud" },
+		{ "data": "rru" },
+		{ "data": "manufacturerdata" },
+		{ "data": "direccion" },
+		{ "data": "gummei_primario" },
+		{ "data": "ip_primario" },
+		{ "data": "mme_usn_primario" },
+		{ "data": "gummei_secundario" },
+		{ "data": "ip_secundario" },
+		{ "data": "mme_usn_secundario" },
+		{ "data": "referencesignalpwr" },
+		{ "data": "ltecellindex" },
+		{ "data": "ubigeo_inei" },
+		{ "data": "jefatura_radio" },
+		{ "data": "azimuth" },
+		{ "data": "height" },
+		{ "data": "modelo_antena" },
+		{ "data": "modelo_rru_a_reportar" }
+	],
+	scrollX:        true,
+	//scrollCollapse: true,
+	//fixedColumns:  true,
+	paging: true, // Activar la paginación
+	searching: true, // Activar la búsqueda genérica
+	info: true // Mostrar la información de la tabla (opcional)
+	});
+
+	// Iniciar la carga de datos
+	loadTableData();
+	});
+	
+</script>
+
+<script type="text/javascript">
+document.getElementById("download-button").addEventListener("click", function(){
+	window.location.href = "/web-tracker/reportes/export01";
+	});
+</script>
+</body>
+</html>
+-->
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<style>
+#loading-text{
+position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    top: 5px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 24px;
+    text-shadow: 3px 2px 1px #717171;
+    color: #fff;
+    background-color: rgb(0 0 0 / 62%);
+    width: 500px;
+    height: auto;
+    padding: 20px 10px 20px 10px;
+    top: 208px;
+    border-radius: 27px;
+}
+#loading-text span{
+	font-size: 15px;
+}
+#download-button{
+	position: absolute;
+    top: 55px;
+    right: 350px;
+    background-color: #5cb85c;
+    border: 2px solid #3aab3a;
+    padding: 5px 15px 5px 15px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    width: auto;
+    display: inline-block;
+    height: auto;
+    border-radius: 7px;
+    margin-bottom: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 9;
+}
+</style>
+<body>
+<header th:replace="layouts/base_reportes::header"></header>
+
+<div class="main">
+	<div class="container">
+	
+		<div class="title-main">
+			<h2>Reporte de Datos 4G</h2>
+		</div>
+		
+<button id="download-button">Descargar Todos los Datos</button>		
+
+<div id="loading-text" style="display: none;">Cargando datos, por favor espere... <br><span>Tambien, puedes descargar la información</span></div>
+
+
+<table id="lista_interferencia" class="table table-striped table-bordered list_results" style="width:100%">
+<thead>
+<tr>
+<th>ENODOB_NAME</th>
+<th>ENODOB_ADDRESS</th>
+<th>SECTOR_NAME</th>
+<th>CELDA_ID</th>
+<th>ENODEBID</th>
+<th>CELLID</th>
+<th>DEPARTAMENTO</th>
+<th>PROVINCIA</th>
+<th>DISTRITO</th>
+<th>SUB_REGION</th>
+<th>TAC</th>
+<th>LOCALCELLID</th>
+<th>OBJID</th>
+<th>ADDITIONALSPECTRUMEMISSION</th>
+<th>AIRCELLFLAG</th>
+<th>CELLACTIVESTATE</th>
+<th>CELLADMINSTATE</th>
+<th>CELLNAME</th>
+<th>CELLRADIUS</th>
+<th>CELLSPECIFICOFFSET</th>
+<th>CPRICOMPRESSION</th>
+<th>CRSPORTNUM</th>
+<th>CSGIND</th>
+<th>CUSTOMIZEDBANDWIDTHCFGIND</th>
+<th>DLBANDWIDTH</th>
+<th>DLCYCLICPREFIX</th>
+<th>DLEARFCN</th>
+<th>EMERGENCYAREAIDCFGIND</th>
+<th>ENODOB</th>
+<th>FDDTDDIND</th>
+<th>FREQBAND</th>
+<th>HIGHSPEEDFLAG</th>
+<th>MULTIRRUCELLFLAG</th>
+<th>PHYCELLID</th>
+<th>PREAMBLEFMT</th>
+<th>QOFFSETFREQ</th>
+<th>ROOTSEQUENCEIDX</th>
+<th>TXRXMODE</th>
+<th>UEPOWERMAXCFGIND</th>
+<th>ULBANDWIDTH</th>
+<th>ULCYCLICPREFIX</th>
+<th>ULEARFCNCFGIND</th>
+<th>WORKMODE</th>
+<th>USERLABEL</th>
+<th>EUCELLSTANDBYMODE</th>
+<th>SPECIALSUBFRAMEPATTERNS</th>
+<th>SUBFRAMEASSIGNMENT</th>
+<th>CNOPSHARINGGROUPID</th>
+<th>CSIRSPERIOD</th>
+<th>FREQPRIORITYFORANR</th>
+<th>INTRAFREQANRIND</th>
+<th>CRSPORTMAP</th>
+<th>MBTS_NAME</th>
+<th>CLUSTER_NAME</th>
+<th>LATITUD</th>
+<th>LONGITUD</th>
+<th>RRU</th>
+<th>MANUFACTURERDATA</th>
+<th>DIRECCION</th>
+<th>GUMMEI_PRIMARIO</th>
+<th>IP_PRIMARIO</th>
+<th>MME_USN_PRIMARIO</th>
+<th>GUMMEI_SECUNDARIO</th>
+<th>IP_SECUNDARIO</th>
+<th>MME_USN_SECUNDARIO</th>
+<th>REFERENCESIGNALPWR</th>
+<th>LTECELLINDEX</th>
+<th>UBIGEO_INEI</th>
+<th>JEFATURA_RADIO</th>
+<th>AZIMUTH</th>
+<th>HEIGHT</th>
+<th>MODELO_ANTENA</th>
+<th>MODELO_RRU_A_REPORTAR</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+
+</div>
+
+</div>
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	//$('#lista_interferencia').DataTable({
+    //se definio una variable "table" para poder reajustar abajo
+   	var table = $('#lista_interferencia').DataTable({
+	serverSide: true,
+	ajax: {
+	url: '/web-tracker/reportes/data/reporte01',
+	type: 'GET',
+	data: function(d) {
+	return {
+	draw: d.draw,
+	page: Math.floor(d.start / d.length),
+	size: d.length,
+	search: d.search.value
+	};
+	},
+	dataSrc: function(json) {
+	console.log("Datos recibidos:", json);
+	return json.data;
+	},
+	beforeSend: function(xhr, settings) {
+	console.log("Solicitud enviada:", settings.url);
+	}
+	},
+	columns: [
+		{ "data": "enodob_name" },
+		{ "data": "enodob_address" },
+		{ "data": "sector_name" },
+		{ "data": "celda_id" },
+		{ "data": "enodebid" },
+		{ "data": "cellid" },
+		{ "data": "departamento" },
+		{ "data": "provincia" },
+		{ "data": "distrito" },
+		{ "data": "sub_region" },
+		{ "data": "tac" },
+		{ "data": "localcellid" },
+		{ "data": "objid" },
+		{ "data": "additionalspectrumemission" },
+		{ "data": "aircellflag" },
+		{ "data": "cellactivestate" },
+		{ "data": "celladminstate" },
+		{ "data": "cellname" },
+		{ "data": "cellradius" },
+		{ "data": "cellspecificoffset" },
+		{ "data": "cpricompression" },
+		{ "data": "crsportnum" },
+		{ "data": "csgind" },
+		{ "data": "customizedbandwidthcfgind" },
+		{ "data": "dlbandwidth" },
+		{ "data": "dlcyclicprefix" },
+		{ "data": "dlearfcn" },
+		{ "data": "emergencyareaidcfgind" },
+		{ "data": "enodob" },
+		{ "data": "fddtddind" },
+		{ "data": "freqband" },
+		{ "data": "highspeedflag" },
+		{ "data": "multirrucellflag" },
+		{ "data": "phycellid" },
+		{ "data": "preamblefmt" },
+		{ "data": "qoffsetfreq" },
+		{ "data": "rootsequenceidx" },
+		{ "data": "txrxmode" },
+		{ "data": "uepowermaxcfgind" },
+		{ "data": "ulbandwidth" },
+		{ "data": "ulcyclicprefix" },
+		{ "data": "ulearfcncfgind" },
+		{ "data": "workmode" },
+		{ "data": "userlabel" },
+		{ "data": "eucellstandbymode" },
+		{ "data": "specialsubframepatterns" },
+		{ "data": "subframeassignment" },
+		{ "data": "cnopsharinggroupid" },
+		{ "data": "csirsperiod" },
+		{ "data": "freqpriorityforanr" },
+		{ "data": "intrafreqanrind" },
+		{ "data": "crsportmap" },
+		{ "data": "mbts_name" },
+		{ "data": "cluster_name" },
+		{ "data": "latitud" },
+		{ "data": "longitud" },
+		{ "data": "rru" },
+		{ "data": "manufacturerdata" },
+		{ "data": "direccion" },
+		{ "data": "gummei_primario" },
+		{ "data": "ip_primario" },
+		{ "data": "mme_usn_primario" },
+		{ "data": "gummei_secundario" },
+		{ "data": "ip_secundario" },
+		{ "data": "mme_usn_secundario" },
+		{ "data": "referencesignalpwr" },
+		{ "data": "ltecellindex" },
+		{ "data": "ubigeo_inei" },
+		{ "data": "jefatura_radio" },
+		{ "data": "azimuth" },
+		{ "data": "height" },
+		{ "data": "modelo_antena" },
+		{ "data": "modelo_rru_a_reportar" }
+		],
+		processing: true,
+		serverSide: true,
+		paging: true,
+		searching: true,
+		scrollX: true,
+        /*reajusta la tabla al terminar la carga*/
+        initComplete: function() {
+                    table.columns.adjust().draw();
+                }
+		});
+		});
+</script>
+
+<script type="text/javascript">
+document.getElementById("download-button").addEventListener("click", function(){
+	window.location.href = "/web-tracker/reportes/export01";
+	alert('Iniciará en unos segundos la descarga');
+	});
+</script>
+</body>
+</html>

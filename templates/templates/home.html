@@ -1,0 +1,238 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head th:replace="layouts/base::head"></head>
+
+<body class="home_base">
+<header th:replace="layouts/base_home::header"></header>
+
+<style>
+    .portal-main {
+        min-height: calc(100vh - 140px);
+        padding: 28px 0 50px;
+        position: relative;
+        background: #000 url('../images/bg-home.jpg') no-repeat center top fixed;
+        background-size: cover;
+    }
+
+    .portal-main:before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.60);
+        pointer-events: none;
+    }
+
+    .portal-container {
+        position: relative;
+        z-index: 2;
+        max-width: 1380px;
+        margin: 0 auto;
+        padding: 0 30px;
+    }
+
+    .portal-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        margin: 18px auto 42px;
+    }
+
+    .portal-title .line {
+        width: 120px;
+        height: 2px;
+        background: rgba(255,255,255,0.85);
+    }
+
+    .portal-title h2 {
+        margin: 0;
+        color: #fff;
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .portal-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(260px, 1fr));
+        gap: 42px 34px;
+        justify-items: center;
+        align-items: start;
+    }
+
+    .portal-link {
+        text-decoration: none !important;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .portal-circle {
+        width: 280px;
+        height: 280px;
+        border-radius: 50%;
+        border: 5px solid #c40000;
+        background: rgba(0, 0, 0, 0.86);
+        box-shadow: 0 16px 34px rgba(0,0,0,0.45);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 22px;
+        text-align: center;
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .portal-link:hover .portal-circle {
+        transform: translateY(-5px);
+        border-color: #ef2020;
+        box-shadow: 0 22px 40px rgba(0,0,0,0.55);
+    }
+
+    .portal-circle-img {
+        width: 92px;
+        height: 92px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .portal-circle-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+        display: block;
+    }
+
+    .portal-circle-label {
+        color: #fff;
+        font-size: 24px;
+        line-height: 1.12;
+        font-weight: 700;
+        text-transform: uppercase;
+        max-width: 210px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 1200px) {
+        .portal-grid {
+            grid-template-columns: repeat(2, minmax(260px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .portal-title {
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .portal-title .line {
+            width: 55px;
+        }
+
+        .portal-title h2 {
+            font-size: 24px;
+        }
+
+        .portal-grid {
+            grid-template-columns: 1fr;
+            gap: 28px;
+        }
+
+        .portal-circle {
+            width: 245px;
+            height: 245px;
+        }
+
+        .portal-circle-img {
+            width: 76px;
+            height: 76px;
+            margin-bottom: 14px;
+        }
+
+        .portal-circle-label {
+            font-size: 20px;
+            max-width: 180px;
+        }
+    }
+</style>
+
+<div class="main portal-main">
+    <div class="portal-container">
+
+        <div class="portal-title">
+            <span class="line"></span>
+            <h2>Panel de Inicio</h2>
+            <span class="line"></span>
+        </div>
+
+        <div class="portal-grid">
+
+            <a class="portal-link" href="#" th:href="@{/mapa/sectores}" target="_blank">
+                <div class="portal-circle">
+                    <div class="portal-circle-img">
+                        <img src="../static/images/ico-mapa-sector.jpg" th:src="@{/images/ico-mapa-sector.jpg}" alt="Mapa de Sectores">
+                    </div>
+                    <div class="portal-circle-label">Mapa de Sectores y Descarga 4G</div>
+                </div>
+            </a>
+
+            <a class="portal-link" href="#" th:href="@{/interferencia/main}">
+                <div class="portal-circle">
+                    <div class="portal-circle-img">
+                        <img src="../static/images/ico-interferencia-12.jpg" th:src="@{/images/ico-interferencia-12.jpg}" alt="Interferencia">
+                    </div>
+                    <div class="portal-circle-label">Interferencia</div>
+                </div>
+            </a>
+
+            <a class="portal-link" href="#" th:href="@{/reportes/seccion}">
+                <div class="portal-circle">
+                    <div class="portal-circle-img">
+                        <img src="../static/images/img-reporte111.jpg" th:src="@{/images/img-reporte111.jpg}" alt="Reporte 111">
+                    </div>
+                    <div class="portal-circle-label">Reporte 111</div>
+                </div>
+            </a>
+
+            <a class="portal-link" href="#" th:href="@{/archivador/listar-categorias}">
+                <div class="portal-circle">
+                    <div class="portal-circle-img">
+                        <img src="../static/images/archivador-2.jpg" th:src="@{/images/archivador-2.jpg}" alt="Biblioteca Archivos">
+                    </div>
+                    <div class="portal-circle-label">Biblioteca Archivos</div>
+                </div>
+            </a>
+
+            <a class="portal-link" href="#" th:href="@{/baseline/main}">
+                <div class="portal-circle">
+                    <div class="portal-circle-img">
+                        <img src="../static/images/baseline-imagen-2.jpg" th:src="@{/images/baseline-imagen-2.jpg}" alt="Baseline">
+                    </div>
+                    <div class="portal-circle-label">Baseline</div>
+                </div>
+            </a>
+
+            <a class="portal-link" href="#" th:href="@{/datafill/list}">
+                <div class="portal-circle">
+                    <div class="portal-circle-img">
+                        <img src="../static/images/cambios-radio.jpg" th:src="@{/images/cambios-radio.jpg}" alt="Datafill">
+                    </div>
+                    <div class="portal-circle-label">Datafill</div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+</div>
+
+<div th:replace="layouts/base::footer"></div>
+</body>
+</html>

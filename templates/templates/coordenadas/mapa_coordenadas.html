@@ -1,0 +1,1038 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head>
+<title>Mapa</title>
+
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+	
+	<!-- funcion de formulario ajax -->
+	<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+	<script type="text/javascript" th:src="@{/js/jquery-3.3.1.min.js}"></script>
+		
+	<!-- <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>-->	
+	<script type="text/javascript" th:src="@{/js/apexcharts.js}"></script>	
+	<!--<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
+	<script type="text/javascript" th:src="@{/js/chart.js}"></script>
+		
+	<!-- Bootstrap CSS -->
+	<link href="../static/css/boostrap-responsive.min.css" rel="stylesheet"
+		th:href="@{/css/boostrap-responsive.min.css}">
+		
+	<link href="../static/css/bootstrap-theme.min.css" rel="stylesheet"
+		th:href="@{/css/bootstrap-theme.min.css}">	
+			
+	<link href="../static/css/bootstrap.min.css" rel="stylesheet"
+		th:href="@{/css/bootstrap.min.css}">
+		
+	<link href="../static/css/estilos.css" rel="stylesheet"
+		th:href="@{/css/estilos.css}">
+		
+	<link href="../static/css/font-awesome.min.css" rel="stylesheet"
+		th:href="@{/css/font-awesome.min.css}">
+
+    <link href="../static/css/datepicker/datepicker.css" rel="stylesheet"
+		th:href="@{/css/datepicker/datepicker.css}">    
+		
+	<link href="https://fonts.googleapis.com/css?family=Lobster&display=swap" rel="stylesheet">
+	
+	<!-- favicon -->
+	<link rel="apple-touch-icon" sizes="120x120" href="../static/images/favicon/apple-touch-icon.png" th:href="@{/images/favicon/apple-touch-icon.png}">
+	<link rel="icon" type="image/png" sizes="32x32" href="../static/images/favicon/favicon-32x32.png" th:href="@{/images/favicon/favicon-32x32.png}">
+	<link rel="icon" type="image/png" sizes="16x16" href="../static/images/favicon/favicon-16x16.png" th:href="@{/images/favicon/favicon-16x16.png}">
+	<link rel="manifest" href="../static/images/favicon/site.webmanifest" th:href="@{/images/favicon/site.webmanifest}">
+	<link rel="mask-icon" href="../static/images/favicon/safari-pinned-tab.svg" th:href="@{/images/favicon/safari-pinned-tab.svg}">
+	<meta name="msapplication-TileColor" content="#2b5797">
+	<meta name="theme-color" content="#ffffff">
+
+<script async defer src="keyy"></script>
+<!-- <script async defer src="https://maps.googleapis.com/keygeometry&loading=async"></script> -->
+
+<!-- <script type="text/javascript" th:src="@{/js/jquery-3.3.1.min.js}"></script> -->
+
+<!-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>-->
+<link href="../static/css/select2/select2.min.css" rel="stylesheet"	th:href="@{/css/select2/select2.min.css}">
+<script type="text/javascript" th:src="@{/css/select2/select2.min.js}"></script> 
+
+<style>
+#map {
+height: 100vh;
+width: 100%;
+margin: auto;
+}
+#loading-spinner{
+ 	position: fixed; 
+ 	top: 50%; 
+ 	left: 50%; 
+ 	transform: translate(-50%, -50%);
+ 	z-index: 999;
+}
+.spinner {
+border: 16px solid #f3f3f3;
+border-top: 16px solid #3498db;
+border-radius: 50%;
+width: 120px;
+height: 120px;
+animation: spin 2s linear infinite;
+}
+
+table.map_info tr:nth-child(2n + 1){
+	background-color: #d0d8f5;
+}
+table.map_info tr:nth-child(2n){
+	background-color: #ffffff;
+}
+table.map_info tr:first-child{
+    background-color: #414141;
+}
+table.map_info.sites tr:first-child{
+	background-color: #ff0707;
+}
+table.map_info tr em{
+    font-size: 13px;
+    color: #fff;
+    line-height: 26px;
+}
+center.map_title h2{
+	text-align: right;
+    line-height: 10px;
+    font-size: 12px;
+    position: relative;
+    z-index: 2;
+    padding-right: 15px;
+    color: #cb0606;
+}
+        .crosshair-cursor {
+            cursor: crosshair;
+        }
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading Spinner -->
+<div id="loading-spinner">
+<div class="spinner"></div>
+</div>
+<div class="main main_mapa_sectores">
+	<!-- <div class="container"> -->
+		
+		
+		<div class="row-fluid stats-box">
+		
+           <div class="span12">	
+           
+	         <div class="botones_mapa">
+	         
+		       	<button onclick="mostrarOcultarBox('box1')">
+		       		<img src="../static/images/capa/ico-filtro.png" th:src="@{/images/capa/ico-filtro.png}"/>
+		       		FILTRAR MAPA		       	
+		       	</button>
+		       	
+		    	<button onclick="mostrarOcultarBox('box2')">
+		    		<img src="../static/images/capa/ico-search.png" th:src="@{/images/capa/ico-search.png}"/>
+		    		BUSCAR SECTOR
+		    	</button>
+		    	
+		    	<button onclick="mostrarOcultarBox('box3')">
+			    	<img src="../static/images/capa/ico-btn-1.png" th:src="@{/images/capa/ico-btn-1.png}"/>
+			    	DESCARGAR CAPAS
+		    	</button>
+		    	
+		    	<button onclick="mostrarOcultarBox('box4')">
+		    		<img src="../static/images/capa/ico-estilo-mapa.png" th:src="@{/images/capa/ico-estilo-mapa.png}"/>
+		    		ESTILO DE MAPA
+		    	</button>
+		    	
+		    	<button onclick="mostrarOcultarBox('box5')">
+		    		<img src="../static/images/capa/ico-medicion.png" th:src="@{/images/capa/ico-medicion.png}"/>
+		    		CALCULAR DISTANCIA
+		    	</button>
+		    	
+		    	<button onclick="mostrarOcultarBox('box6')">
+		    		<img src="../static/images/capa/ico-regla.png" th:src="@{/images/capa/ico-regla.png}"/>
+		    		CALCULAR ÁREA Y RADIO
+		    	</button>
+		    	
+		    	<button onclick="mostrarOcultarBox('box7')">
+		    		<img src="../static/images/capa/ico-coord.png" th:src="@{/images/capa/ico-coord.png}"/>
+		    		BUSCAR COORDENADAS
+		    	</button>
+		    	
+		    	
+		    	
+		    	<div class="flotante_mostrar">
+		    		<span>
+		    			<input type="checkbox" class="toggleMarkerSector" checked>  Sector 4G
+		    		</span>
+		    		<span>
+			    		<input type="checkbox" class="toggleMarkerSites">  Sites
+			    	</span>
+			    	<span>
+			    		<input type="checkbox" class="toggleMarker5G">  Sector 5G
+			    	</span>
+			    	<span>
+			    	<input type="checkbox" class="toggleMarkerConstruccion"> Construcción
+			    	</span>
+			    </div>
+		    			    	
+	    	 </div>
+	           
+	         <!-- CAMBIO 22 ABRIL 2026 -->  
+	           
+           	<div id="box1" class="contenido content_filtro" style="left: -350px;">
+    <div class="content">
+        <img src="../static/images/capa/icono-filtrar-bg.png" th:src="@{/images/capa/icono-filtrar-bg.png}"/>
+        <button onclick="mostrarOcultarBox('box1')" class="cerrar">Cerrar</button>
+
+        <h2>Filtros del Mapa<strong>Capas visibles y filtros actuales en un solo panel</strong></h2>
+
+        <hr>
+
+        <details open style="margin-bottom:12px;">
+            <summary style="cursor:pointer; font-weight:700; background:#f5f5f5; padding:10px 12px; border-radius:8px;">
+                Capas visibles
+            </summary>
+
+            <div class="filtros_datos" style="margin-top:10px;">
+                <input type="checkbox" class="toggleMarkerSector" checked> <label>Sector 4G</label>
+                <br>
+                <input type="checkbox" class="toggleMarker5G"> <label>Sector 5G</label>
+                <br>
+                <input type="checkbox" class="toggleMarkerSites"> <label>Sites</label>
+                <br>
+                <input type="checkbox" class="toggleMarkerLabels" checked> <label>Etiquetas Sites</label>
+            </div>
+        </details>
+
+        <details open style="margin-bottom:12px;">
+            <summary style="cursor:pointer; font-weight:700; background:#f5f5f5; padding:10px 12px; border-radius:8px;">
+                Filtros de Sectores
+            </summary>
+
+            <div style="margin-top:10px;">
+
+                <details open style="margin-bottom:10px;">
+                    <summary style="cursor:pointer; font-weight:600;">Prioridades</summary>
+                    <div class="filtros_datos" style="margin-top:8px;">
+                        <input type="checkbox" id="selectAll" class="p_fill"/> <label for="selectAll" class="p_fill">SELECCIONAR TODO</label>
+                        <input type="checkbox" class="priority-filter s_fill" value="1-Critical" /> <label class="s_fill">1-Critical <span></span></label>
+                        <input type="checkbox" class="priority-filter s_fill" value="2-Severe" /> <label class="s_fill">2-Severe <span></span></label>
+                        <input type="checkbox" class="priority-filter s_fill" value="3-High" /> <label class="s_fill">3-High <span></span></label>
+                        <input type="checkbox" class="priority-filter s_fill" value="4-Moderate" /> <label class="s_fill">4-Moderate <span></span></label>
+                        <input type="checkbox" class="priority-filter s_fill" value="5-Low" /> <label class="s_fill">5-Low <span></span></label>
+                        <input type="checkbox" class="priority-filter s_fill" value="6-Very Low" /> <label class="s_fill">6-Very Low <span></span></label>
+                        <input type="checkbox" class="priority-filter s_fill" value="7-Not Loaded" /> <label class="s_fill">7-Not Loaded <span></span></label>
+                    </div>
+                </details>
+
+                <details style="margin-bottom:10px;">
+                    <summary style="cursor:pointer; font-weight:600;">Zonas Sectores</summary>
+                    <div class="filtros_datos" style="margin-top:8px;">
+                        <input type="checkbox" id="selectAllRegions" class="p_fill"> <label class="p_fill">SELECCIONAR TODO</label>
+                        <input type="checkbox" class="region-filter s_fill" value="LIMA"> <label class="s_fill">LIMA</label>
+                        <input type="checkbox" class="region-filter s_fill t_fill" value="LIMA SUR"> <label class="s_fill">LIMA SUR</label>
+                        <input type="checkbox" class="region-filter s_fill t_fill" value="LIMA NORTE"> <label class="s_fill">LIMA NORTE</label>
+                        <input type="checkbox" class="region-filter s_fill t_fill" value="LIMA ESTE"> <label class="s_fill">LIMA ESTE</label>
+                        <input type="checkbox" class="region-filter s_fill t_fill" value="LIMA OESTE"> <label class="s_fill">LIMA OESTE</label>
+                        <input type="checkbox" class="region-filter s_fill" value="CENTRO"> <label class="s_fill">CENTRO</label>
+                        <input type="checkbox" class="region-filter s_fill" value="NORTE"> <label class="s_fill">NORTE</label>
+                        <input type="checkbox" class="region-filter s_fill" value="SUR"> <label class="s_fill">SUR</label>
+                    </div>
+                </details>
+
+                <details style="margin-bottom:10px;">
+                    <summary style="cursor:pointer; font-weight:600;">Requerimiento</summary>
+                    <div class="filtros_datos" style="margin-top:8px;">
+                        <select id="requerimientoSelect" class="select2">
+                            <option value="">Seleccionar Requerimiento</option>
+                            <option value="SI">SI</option>
+                            <option value="NO">NO</option>
+                        </select>
+
+                        <button id="clearButtonRequerimiento">Restablecer Requerimiento</button>
+                    </div>
+                </details>
+
+                <details style="margin-bottom:10px;">
+                    <summary style="cursor:pointer; font-weight:600;">Número de Requerimiento</summary>
+                    <div class="filtros_datos" style="margin-top:8px;">
+                        <select id="numeroRequerimientoSelect" class="select2">
+                            <option value="">Seleccionar N° Requerimiento</option>
+                        </select>
+
+                        <button id="clearButtonNumeroRequerimiento">Restablecer N° Requerimiento</button>
+                    </div>
+                </details>
+
+                <details style="margin-bottom:10px;">
+                    <summary style="cursor:pointer; font-weight:600;">Distrito Sectores</summary>
+                    <div class="filtros_datos" style="margin-top:8px;">
+                        <select id="distritoSelect" class="select2">
+                            <option value="">Seleccionar Distrito</option>
+                        </select>
+                        <button id="clearButton">Restablecer Distrito</button>
+                    </div>
+                </details>
+
+            </div>
+        </details>
+
+        <details style="margin-bottom:12px;">
+            <summary style="cursor:pointer; font-weight:700; background:#f5f5f5; padding:10px 12px; border-radius:8px;">
+                Filtros de Sites
+            </summary>
+
+            <div style="margin-top:10px;">
+
+                <details open style="margin-bottom:10px;">
+                    <summary style="cursor:pointer; font-weight:600;">Tecnologías</summary>
+                    <div class="filtros_datos" style="margin-top:8px;">
+                        <input type="checkbox" id="selectAllSites" class="p_fill" style="display:none;"/> <label class="p_fill">FILTRAR</label>
+                        <input type="checkbox" class="gsm-filter s_fill" value="G" /> <label class="s_fill">GSM</label>
+                        <input type="checkbox" class="umts-filter s_fill" value="U" /> <label class="s_fill">UMTS</label>
+                        <input type="checkbox" class="lte-filter s_fill" value="L" /> <label class="s_fill">LTE</label>
+                        <input type="checkbox" class="nr-filter s_fill" value="N" /> <label class="s_fill">5G</label>
+                        <input type="checkbox" class="nr-filter s_fill" value="N(DSS)" /> <label class="s_fill">5G(DSS)</label>
+                    </div>
+                </details>
+
+                <details style="margin-bottom:10px;">
+                    <summary style="cursor:pointer; font-weight:600;">Zonas Sites</summary>
+                    <div class="filtros_datos" style="margin-top:8px;">
+                        <input type="checkbox" id="selectAllsub_regions" class="p_fill"> <label class="p_fill">SELECCIONAR TODO</label>
+                        <input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO LIMA SUR"> <label class="s_fill">ING. RADIO LIMA SUR</label>
+                        <input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO LIMA NORTE"> <label class="s_fill">ING. RADIO LIMA NORTE</label>
+                        <input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO LIMA ESTE"> <label class="s_fill">ING. RADIO LIMA ESTE</label>
+                        <input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO LIMA OESTE"> <label class="s_fill">ING. RADIO LIMA OESTE</label>
+                        <input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO CENTRO"> <label class="s_fill">ING. RADIO CENTRO</label>
+                        <input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO SUR 1"> <label class="s_fill">ING. RADIO SUR 1</label>
+                        <input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO SUR 2"> <label class="s_fill">ING. RADIO SUR 2</label>
+                        <input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO NORTE 1"> <label class="s_fill">ING. RADIO NORTE 1</label>
+                        <input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO NORTE 2"> <label class="s_fill">ING. RADIO NORTE 2</label>
+                    </div>
+                </details>
+
+                <details style="margin-bottom:10px;">
+                    <summary style="cursor:pointer; font-weight:600;">Distrito Sites</summary>
+                    <div class="filtros_datos" style="margin-top:8px;">
+                        <select id="distritoSelectSites" class="select2">
+                            <option value="">Seleccionar Distrito</option>
+                        </select>
+
+                        <button id="clearButtonSites">Restablecer Distrito</button>
+                    </div>
+                </details>
+
+            </div>
+        </details>
+    </div>
+</div>
+			
+					<div id="box11" class="contenido content_filtro contenido_interna" style="left: -350px;">           	
+           				<div class="content"> 
+           					
+           					<img src="../static/images/capa/icono-filtrar-bg.png" th:src="@{/images/capa/icono-filtrar-bg.png}"/>
+			           		<button onclick="mostrarOcultarBox('box11')" class="cerrar">Regresar</button>
+			           		
+			           		<h2>Filtro de Sectores<strong>Filtra lo que requieras visualizar</strong></h2>
+			           		
+			           		<hr>
+           				
+			           		<input type="checkbox" class="toggleMarkerSector" checked> Mostrar Sectores
+			           		<br>
+			           		<input type="checkbox" class="toggleMarkerSites"> Mostrar Sites			           		
+			           		<br>
+						    <input type="checkbox" class="toggleMarkerLabels" checked> Mostrar Etiquetas Sites
+						    
+			           		<!-- <input type="checkbox" id="toggleMarkerSector"> Mostrar Marcadores -->
+			           		<h3>Prioridades</h3>
+			           		<!-- Filtro para seleccionar prioridad -->
+							<div id="filter-container" class="filtros_datos">
+								<input type="checkbox" id="selectAll" class="p_fill"/> <label for="selectAll" class="p_fill">SELECCIONAR TODO</label>
+								<input type="checkbox" class="priority-filter s_fill" value="1-Critical" /> <label for="critical" class="s_fill">1-Critical <span></span></label>
+								<input type="checkbox" class="priority-filter s_fill" value="2-Severe" /> <label for="severe" class="s_fill">2-Severe <span></span></label>
+								<input type="checkbox" class="priority-filter s_fill" value="3-High" /> <label for="high" class="s_fill">3-High <span></span></label>
+								<input type="checkbox" class="priority-filter s_fill" value="4-Moderate" /> <label for="moderate" class="s_fill">4-Moderate <span></span></label>
+								<input type="checkbox" class="priority-filter s_fill" value="5-Low" /> <label for="low" class="s_fill">5-Low <span></span></label>
+								<input type="checkbox" class="priority-filter s_fill" value="6-Very Low" /> <label for="very-low" class="s_fill">6-Very Low <span></span></label>
+								<input type="checkbox" class="priority-filter s_fill" value="7-Not Loaded" /> <label for="very-low" class="s_fill">7-Not Loaded <span></span></label>
+							</div>
+							
+							<h3>Zonas</h3>
+							<!-- Filtros de Región con Seleccionar Todo -->
+							<div class="filtros_datos">
+								<input type="checkbox" id="selectAllRegions" class="p_fill"> <label class="p_fill">SELECCIONAR TODO</label>
+								<input type="checkbox" class="region-filter s_fill" value="LIMA"> <label class="s_fill">LIMA</label>
+								<input type="checkbox" class="region-filter s_fill t_fill" value="LIMA SUR"> <label class="s_fill">LIMA SUR</label>
+								<input type="checkbox" class="region-filter s_fill t_fill" value="LIMA NORTE"> <label class="s_fill">LIMA NORTE</label>
+								<input type="checkbox" class="region-filter s_fill t_fill" value="LIMA ESTE"> <label class="s_fill">LIMA ESTE</label>
+								<input type="checkbox" class="region-filter s_fill t_fill" value="LIMA OESTE"> <label class="s_fill">LIMA OESTE</label>
+								<input type="checkbox" class="region-filter s_fill" value="CENTRO"> <label class="s_fill">CENTRO</label>
+								<input type="checkbox" class="region-filter s_fill" value="NORTE"> <label class="s_fill">NORTE</label>
+								<input type="checkbox" class="region-filter s_fill" value="SUR"> <label class="s_fill">SUR</label>
+							</div>
+							
+							<h3>Requerimiento</h3>
+							<!-- Filtro Requerimiento -->
+							<div class="filtros_datos">
+							    <select id="requerimientoSelect" class="select2">
+							        <option value="">Seleccionar Requerimiento</option>
+							        <option value="SI">SI</option>
+							        <option value="NO">NO</option>
+							    </select>
+							
+							    <button id="clearButtonRequerimiento">Restablecer Requerimiento</button>
+							</div>
+									
+							<h3>Número de Requerimiento</h3>
+								<!-- Filtro por Número de Requerimiento -->
+								<div class="filtros_datos">
+								  <select id="numeroRequerimientoSelect" class="select2">
+								    <option value="">Seleccionar N° Requerimiento</option>
+								  </select>
+								
+								  <button id="clearButtonNumeroRequerimiento">Restablecer N° Requerimiento</button>
+								</div>
+		
+							
+							<h3>Distrito</h3>
+							<!-- Filtro de Distrito -->
+							<div class="filtros_datos">
+								
+								
+								<select id="distritoSelect" class="select2">
+									<option value="">Seleccionar Distrito</option>
+								</select>
+								<button id="clearButton">Restablecer Distrito</button>
+								
+							</div>	
+						</div>
+					</div>
+					
+					<div id="box12" class="contenido content_filtro contenido_interna" style="left: -350px;">           	
+           				<div class="content"> 
+           					
+           					<img src="../static/images/capa/icono-filtrar-bg.png" th:src="@{/images/capa/icono-filtrar-bg.png}"/>
+			           		<button onclick="mostrarOcultarBox('box12')" class="cerrar">Regresar</button>
+			           		
+			           		<h2>Filtro de Sites<strong>Filtra lo que requieras visualizar</strong></h2>
+			           		
+			           		<hr>
+           				
+			           		<input type="checkbox" class="toggleMarkerSector" checked> Mostrar Sectores
+			           		<br>
+			           		<input type="checkbox" class="toggleMarkerSites"> Mostrar Sites
+			           		<br>
+			           		<input type="checkbox" class="toggleMarkerLabels" checked> Mostrar Etiquetas Sites
+						    
+						    
+						    <h3>Tecnologias</h3>
+			           		<!-- Filtro para seleccionar prioridad -->
+							<div id="filter-container" class="filtros_datos">
+								<input type="checkbox" id="selectAllSites" class="p_fill" style="display: none;"/> <label for="selectAll" class="p_fill">FILTRAR</label>
+								<input type="checkbox" class="gsm-filter s_fill" value="G" /> <label for="L" class="s_fill">GSM </label>
+								<input type="checkbox" class="umts-filter s_fill" value="U" /> <label for="L" class="s_fill">UMTS </label>
+								<input type="checkbox" class="lte-filter s_fill" value="L" /> <label for="L" class="s_fill">LTE </label>
+								<input type="checkbox" class="nr-filter s_fill" value="N" /> <label for="L" class="s_fill">5G </label>
+								<input type="checkbox" class="nr-filter s_fill" value="N(DSS)" /> <label for="L" class="s_fill">5G(DSS) </label>
+							</div>
+							
+							<h3>Zonas</h3>
+							<!-- Filtros de Región con Seleccionar Todo -->
+							<div class="filtros_datos">
+								<input type="checkbox" id="selectAllsub_regions" class="p_fill"> <label class="p_fill">SELECCIONAR TODO</label>								
+								<input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO LIMA SUR"> <label class="s_fill">ING. RADIO LIMA SUR</label>
+								<input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO LIMA NORTE"> <label class="s_fill">ING. RADIO LIMA NORTE</label>
+								<input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO LIMA ESTE"> <label class="s_fill">ING. RADIO LIMA ESTE</label>
+								<input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO LIMA OESTE"> <label class="s_fill">ING. RADIO LIMA OESTE</label>
+								<input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO CENTRO"> <label class="s_fill">ING. RADIO CENTRO</label>
+								<input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO SUR 1"> <label class="s_fill">ING. RADIO SUR 1</label>
+								<input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO SUR 2"> <label class="s_fill">ING. RADIO SUR 2</label>
+								<input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO NORTE 1"> <label class="s_fill">ING. RADIO NORTE 1</label>
+								<input type="checkbox" class="sub_region-filter s_fill" value="ING. RADIO NORTE 2"> <label class="s_fill">ING. RADIO NORTE 2</label>
+							</div>							
+						    
+						    <h3>Distrito</h3>
+							<!-- Filtro de Distrito -->
+							<div class="filtros_datos">
+								
+								
+								<select id="distritoSelectSites" class="select2">
+									<option value="">Seleccionar Distrito</option>
+								</select>
+								
+								<button id="clearButtonSites">Restablecer Distrito</button>
+								
+							</div>								
+			           		
+						</div>
+					</div>
+			
+			<div id="box2" class="contenido content_buscar" style="left: -350px;">
+				<div class="content">  
+					<img src="../static/images/capa/icono-buscar-bg.png" th:src="@{/images/capa/icono-buscar-bg.png}"/>
+			    	
+			    	<button onclick="mostrarOcultarBox('box2')" class="cerrar">Regresar</button>
+			    	
+	           		<h2>Sección de Buscadores<strong>Selecciona que buscador usar</strong></h2>  
+	           		
+	           		<hr>
+	           		
+	           		<button onclick="mostrarOcultarBox('box21')" class="filtro_general">		       		
+		       		BUSCADOR DE SECTORES <img src="../static/images/capa/arrow-double.png" th:src="@{/images/capa/arrow-double.png}"/>
+		       		</button>       
+		       		    		
+	           		<button onclick="mostrarOcultarBox('box22')" class="filtro_general">		       		
+		       		BUSCADOR DE SITES<img src="../static/images/capa/arrow-double.png" th:src="@{/images/capa/arrow-double.png}"/>
+		       		</button>   
+	           		
+	           		      		
+				</div>
+			</div>
+			
+					<div id="box21" class="contenido content_buscar contenido_interna" style="left: -350px;">           	
+           				<div class="content"> 
+           					
+           					<img src="../static/images/capa/icono-buscar-bg.png" th:src="@{/images/capa/icono-buscar-bg.png}"/>
+			           		<button onclick="mostrarOcultarBox('box21')" class="cerrar">Regresar</button>
+			           		
+			           		<h2>Buscar Sectores<strong>Escribe el nombre del sector que requieras</strong></h2>
+			           		
+			           		<hr>
+			           		
+			           		<div id="search-container">
+					
+								<form id="searchForm">
+									<input type="text" id="markerSearch" placeholder="Buscar marcador..." />
+									<button id="searchButton" type="submit" class="btn btn-primary">Buscar</button>
+									
+								</form>
+								
+								<div id="searchResults"></div>
+							
+							</div>	
+			           		
+			           </div>
+			        </div>   
+			        
+			        <div id="box22" class="contenido content_buscar contenido_interna" style="left: -350px;">           	
+           				<div class="content"> 
+           					
+           					<img src="../static/images/capa/icono-buscar-bg.png" th:src="@{/images/capa/icono-buscar-bg.png}"/>
+			           		<button onclick="mostrarOcultarBox('box22')" class="cerrar">Regresar</button>
+			           		
+			           		<h2>Buscar Sites<strong>Escribe el nombre del site que requieras</strong></h2>
+			           		
+			           		<hr>
+			           		
+			           		<div id="search-container">
+							    <form id="searchFormSites">
+							        <input type="text" id="markerSearchSites" placeholder="Buscar marcador..." />
+							        <button id="searchButton" type="submit" class="btn btn-primary">Buscar</button>
+							    </form>
+							    <div id="searchResultsSites"></div>
+							</div>		
+			           		
+			           </div>
+			        </div>  
+			
+			
+			<div id="box3" class="contenido content_descarga" style="left: -350px;">
+				<div class="content">  
+					<img src="../static/images/capa/icono-descargar-capa-bg.png" th:src="@{/images/capa/icono-descargar-capa-bg.png}"/>
+				
+			    	<button onclick="mostrarOcultarBox('box3')" class="cerrar">CERRAR</button>
+				
+	           		<h2>Descargar Capas<strong>Capas generadas en formato kmz</strong></h2>
+	           		
+	           		<hr>
+	           		<h3>Requerimientos x Sector</h3>
+	           			           		
+	           		<button class="btn btn_dw" onclick="descargarCsvRequerimientos(points)">
+					    Descargar Requerimientos CSV
+					</button>
+					<button
+  id="downloadFilteredSector"
+  type="button"
+  aria-label="Descargar: Capa de Sectores Requerimientos"
+  title="Descargar: Capa de Sectores Requerimientos"
+  style="
+    /* Caja */
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 16px; margin:0;
+    border:0; border-radius:8px;
+    background:#00875A; /* verde accesible */
+    color:#FFFFFF; font:500 13px/1.2 'Helvetica Neue', Helvetica, Arial, Roboto, sans-serif;
+    letter-spacing:.2px;
+  "
+>
+ Capa Requerimientos x Sector 4G
+</button>			
+				<h3>Capa de Sectores 5G</h3>
+	           		
+	           		<button class="btn btn_dw" onclick="descargarCsvCapas5G(points5G)">Descargar CSV Sectores 5G</button>
+				<button
+  id="download5GSector"
+  type="button"
+  aria-label="Descargar: Capa de Sectores Requerimientos"
+  title="Descargar: Capa de Sectores Requerimientos"
+  style="
+    /* Caja */
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 16px; margin:0;
+    border:0; border-radius:8px;
+    background:#00875A; /* verde accesible */
+    color:#FFFFFF; font:500 13px/1.2 'Helvetica Neue', Helvetica, Arial, Roboto, sans-serif;
+    letter-spacing:.2px;
+  "
+>
+ Capa Sectores 5G_ nivel nacional
+</button>			
+
+
+
+
+	           		<h3>Capa de Sectores 4G</h3>
+	           		
+	           		<button class="btn btn_dw" onclick="descargarCsvCapas(points)">Descargar CSV Sectores</button>
+	           		
+	           		
+	           		
+	           		<div class="box_capas">
+	           			<div id="buttonContainer"></div>
+	           		</div>
+	           		
+	           		
+	           		<h3>Capa de Sitios</h3>
+	           		  
+    				<button class="btn btn_dw" onclick="descargarCsvSites(pointsCapas)">Descargar CSV Sites</button>
+    				
+	           		<div class="box_capas">
+	           		
+	           			<button id="downloadButtonSites">Capa de Sites</button>
+
+	           		</div>
+	           		
+	           		<h3>Capa de Sitios IPT</h3>
+	           			           			
+	           		<a th:href="@{/files/datos_capa_ipt_3G.csv}">
+						<button class="btn btn_dw" type="button">CSV Sites 3G IPT</button>
+					</a>
+						
+					<a th:href="@{/files/datos_capa_ipt_4G.csv}">
+						<button class="btn btn_dw" type="button">CSV Sites 4G IPT</button>
+					</a>
+					
+					<div class="box_capas">
+						<a th:href="@{/files/capa_ipt_3G.kmz}">
+							<button type="button">Capa 3G IPT</button>
+						</a>
+						
+						<a th:href="@{/files/capa_ipt_4G.kmz}">
+							<button type="button">Capa 4G IPT</button>
+						</a>
+					</div>
+
+	           		
+	           		
+	           		 
+										
+				</div>
+			</div>
+			
+			<div id="box4" class="contenido content_estilos" style="left: -350px;">
+				<div class="content">  
+			    	<img src="../static/images/capa/icono-estilo-bg.png" th:src="@{/images/capa/icono-estilo-bg.png}"/>
+			    	<button onclick="mostrarOcultarBox('box4')" class="cerrar">Regresar</button>
+				
+	           		<h2>Estilos de Mapa<strong>Elige el estilo de mapa</strong></h2>
+	           		
+	           		<hr>
+	           		
+	           		<div class="box_estilos_mapa">
+	           		
+		           		<div class="box">
+		           			<button onclick="cambiarEstilo('default')">
+		           				<h5>Predeterminado</h5>
+		           				<figure th:style="'background-image: url(' + @{/images/capa/estilo-pred.jpg} + ');'" class="background"></figure>
+		           			</button>
+		           			
+		           		</div>
+		           		
+		           		<div class="box">
+		           			<button onclick="cambiarEstilo('nocturno')">
+		           				<h5>Nocturno</h5>
+		           				<figure th:style="'background-image: url(' + @{/images/capa/estilo-noct.jpg} + ');'" class="background"></figure>
+		           			</button>
+		           		</div>
+		           		
+		           		<div class="box">
+		           			<button onclick="cambiarEstilo('blancoNegro')">
+		           				<h5>Blanco y Negro</h5>
+		           				<figure th:style="'background-image: url(' + @{/images/capa/estilo-blanc.jpg} + ');'" class="background"></figure>
+		           			</button>
+		           		</div>
+		           		
+		           		<div class="box">
+					    	<button onclick="cambiarEstilo('beige')">
+					    		<h5>Beige</h5>
+		           				<figure th:style="'background-image: url(' + @{/images/capa/estilo-beig.jpg} + ');'" class="background"></figure>
+		           			</button>
+					    </div>
+					    
+					    <div class="box">
+					    	<button onclick="cambiarEstilo('retro')">
+					    		<h5>Retro</h5>
+		           				<figure th:style="'background-image: url(' + @{/images/capa/estilo-retro.jpg} + ');'" class="background"></figure>
+		           			</button>
+					    </div>
+					    
+					    <div class="box">
+					    	<button onclick="cambiarEstilo('blueMap')">
+					    		<h5>Sky</h5>
+		           				<figure th:style="'background-image: url(' + @{/images/capa/estilo-celeste.jpg} + ');'" class="background"></figure>
+		           			</button>
+					    </div>
+					    
+					    <div class="box">
+					    	<button onclick="cambiarEstilo('lightGrayMap')">
+					    		<h5>Gray</h5>
+		           				<figure th:style="'background-image: url(' + @{/images/capa/estilo-gris.jpg} + ');'" class="background"></figure>
+		           			</button>
+					    </div>
+					    
+					    <div class="box">
+					    	<button onclick="cambiarEstilo('evenLighterMap')">
+					    		<h5>Light</h5>
+		           				<figure th:style="'background-image: url(' + @{/images/capa/estilo-light.jpg} + ');'" class="background"></figure>
+		           			</button>
+						</div>
+											               		
+	           		</div>										
+				</div>
+			</div>
+			
+			<div id="box5" class="contenido content_recorrido" style="left: -350px;">
+				<div class="content">  
+				
+					<img src="../static/images/capa/icono-ruta-bg.png" th:src="@{/images/capa/icono-ruta-bg.png}"/>
+			    	<button onclick="mostrarOcultarBox('box5')" class="cerrar">Regresar</button>
+				
+	           		<h2>Calcular Distancias<strong>Analiza las distancias y ángulos en el mapa</strong></h2>
+			    	
+			    	
+			    	<button id="add-point" class="boton buton boton_1">Añadir Punto</button>
+					<button id="calculate-distance" class="boton boton_2 boton_1">Calcular Distancia</button>
+					<button id="clear-points" class="boton boton_3">Eliminar Puntos</button>
+					<button id="toggle-labels" class="boton boton_4">Mostrar/Ocultar Distancias</button>
+					<!-- <h4>Información de la Ruta Trazada:</h4>-->
+					<div id="distance-display"></div>
+					<div id="details-display"></div>
+					
+					
+					  
+							
+			    </div>
+			</div>
+			
+			<div id="box6" class="contenido content_radio" style="left: -350px;">
+				<div class="content">  
+				
+					<img src="../static/images/capa/icono-regla-bg.png" th:src="@{/images/capa/icono-regla-bg.png}"/>
+			    	<button onclick="mostrarOcultarBox('box6')" class="cerrar">Regresar</button>
+				
+	           		<h2>Trazar en el Mapa<strong>Mide el radio y área en el mapa</strong></h2>
+			    	
+			    	<hr>
+			    	
+			    	<h3>Elige la unidad global de medida</h3>
+			    	
+			    	<div class="tipo_unidad">
+					    <label for="unit-global"><strong>Sincronizar Unidades</strong></label>
+					    <select id="unit-global">
+					        <option value="meters">Metros</option>
+					        <option value="kilometers">Kilómetros</option>
+					    </select>
+					</div>
+					
+					<h4>Selecciona Medidas individuales</h4>
+					
+			    	<div class="tipo_unidad">
+					    <label for="radius-unit-select">Unidad de Radio:</label>
+					    <select id="radius-unit-select">
+					      <option value="meters">Metros</option>
+					      <option value="kilometers">Kilómetros</option>
+					    </select>
+					</div>
+					<div class="tipo_unidad">
+					    <label for="circumference-unit-select">Unidad de Circunferencia:</label>
+					    <select id="circumference-unit-select">
+					      <option value="meters">Metros</option>
+					      <option value="kilometers">Kilómetros</option>
+					    </select>
+					</div>
+					<div class="tipo_unidad">
+					    <label for="area-unit-select">Unidad de Área:</label>
+					    <select id="area-unit-select">
+					      <option value="meters">Metros Cuadrados (m²)</option>
+					      <option value="kilometers">Kilómetros Cuadrados (km²)</option>
+					    </select>
+					</div>
+								
+			    	<div id="radius-display" style="margin-top: 10px;">
+					    <strong>Radio:</strong> 0 metros<br>
+					    <strong>Área:</strong> 0 km²<br>
+					    <strong>Circunferencia:</strong> 0 metros
+					</div>
+					
+					<button id="draw-circle">Trazar Círculo</button>
+					<button id="clear-circle">Limpiar Círculo</button>
+					  
+				</div>
+			</div>
+			
+			<div id="box7" class="contenido content_coord" style="left: -350px;">
+				<div class="content">  
+				
+					<img src="../static/images/capa/icono-regla-bg.png" th:src="@{/images/capa/icono-coord-bg.png}"/>
+			    	<button onclick="mostrarOcultarBox('box7')" class="cerrar">Regresar</button>
+				
+	           		<h2>Busca en el mapa<strong>Ingresa las coordenadas</strong></h2>
+			    	
+			    	<hr>			    	
+			    	
+					<label for="latitud">Latitud:</label>
+					<input type="text" id="latitud" name="latitud"><br>
+					<label for="longitud">Longitud:</label>
+					<input type="text" id="longitud" name="longitud"><br>
+					<button onclick="buscarCoordenadas()" class="btn btn-primary">Buscar</button>  
+					<br><br>
+					
+					<hr>
+					
+					<h3>Selección de Coordenadas en el mapa<br><strong>Nota: Dar click en el mapa y muestra las coordenadas</strong></h3>
+					
+					<button id="activateButton" class="btn btn-primary">Activar Selección de Coordenadas</button>
+				    <br><br>
+				    <label for="lat">Latitud:</label>
+				    <input type="text" id="lat" readonly>
+				    <br>
+				    <label for="lng">Longitud:</label>
+				    <input type="text" id="lng" readonly>
+				    
+				</div>
+			</div>
+			
+			
+			
+           </div>
+           
+           <div class="span12">
+           	<div id="map"></div>
+           </div>
+           
+        </div>
+   <!-- </div>-->
+</div> 
+
+
+
+
+
+<div  th:replace="layouts/base::footer"></div>
+
+<!-- CAMBIO 22 ABRIL 2026 -->
+
+<script>
+$(document).ready(function() {
+  const $box1 = $('#box1 .content');
+
+  $('#distritoSelect').select2({
+    dropdownParent: $box1
+  });
+
+  $('#distritoSelectSites').select2({
+    dropdownParent: $box1
+  });
+
+  $('#clearButton').click(function() {
+    $('#distritoSelect').val(null).trigger('change');
+  });
+
+  $('#clearButtonSites').click(function() {
+    $('#distritoSelectSites').val(null).trigger('change');
+  });
+});
+</script>
+
+<!--  
+<script>
+$(document).ready(function() {
+  $('#distritoSelect').select2();
+
+  $('#clearButton').click(function() {
+    $('#distritoSelect').val(null).trigger('change');
+  });
+});
+</script>
+<script>
+$(document).ready(function() {
+  $('#distritoSelectSites').select2();
+
+  $('#clearButtonSites').click(function() {
+    $('#distritoSelectSites').val(null).trigger('change');
+  });
+});
+</script>-->
+
+<!-- Script para inicializar el mapa -->
+<script type="text/javascript" th:src="@{/js/map/map_sector.js}"></script>
+<script type="text/javascript" th:src="@{/js/map/stylemap.js}"></script>
+<script type="text/javascript" th:src="@{/js/map/formato_kmz.js}"></script>
+<!-- <script src="https://stuk.github.io/jszip/dist/jszip.min.js"></script>-->
+<script type="text/javascript" th:src="@{/js/map/jszip.min.js}"></script>
+<script>
+function downloadKMZ(jefatura_radio) {
+    const { kml, semanaRadio } = generateKML(jefatura_radio);
+
+    const zip = new JSZip();
+    zip.file("mapa.kml", kml); // Agregar el KML al archivo ZIP
+
+    zip.generateAsync({ type: "blob" })
+    .then(function(content) {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(content);
+        link.download = `Week_${semanaRadio}_${jefatura_radio}.kmz`; // Nombre del archivo basado en jefatura_radio
+        link.click();
+    });
+}
+
+function createButtons() {
+    const jefatura_radios = [...new Set(points.map(point => point.jefatura_radio))];
+    const container = document.getElementById('buttonContainer');
+    
+    jefatura_radios.forEach(jefatura_radio => {
+        // Obtener la semana más reciente para cada jefatura_radio
+        const semanas = points.filter(point => point.jefatura_radio === jefatura_radio).map(point => point.semana);
+        const semana = semanas.length > 0 ? Math.max(...semanas) : 'N/A'; // Obtener la semana más reciente o 'N/A' si no hay
+
+        const button = document.createElement('button');
+        button.textContent = `Capa ${jefatura_radio} - Week ${semana}`; // Agregar semana al texto
+        button.onclick = () => downloadKMZ(jefatura_radio);
+        container.appendChild(button);
+    });
+}
+
+window.onload = createButtons;
+</script>
+<script>
+    /*function mostrarOcultarBox(id) {
+        var boxes = document.getElementsByClassName('box');
+        for (var i = 0; i < boxes.length; i++) {
+            if (boxes[i].id !== id) {
+                boxes[i].style.left = '-350px';
+            }
+        }
+        var box = document.getElementById(id);
+        if (box.style.left === '-350px' || box.style.left === '') {
+            box.style.left = '0px';
+        } else {
+            box.style.left = '-350px';
+        }
+    }*/
+    function mostrarOcultarBox(id) {
+        var box = document.getElementById(id);
+        /*if (box.style.display === "none") {
+        	box.style.display = "block";
+        } else {
+        	box.style.display = "none";
+        }*/
+        if (box.style.left === "-350px") {
+        	box.style.left = "0px";
+        } else {
+        	box.style.left = "-350px";
+        }
+    }
+</script>
+
+<script>
+const selectAllCheckbox = document.getElementById('selectAllRegions');
+const regionCheckboxes = document.querySelectorAll('.region-filter');
+
+selectAllCheckbox.addEventListener('change', () => {
+  regionCheckboxes.forEach(checkbox => {
+    checkbox.checked = selectAllCheckbox.checked;
+  });
+});
+
+regionCheckboxes.forEach(checkbox => {
+  checkbox.addEventListener('change', () => {
+    if (!checkbox.checked) {
+      selectAllCheckbox.checked = false;
+    }
+  });
+});
+
+// Función para marcar automáticamente los checkboxes de Lima
+function selectLimaRegions() {
+  const limaCheckbox = document.querySelector('.region-filter[value="LIMA"]');
+  const limaRegionCheckboxes = document.querySelectorAll('.region-filter[value^="LIMA"]');
+
+  if (limaCheckbox.checked) {
+    limaRegionCheckboxes.forEach(checkbox => {
+      checkbox.checked = true;
+    });
+  } else {
+    limaRegionCheckboxes.forEach(checkbox => {
+      checkbox.checked = false;
+    });
+  }
+}
+
+// Asociar la función al checkbox de Lima
+const limaCheckbox = document.querySelector('.region-filter[value="LIMA"]');
+limaCheckbox.addEventListener('change', selectLimaRegions);
+</script>
+
+
+<script type="text/javascript" th:src="@{/js/map/formato_kmz_sites.js}"></script>
+<script type="text/javascript" th:src="@{/js/map/descargarCsvRequerimientos.js}"></script>
+
+<script type="text/javascript" th:src="@{/js/map/formato_kmz_filtered.js}"></script>
+
+<script type="text/javascript" th:src="@{/js/map/descargarCsvSites.js}"></script>
+<script type="text/javascript" th:src="@{/js/map/descargarCsvCapas.js}"></script>
+
+<!-- NUEVO  -->
+<script type="text/javascript" th:src="@{/js/map/descargarCsvCapas5G.js}"></script>
+<script type="text/javascript" th:src="@{/js/map/formato_kmz_5G.js}"></script>
+
+
+
+
+<!-- Inyección de puntos JSON sin escapado -->
+<!-- Inyección de puntos JSON sin escapado -->
+<!-- Inyección de puntos JSON sin escapado -->
+<div th:utext="'
+<script>
+showLoading(); 
+var points = ' + ${pointsJson} + '; 
+var pointsCapas = ' + ${pointsCapasJson} + ';
+var points5G = ' + ${points5GJson} + ';
+var plotConstruccion = ' + ${plotConstruccionJson} + ';
+hideLoading();
+</script>
+'">
+</div>
+
+
+</body>
+</html>

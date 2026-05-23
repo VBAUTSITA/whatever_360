@@ -1,0 +1,1181 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<style>
+#loading-text{
+position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    top: 5px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 24px;
+    text-shadow: 3px 2px 1px #717171;
+    color: #fff;
+    background-color: rgb(0 0 0 / 62%);
+    width: 500px;
+    height: auto;
+    padding: 20px 10px 20px 10px;
+    top: 208px;
+    border-radius: 27px;
+}
+#loading-text span{
+	font-size: 15px;
+}
+.descargar_tabla{
+    position: relative;
+    max-width: 100%;
+}
+.descargar_tabla #download-button{
+    position: absolute;
+    top: -9px;
+    right: 275px;
+    background-color: #5cb85c;
+    border: 2px solid #3aab3a;
+    padding: 5px 15px 5px 15px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    width: auto;
+    display: inline-block;
+    height: auto;
+    border-radius: 7px;
+    margin-bottom: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 9;
+}
+/*diseno constr filtro grafico*/   
+
+    
+    .filtro_constr,
+    .botones_constr {
+        background-color: #ffffff;
+        padding: 15px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+    }
+
+    .filtro_constr label,
+    .botones_constr label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .filtro_constr select,
+    .botones_constr button {
+        width: 100%;
+        padding: 8px 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+        height: 36px;
+    }
+	.boton_valores {
+  background-color: #007BFF; /* Azul moderno */
+  color: white;
+  border: none;
+  padding: 4px 20px;
+  font-size: 11px;
+  line-height: 13px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.boton_valores:hover {
+  background-color: #0056b3; /* Azul más oscuro al pasar el mouse */
+}
+
+.boton_valores:active {
+  background-color: #004494; /* Azul aún más oscuro al hacer clic */
+  transform: scale(0.98); /* Efecto de presión */
+}
+	
+    .botones_constr button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+    width: 49%;
+    font-size: 11px;
+    padding: 5px 4px;
+    height: auto;
+    }
+    .botones_constr .seleccionar_todos{
+    	margin-bottom: 0px;
+    }
+    .botones_constr .seleccionar_todos button {
+	padding: 6px 0px;
+    font-size: 8px;
+    text-transform: uppercase;
+    line-height: initial;
+    font-weight: 700;
+    }
+
+    .botones_constr button:hover {
+        background-color: #0056b3;
+    }
+    
+    .botones_export button{
+    	background-color: #046f48;	
+        line-height: 12px;
+    }
+	.botones_export button:hover{
+    	background-color: #04AA6D;	
+    }
+    
+    #filtroStatusCheckboxes label {
+        display: flex;
+        margin-bottom: 5px;
+        font-weight: normal;
+    }
+
+    #filtroStatusCheckboxes input[type="checkbox"] {
+        margin-right: 6px;
+    }
+
+    .botones_constr > div {
+        margin-bottom: 10px;
+    }
+    #filtroStatusCheckboxes br{
+    	display: none;
+    }
+    
+    #filtroRegionCheckboxes label {
+        display: flex;
+        margin-bottom: 5px;
+        font-weight: normal;
+    }
+
+    #filtroRegionCheckboxes input[type="checkbox"] {
+        margin-right: 6px;
+    }
+
+    #filtroRegionCheckboxes br{
+    	display: none;
+    }
+    
+    /*tabs*/
+	.tabs_dash {
+	  border-bottom: 1px solid #ddd;
+	  margin-bottom: 0px; display: flex; gap: 8px;
+	  margin-top: 25px;
+	}
+	.tab_btn_dash {
+	  padding: 8px 12px; 
+	  border: 1px solid #ddd; 
+	  border-bottom: none; background: #fff; 
+	  cursor: pointer;
+	  border-top-left-radius: 6px; border-top-right-radius: 6px; font-weight: 600;
+	}
+	.tab_btn_dash.active {     background: #da272c;
+    color: #fff;}
+	.tab_content_dash {
+	  display: none; 
+	  border: 0px solid #ddd; 
+	  border-radius: 0 6px 6px 6px; 
+	  padding: 10px; background: #fff;
+	  padding-top: 0;
+	}
+	.tab_content_dash.active { display: block; }
+
+</style>
+
+<body>
+<header th:replace="layouts/base_constr_segu::header"></header>
+
+
+	<div class="container">
+		<div class="tabs_dash" id="dashTabs">
+			  <button class="tab_btn_dash active" data-target="#tab_construccion">Sitios Nuevos</button>
+			  <button class="tab_btn_dash" data-target="#tab_pap">Expansiones</button>
+		</div>
+	</div>
+
+<div id="tab_construccion" class="tab_content_dash active">
+<div class="main">
+	<div class="container">
+		
+		<div class="title-main">
+			<h2>SEGUIMIENTO - SITIOS NUEVOS</h2>
+		</div>
+		
+	
+		<div class="row-fluid stats-box">
+		
+          
+			<div class="span3">	
+			
+				<div class="filtro_constr">
+           			
+					<!-- Filtros -->
+					<label for="filtroTipo">Tipo de Seguimiento:</label>
+					<select id="filtroTipo">
+					    <option value="">Todos</option>
+					</select>
+					
+					<label style="display: flex;">
+						<input type="checkbox" id="modoAcumulado" onchange="filtrarYGraficar()" checked>
+						<span style="margin-left: 10px;">Mostrar gráfico acumulado</span>
+					</label>
+					
+					
+					<button class="boton_valores" onclick="toggleDataLabels()">Mostrar/Ocultar valores Flotantes</button>
+					
+				</div>
+				
+				<div class="botones_constr">	
+									
+					<label>Estado OT:</label>
+					<div class="seleccionar_todos">
+					    <button onclick="toggleCheckboxes(true)">Seleccionar todos</button>
+					    <button onclick="toggleCheckboxes(false)">Deseleccionar todos</button>
+					</div>
+					<div id="filtroStatusCheckboxes"></div>
+					
+					
+					<label>Región:</label>
+					<div class="seleccionar_todos">
+					    <button onclick="toggleRegionCheckboxes(true)">Seleccionar todos</button>
+					    <button onclick="toggleRegionCheckboxes(false)">Deseleccionar todos</button>
+					</div>
+					<div id="filtroRegionCheckboxes"></div>
+				
+					
+					<!-- Botones de exportación -->
+					<div class="botones_export" style="margin-top: 10px;">
+					    <button onclick="descargarImagen()">Descargar gráfico como imagen</button>
+					    <button onclick="descargarCSV()">Descargar datos como CSV</button>
+					</div>
+				</div>
+				
+			</div>
+			
+			<div class="span9" style="height:480px">	
+           	
+           		<canvas id="miGrafico"></canvas>
+				<!-- <a href="/proyectos-construccion/grafico" target="_blank">Ver Gráfico</a>-->
+				
+			</div>
+			
+	   </div>
+			
+		
+		 
+		
+	<div style="height: 40px;"></div>
+	<div class="title-main">
+			<h2>SEGUIMIENTO - SITIOS NUEVOS</h2>
+		</div>
+	<div style="height: 10px;"></div>	
+
+
+<div id="loading-text" style="display: none;">Cargando datos, por favor espere... <br><span>Tambien, puedes descargar la información</span></div>
+
+<div class="descargar_tabla" style="position:relative">
+<button id="download-button">Descargar Todos los Datos</button>		
+</div>
+
+<table id="lista_interferencia" class="table table-striped table-bordered list_results" style="width:100%">
+<thead>
+<tr>
+<th>TIPO_SEGUIMIENTO</th>
+<th>OT</th>
+<th>REQ_ALTA</th>
+<th>CODIGOSITE</th>
+<th>NOMBRESITE</th>
+<th>ESTADO_SITIO</th>
+<th>TIPO_ESTACION</th>
+<th>ETIQUETA</th>
+<th>PROYECTO</th>
+<th>SUB_PROYECTO</th>
+<th>REGION</th>
+<th>SUBREGION</th>
+<th>CONTRATA</th>
+<th>STATUS_OT</th>
+<th>ESTADO_TOTAL</th>
+<th>FASE_PROYECTO</th>
+<th>ETAPA_EVOLUCION</th>
+<th>SUBPROY_CONST</th>
+<th>FORECAST_ETAPA</th>
+<th>FORECAST_PROYECTO</th>
+<th>CAMBIOS_FORECAST_PROYECTO</th>
+<th>LATITUD</th>
+<th>LONGITUD</th>
+<th>FECHA_ACTIVACION</th>
+<th>FECHA_ON_AIR</th>
+<th>SEGUIMIENTO_HISTORICO</th>
+<th>DEPARTAMENTO</th>
+<th>PROVINCIA</th>
+<th>DISTRITO</th>
+<th>FECHA_CARGA</th>
+<th>WEEK_FECHA_ACTIVACION</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+<div id="tab_pap" class="tab_content_dash">
+<!-- DASHBOARD 2 - PAP -->
+<div class="main">
+  <div class="container">
+    <div class="title-main">
+      <h2>SEGUIMIENTO - EXPANSIONES</h2>
+    </div>
+
+    <div class="row-fluid stats-box">
+      <div class="span3">
+        <div class="filtro_constr botones_constr">
+        
+        <label style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+		  <input type="checkbox" id="modoAcumuladoPAP" checked>
+		  <span>Mostrar gráfico acumulado</span>
+		</label>
+		  
+		  <button class="boton_valores" onclick="toggleDataLabelsPAP()" style="width: 100%;">Mostrar/Ocultar valores Flotantes</button> 
+			
+			<label for="agrupacionPAP">Agrupar por:</label>
+			<select id="agrupacionPAP">
+			  <option value="semana" selected>Semana</option>
+			  <option value="mes">Mes</option>
+			</select>
+			
+		  <label for="filtroEstatusGeneral">Estatus General:</label>
+		  <select id="filtroEstatusGeneral"><option value="">Todos</option></select>
+		
+		  <label for="filtroProyectoPAP">Proyecto:</label>
+			<select id="filtroProyectoPAP"><option value="">Todos</option></select>
+			
+			<label for="filtroSubProyectoPAP">Sub Proyecto:</label>
+			<select id="filtroSubProyectoPAP"><option value="">Todos</option></select>
+		  
+		
+		  <label for="filtroRegionPAP">Región:</label>
+		  <select id="filtroRegionPAP"><option value="">Todas</option></select>
+		
+		  <label for="filtroAnioPAP">Año:</label>
+		  <select id="filtroAnioPAP"><option value="">Todos</option></select>
+		  
+		  <label for="filtroMesPAP" id="labelMesPAP" style="display:none;">Mes:</label>
+		<select id="filtroMesPAP" style="display:none;"><option value="">Todos</option></select>
+		   		
+		  <label for="filtroSemanaPAP">Semana:</label>
+		  <select id="filtroSemanaPAP"><option value="">Todas</option></select>
+		
+		  <button class="boton_valores" onclick="filtrarYGraficarPAP()">Filtrar y graficar</button>
+		
+		   <div class="botones_export" style="margin-top: 10px;">
+	          <button onclick="descargarGraficoPAP()">Descargar gráfico como imagen</button>
+	          <button onclick="descargarCsvPAP()">Descargar <br>CSV</button>
+	       </div>
+        
+		</div>
+
+
+        
+      </div>
+
+      <div class="span9" style="height:480px">
+    		<canvas id="graficoPAP" style="height:480px"></canvas>
+	   </div>
+    </div>
+
+    <div style="height: 40px;"></div>
+    <div class="title-main">
+      <h2>SEGUIMIENTO - EXPANSIONES</h2>
+    </div>
+
+    <div class="descargar_tabla" style="position:relative">
+      <button id="download-button" onclick="window.location.href='/proyectos-construccion/export02'"style="top: 15px;">Descargar Todos los Datos</button>
+    </div>
+
+    <table id="lista_construccion_02" class="table table-striped table-bordered list_results" style="width:100%">
+	  <thead>
+	    <tr>
+	      <th>ID</th>
+	      <th>Código</th>
+	      <th>Nombre</th>
+	      <th>Responsable</th>
+	      <th>Proyecto</th>
+	      <th>Sub Proyecto</th>
+	      <th>Jefatura RF</th>
+	      <th>Sub Región</th>
+	      <th>Contratista</th>
+	      <th>Región</th>
+	      <th>Sector</th>
+	      <th>OT PAP</th>
+	      <th>REQ</th>
+	      <th>Año</th>
+	      <th>Semana</th> <!-- NUEVA -->
+	      <th>Estatus General</th>
+	      <th>Mes</th>
+	    </tr>
+	  </thead>
+	  <tbody></tbody>
+	</table>
+
+  </div>
+</div>
+</div>
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    //$('#lista_interferencia').DataTable({
+    	//se definio una variable "table" para poder reajustar abajo
+   	var table = $('#lista_interferencia').DataTable({
+        serverSide: true,
+        processing: true,
+        paging: true,
+        searching: true,
+        scrollX: true,
+        ajax: {
+            url: '/web-tracker/proyectos-construccion/data/reporte01',
+            type: 'GET',
+            error: function(xhr, error, thrown) {
+                        console.error("Error en AJAX:", xhr.responseText);
+                        alert("Error al cargar los datos: " + xhr.status + " " + thrown);
+                    },
+            data: function(d) {
+                return {
+                    draw: d.draw,
+                    page: Math.floor(d.start / d.length),
+                    size: d.length,
+                    search: d.search.value
+                };
+            },
+            dataSrc: function(json) {
+                console.log("Datos recibidos:", json);
+                return json.data;
+            },
+            beforeSend: function(xhr, settings) {
+                console.log("Solicitud enviada:", settings.url);
+            }
+        },
+        columns: [
+            { "data": "tipoSeguimiento" },
+            { "data": "ot" },
+            { "data": "reqAlta" },
+            { "data": "codigosite" },
+            { "data": "nombresite" },
+            { "data": "estadoSitio" },
+            { "data": "tipoEstacion" },
+            { "data": "etiqueta" },
+            { "data": "proyecto" },
+            { "data": "subProyecto" },
+            { "data": "region" },
+            { "data": "subregion" },
+            { "data": "contrata" },
+            { "data": "statusOt" },
+            { "data": "estadoTotal" },
+            { "data": "faseProyecto" },
+            { "data": "etapaEvolucion" },
+            { "data": "subproyConst" },
+            { "data": "forecastEtapa" },
+            { "data": "forecastProyecto" },
+            { "data": "cambiosForecastProyecto" },
+            { "data": "latitud" },
+            { "data": "longitud" },
+            { "data": "fechaActivacion" },
+            { "data": "fechaOnAir" },
+            { "data": "seguimientoHistorico" },
+            { "data": "departamento" },
+            { "data": "provincia" },
+            { "data": "distrito" },
+            { "data": "fechaCarga" },
+            { "data": "weekFechaActivacion" }
+        ],
+        /*reajusta la tabla al terminar la carga*/
+        initComplete: function() {
+                    table.columns.adjust().draw();
+                }
+
+    });
+});
+</script>
+
+
+
+<script type="text/javascript">
+document.getElementById("download-button").addEventListener("click", function(){
+	window.location.href = "/proyectos-construccion/export01";
+	alert('Iniciará en unos segundos la descarga');
+	});
+</script>
+
+
+<script>
+    let datosOriginales = [];
+    let datosFiltradosGlobal = [];
+    let mostrarLabels = true;
+
+    function actualizarFiltros(data) {
+        const tipos = [...new Set(data.map(item => item.tipoSeguimiento))];
+        const estados = [...new Set(data.map(item => item.statusOt))];
+        const regiones = [...new Set(data.map(item => item.region))];
+
+        const filtroTipo = document.getElementById('filtroTipo');
+        const filtroStatusDiv = document.getElementById('filtroStatusCheckboxes');
+        const filtroRegionDiv = document.getElementById('filtroRegionCheckboxes');
+
+        filtroTipo.innerHTML = '<option value="">Todos</option>';
+        filtroStatusDiv.innerHTML = '';
+        filtroRegionDiv.innerHTML = '';
+
+        tipos.forEach(tipo => {
+            const option = document.createElement('option');
+            option.value = tipo;
+            option.textContent = tipo;
+            filtroTipo.appendChild(option);
+        });
+
+        estados.forEach(status => {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = status;
+            checkbox.name = 'statusOt';
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(' ' + status));
+            filtroStatusDiv.appendChild(label);
+            filtroStatusDiv.appendChild(document.createElement('br'));
+        });
+
+        regiones.forEach(region => {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = region;
+            checkbox.name = 'region';
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(' ' + region));
+            filtroRegionDiv.appendChild(label);
+            filtroRegionDiv.appendChild(document.createElement('br'));
+        });
+    }
+
+    function filtrarYGraficar() {
+        const tipoSeleccionado = document.getElementById('filtroTipo').value;
+        const statusSeleccionado = Array.from(document.querySelectorAll('input[name="statusOt"]:checked')).map(cb => cb.value);
+        const regionSeleccionada = Array.from(document.querySelectorAll('input[name="region"]:checked')).map(cb => cb.value);
+
+        datosFiltradosGlobal = datosOriginales.filter(item => {
+            const semana = parseInt(item.weekFechaActivacion);
+            return !isNaN(semana) &&
+                   semana > 0 &&
+                   (tipoSeleccionado === '' || item.tipoSeguimiento === tipoSeleccionado) &&
+                   (statusSeleccionado.length === 0 || statusSeleccionado.includes(item.statusOt)) &&
+                   (regionSeleccionada.length === 0 || regionSeleccionada.includes(item.region));
+        });
+
+        const conteoFechas = {};
+        datosFiltradosGlobal.forEach(item => {
+            const semana = parseInt(item.weekFechaActivacion);
+            conteoFechas[semana] = (conteoFechas[semana] || 0) + 1;
+        });
+
+        const semanas = Object.keys(conteoFechas)
+            .map(Number)
+            .sort((a, b) => a - b);
+
+        const etiquetas = semanas.map(String);
+        const modoAcumulado = document.getElementById('modoAcumulado').checked;
+        let acumulado = 0;
+        const cantidades = semanas.map(semana => {
+            const valor = conteoFechas[semana];
+            if (modoAcumulado) {
+                acumulado += valor;
+                return acumulado;
+            } else {
+                return valor;
+            }
+        });
+
+        const ctx = document.getElementById('miGrafico').getContext('2d');
+
+        if (window.miGrafico instanceof Chart) {
+            window.miGrafico.destroy();
+        }
+
+        window.miGrafico = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: etiquetas,
+                datasets: [{
+                    label: 'Activaciones',
+                    data: cantidades,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                return `SEMANA ${context[0].label}`;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        display: mostrarLabels,
+                        color: '#888888',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderRadius: 4,
+                        padding: 2,
+                        align: 'top',
+                        font: {
+                            weight: 'bold',
+                            size: 13
+                        },
+                        formatter: function(value) {
+                            return value;
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Semana',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Cantidad de Activaciones',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    }
+
+    function descargarImagen() {
+        const link = document.createElement('a');
+     	// Formatear fecha y hora local
+        const now = new Date();
+        const fechaHoraLocal = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}`;
+
+        link.download = `grafico_activaciones_${fechaHoraLocal}.png`;
+        
+        //link.download = 'grafico_activaciones.png';
+        link.href = document.getElementById('miGrafico').toDataURL('image/png');
+        link.click();
+    }
+
+    function descargarCSV() {
+        let csv = 'Semana,CantidadActivaciones\n';
+        const conteo = {};
+
+        datosFiltradosGlobal.forEach(item => {
+            const semana = parseInt(item.weekFechaActivacion);
+            if (!isNaN(semana) && semana > 0) {
+                conteo[semana] = (conteo[semana] || 0) + 1;
+            }
+        });
+
+        const semanas = Object.keys(conteo).map(Number).sort((a, b) => a - b);
+        semanas.forEach(semana => {
+            csv += `${semana},${conteo[semana]}\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+
+        // Formatear fecha y hora local
+        const now = new Date();
+        const fechaHoraLocal = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}`;
+
+        a.download = `activaciones_por_semana_${fechaHoraLocal}.csv`;
+        a.href = url;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+
+
+    function toggleCheckboxes(seleccionar) {
+        document.querySelectorAll('input[name="statusOt"]').forEach(cb => {
+            cb.checked = seleccionar;
+        });
+        filtrarYGraficar();
+    }
+
+    function toggleRegionCheckboxes(seleccionar) {
+        document.querySelectorAll('input[name="region"]').forEach(cb => {
+            cb.checked = seleccionar;
+        });
+        filtrarYGraficar();
+    }
+
+    function toggleDataLabels() {
+        mostrarLabels = !mostrarLabels;
+        if (window.miGrafico) {
+            window.miGrafico.options.plugins.datalabels.display = mostrarLabels;
+            window.miGrafico.update();
+        }
+    }
+
+    fetch('/web-tracker/proyectos-construccion/data/dash01')
+        .then(response => response.json())
+        .then(data => {
+            datosOriginales = data.filter(item => {
+                const semana = parseInt(item.weekFechaActivacion);
+                return !isNaN(semana) && semana > 0;
+            });
+
+            actualizarFiltros(datosOriginales);
+            filtrarYGraficar();
+
+            document.getElementById('filtroTipo').addEventListener('change', filtrarYGraficar);
+            document.getElementById('filtroStatusCheckboxes').addEventListener('change', filtrarYGraficar);
+            document.getElementById('filtroRegionCheckboxes').addEventListener('change', filtrarYGraficar);
+        });
+</script>
+
+<script type="text/javascript">
+let mostrarLabelsPAP = true;
+let datosPAP = [];
+
+// === Mes en texto <-> número ===
+const MESES_TXT = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SETIEMBRE','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+function mesTextoANumero(mRaw) {
+  if (mRaw == null) return NaN;
+  const s = String(mRaw).trim().toUpperCase();
+  const sNorm = s === 'SEPTIEMBRE' ? 'SETIEMBRE' : s;
+  const idx = MESES_TXT.indexOf(sNorm);
+  if (idx >= 0) return idx + 1;
+  const n = Number(s);
+  if (Number.isFinite(n) && n >= 1 && n <= 12) return n;
+  if (Number.isFinite(n) && n >= 0 && n <= 11) return n + 1;
+  return NaN;
+}
+
+function mesNumeroATexto(n) {
+  const i = Number(n) - 1;
+  if (i >= 0 && i < MESES_TXT.length) return MESES_TXT[i];
+  return 'MES';
+}
+
+// === Combo genérico ===
+function setOptions(selectEl, values) {
+  selectEl.innerHTML = '';
+  const optAll = document.createElement('option');
+  optAll.value = '';
+  optAll.text = selectEl.id.includes('Region') ? 'Todas' : 'Todos';
+  selectEl.appendChild(optAll);
+
+  [...values].sort((a,b)=>{
+    if (typeof a === 'number' && typeof b === 'number') return a-b;
+    return (a||'').localeCompare(b||'');
+  }).forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.text = v;
+    selectEl.appendChild(opt);
+  });
+}
+
+// === Combo de mes ordenado ===
+function setOptionsMes(selectEl, values) {
+  selectEl.innerHTML = '';
+  const optAll = document.createElement('option');
+  optAll.value = '';
+  optAll.text = 'Todos';
+  selectEl.appendChild(optAll);
+
+  const arr = [...values]
+    .map(v => ({ txt: String(v).trim(), num: mesTextoANumero(v) }))
+    .filter(x => Number.isFinite(x.num))
+    .sort((a,b) => a.num - b.num);
+
+  arr.forEach(x => {
+    const opt = document.createElement('option');
+    opt.value = x.txt;
+    opt.text = x.txt;
+    selectEl.appendChild(opt);
+  });
+}
+
+function cargarFiltrosPAP(data) {
+	  const estatusSet = new Set();
+	  const regionSet  = new Set();
+	  const anioSet    = new Set();
+	  const semanaSet  = new Set();
+	  const mesSet     = new Set();
+	  const proyectoSet = new Set();        // <-- NUEVO
+	  const subProyectoSet = new Set();     // <-- NUEVO
+
+	  data.forEach(item => {
+	    if (item.estatusGeneral) estatusSet.add(item.estatusGeneral);
+	    if (item.region) regionSet.add(item.region);
+	    if (item.anio != null) anioSet.add(item.anio);
+	    if (item.semana != null) semanaSet.add(item.semana);
+	    if (item.mes != null) mesSet.add(item.mes);
+	    if (item.proyecto) proyectoSet.add(item.proyecto);            // <-- NUEVO
+	    if (item.subProyecto) subProyectoSet.add(item.subProyecto);   // <-- NUEVO
+	  });
+
+	  setOptions(document.getElementById('filtroEstatusGeneral'), estatusSet);
+	  setOptions(document.getElementById('filtroRegionPAP'), regionSet);
+	  setOptions(document.getElementById('filtroAnioPAP'), anioSet);
+	  setOptions(document.getElementById('filtroSemanaPAP'), semanaSet);
+	  setOptionsMes(document.getElementById('filtroMesPAP'), mesSet);
+	  setOptions(document.getElementById('filtroProyectoPAP'), proyectoSet);        // <-- NUEVO
+	  setOptions(document.getElementById('filtroSubProyectoPAP'), subProyectoSet);  // <-- NUEVO
+}
+
+
+function filtrarYGraficarPAP() {
+	  const estatus = document.getElementById('filtroEstatusGeneral').value;
+	  const region  = document.getElementById('filtroRegionPAP').value;
+	  const anioSel = document.getElementById('filtroAnioPAP')?.value ?? '';
+	  const semanaSel = document.getElementById('filtroSemanaPAP')?.value ?? '';
+	  const mesSel = document.getElementById('filtroMesPAP')?.value ?? '';
+	  const proyectoSel = document.getElementById('filtroProyectoPAP')?.value ?? '';       // <-- NUEVO
+	  const subProyectoSel = document.getElementById('filtroSubProyectoPAP')?.value ?? ''; // <-- NUEVO
+	  const modoAcumulado = document.getElementById('modoAcumuladoPAP')?.checked ?? false;
+	  const agrupacion = document.getElementById('agrupacionPAP')?.value || 'semana';
+
+	  const filtrados = datosPAP.filter(it => {
+	    const anioIt   = it.anio   != null ? String(it.anio).trim()   : '';
+	    const semanaIt = it.semana != null ? String(it.semana).trim() : '';
+	    const mesIt    = it.mes    != null ? String(it.mes).trim()    : '';
+	    return (estatus === '' || it.estatusGeneral === estatus) &&
+	           (region  === '' || it.region === region) &&
+	           (proyectoSel === '' || it.proyecto === proyectoSel) &&                 // <-- NUEVO
+	           (subProyectoSel === '' || it.subProyecto === subProyectoSel) &&        // <-- NUEVO
+	           (anioSel === '' || anioIt === String(anioSel)) &&
+	           (agrupacion === 'semana'
+	              ? (semanaSel === '' || semanaIt === String(semanaSel))
+	              : (mesSel === ''    || mesIt    === String(mesSel))
+	           );
+	  });
+
+
+  const buckets = {};
+  filtrados.forEach(it => {
+    const y = Number(it.anio);
+    if (!Number.isFinite(y) || y <= 0) return;
+
+    if (agrupacion === 'semana') {
+      const w = Number(it.semana);
+      if (!Number.isFinite(w) || w <= 0) return;
+      const key = `${y}-W${String(w).padStart(2,'0')}`;
+      buckets[key] = (buckets[key] || 0) + 1;
+    } else {
+      const mNum = mesTextoANumero(it.mes);
+      if (!Number.isFinite(mNum) || mNum <= 0) return;
+      const key = `${y}-M${String(mNum).padStart(2,'0')}`;
+      buckets[key] = (buckets[key] || 0) + 1;
+    }
+  });
+
+  let keys = Object.keys(buckets);
+  if (keys.length === 0) {
+    if (window.graficoPAP && typeof window.graficoPAP.destroy === 'function') window.graficoPAP.destroy();
+    const ctx = document.getElementById('graficoPAP').getContext('2d');
+    window.graficoPAP = new Chart(ctx, {
+      type: 'line',
+      data: { labels: ['Sin datos'], datasets: [{ label: 'Cantidad', data: [0] }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+    return;
+  }
+
+  keys = keys.sort((a,b)=>{
+    const [ay, asuf] = a.split('-');
+    const [by, bsuf] = b.split('-');
+    if (+ay !== +by) return +ay - +by;
+    return (+asuf.slice(1)) - (+bsuf.slice(1));
+  });
+
+  const labels = keys.map(k => {
+    const [yy, suf] = k.split('-');
+    if (agrupacion === 'semana') return `${yy}-W${suf.slice(1).padStart(2,'0')}`;
+    const mNum = Number(suf.slice(1));
+    return `${yy}-${mesNumeroATexto(mNum)}`;
+  });
+
+  let values = keys.map(k => buckets[k]);
+  if (modoAcumulado) {
+    let run = 0;
+    values = values.map(v => (run += v));
+  }
+
+  if (window.graficoPAP && typeof window.graficoPAP.destroy === 'function') window.graficoPAP.destroy();
+  const ctx = document.getElementById('graficoPAP').getContext('2d');
+  const tituloX = (agrupacion === 'semana') ? 'Año–Semana' : 'Año–Mes';
+  const etiqueta = (modoAcumulado ? 'Acumulado ' : 'Cantidad ') + 'por ' + tituloX;
+
+  window.graficoPAP = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: etiqueta,
+        data: values,
+        borderColor: 'rgba(212, 38, 43, 1)',
+        backgroundColor: 'rgba(212, 38, 43, 0.15)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, title: { display: true, text: 'Cantidad' } },
+        x: { title: { display: true, text: tituloX } }
+      },
+      plugins: {
+        tooltip: { callbacks: { title: (ctx) => `${tituloX}: ${ctx[0].label}` } },
+        datalabels: {
+          display: () => mostrarLabelsPAP,
+          color: '#888888',
+          backgroundColor: 'rgba(54, 162, 235, 0.15)',
+          borderRadius: 4,
+          padding: 3,
+          align: 'top',
+          offset: 4,
+          font: { weight: 'bold', size: 12 },
+          formatter: (v) => v
+        }
+      }
+    },
+    plugins: (typeof ChartDataLabels !== 'undefined') ? [ChartDataLabels] : []
+  });
+}
+
+function descargarCsvPAP() {
+  const estatus = document.getElementById('filtroEstatusGeneral').value;
+  const region  = document.getElementById('filtroRegionPAP').value;
+  const anio    = document.getElementById('filtroAnioPAP').value;
+  const semana  = document.getElementById('filtroSemanaPAP').value;
+  const mes     = document.getElementById('filtroMesPAP').value;
+  const agrupacion = document.getElementById('agrupacionPAP')?.value || 'semana';
+
+  const filtrados = datosPAP.filter(it =>
+    (estatus === '' || it.estatusGeneral === estatus) &&
+    (region  === '' || it.region === region) &&
+    (anio    === '' || String(it.anio) === String(anio)) &&
+    (agrupacion === 'semana'
+      ? (semana === '' || String(it.semana) === String(semana))
+      : (mes    === '' || String(it.mes)    === String(mes))
+    )
+  );
+
+  const buckets = {};
+  filtrados.forEach(it => {
+    const y = it.anio ?? 'SN';
+    if (agrupacion === 'semana') {
+      const w = it.semana ?? 0;
+      const key = `${y}-W${String(w).padStart(2,'0')}`;
+      buckets[key] = (buckets[key] || 0) + 1;
+    } else {
+      const mNum = mesTextoANumero(it.mes);
+      if (!Number.isFinite(mNum)) return;
+      const key = `${y}-M${String(mNum).padStart(2,'0')}`;
+      buckets[key] = (buckets[key] || 0) + 1;
+    }
+  });
+
+  const keys = Object.keys(buckets).sort((a,b)=>{
+    const [ay, asuf] = a.split('-');
+    const [by, bsuf] = b.split('-');
+    if (+ay !== +by) return +ay - +by;
+    return (+asuf.slice(1)) - (+bsuf.slice(1));
+  });
+
+  const header = (agrupacion === 'semana') ? 'anio_semana' : 'anio_mes';
+  let csv = `${header},cantidad\n`;
+  keys.forEach(k => {
+    const [yy, suf] = k.split('-');
+    const label = (agrupacion === 'semana')
+      ? `${yy}-W${suf.slice(1).padStart(2,'0')}`
+      : `${yy}-${mesNumeroATexto(Number(suf.slice(1)))}`;
+    csv += `${label},${buckets[k]}\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.download = `expansiones_${header}_${new Date().toISOString()}.csv`;
+  a.href = url;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// === DataTable ===
+$(document).ready(function () {
+  var table = $('#lista_construccion_02').DataTable({
+    serverSide: true,
+    processing: true,
+    paging: true,
+    searching: true,
+    scrollX: true,
+    ajax: {
+      url: '/web-tracker/proyectos-construccion/data/reporte02',
+      type: 'GET',
+      data: function (d) {
+        return {
+          draw: d.draw,
+          page: Math.floor(d.start / d.length),
+          size: d.length,
+          search: d.search.value
+        };
+      },
+      dataSrc: function (json) { return json.data; }
+    },
+    columns: [
+      { data: "id" },
+      { data: "codigo" },
+      { data: "nombre" },
+      { data: "responsable" },
+      { data: "proyecto" },
+      { data: "subProyecto" },
+      { data: "jefaturaRf" },
+      { data: "subRegion" },
+      { data: "contratista" },
+      { data: "region" },
+      { data: "sector" },
+      { data: "otPap" },
+      { data: "req" },
+      { data: "anio" },
+      { data: "semana" },
+      { data: "estatusGeneral" },
+      { data: "mes" }
+    ]
+  });
+
+  fetch('/web-tracker/proyectos-construccion/data/dash02')
+    .then(resp => resp.json())
+    .then(data => {
+      datosPAP = data;
+      cargarFiltrosPAP(datosPAP);
+
+      document.getElementById('filtroEstatusGeneral').addEventListener('change', filtrarYGraficarPAP);
+      document.getElementById('filtroRegionPAP').addEventListener('change', filtrarYGraficarPAP);
+      document.getElementById('filtroAnioPAP').addEventListener('change', filtrarYGraficarPAP);
+      document.getElementById('filtroSemanaPAP').addEventListener('change', filtrarYGraficarPAP);
+      document.getElementById('filtroMesPAP').addEventListener('change', filtrarYGraficarPAP);
+      document.getElementById('filtroProyectoPAP').addEventListener('change', filtrarYGraficarPAP);
+      document.getElementById('filtroSubProyectoPAP').addEventListener('change', filtrarYGraficarPAP);
+
+
+      document.getElementById('agrupacionPAP').addEventListener('change', function () {
+        const isMes = this.value === 'mes';
+        document.getElementById('filtroMesPAP').style.display   = isMes ? '' : 'none';
+        document.getElementById('labelMesPAP').style.display    = isMes ? '' : 'none';
+        document.getElementById('filtroSemanaPAP').style.display = isMes ? 'none' : '';
+        filtrarYGraficarPAP();
+      });
+
+      filtrarYGraficarPAP();
+    });
+});
+
+document.getElementById('modoAcumuladoPAP').addEventListener('change', filtrarYGraficarPAP);
+
+function toggleDataLabelsPAP() {
+  mostrarLabelsPAP = !mostrarLabelsPAP;
+  if (window.graficoPAP) {
+    window.graficoPAP.options.plugins.datalabels.display = () => mostrarLabelsPAP;
+    window.graficoPAP.update();
+  }
+}
+</script>
+
+
+
+<script>
+(function initDashTabs() {
+  const tabs = document.getElementById('dashTabs');
+  if (!tabs) return;
+  const btns = tabs.querySelectorAll('.tab_btn_dash');
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // activar botón
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // mostrar contenido
+      const target = btn.getAttribute('data-target');
+      document.querySelectorAll('#tab_construccion, #tab_pap').forEach(p => p.classList.remove('active'));
+      const pane = document.querySelector(target);
+      if (pane) pane.classList.add('active');
+
+      // Ajustar componentes del pane activo
+      if (target === '#tab_construccion') {
+        if (window.ConstruccionTable && $.fn.dataTable.isDataTable('#lista_interferencia')) {
+          window.ConstruccionTable.columns.adjust().draw(false);
+        }
+        if (window.graficoConstruccion && typeof window.graficoConstruccion.update === 'function') {
+          window.graficoConstruccion.update();
+        }
+      } else if (target === '#tab_pap') {
+        if (window.PAPTable && $.fn.dataTable.isDataTable('#lista_construccion_02')) {
+          window.PAPTable.columns.adjust().draw(false);
+        }
+        if (window.graficoPAP && typeof window.graficoPAP.update === 'function') {
+          window.graficoPAP.update();
+        }
+      }
+    });
+  });
+})();
+</script>
+
+
+
+
+
+</body>
+</html>

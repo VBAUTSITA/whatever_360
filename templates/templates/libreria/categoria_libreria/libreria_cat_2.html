@@ -1,0 +1,208 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head th:replace="layouts/base::head"></head>
+
+<link href="../static/css/jquery.dataTables.min.css"
+      th:href="@{/css/jquery.dataTables.min.css}" rel="stylesheet">
+
+
+<body>
+
+<header th:replace="layouts/base_libreria::header"></header>
+
+<div class="main">
+<div class="container">
+
+<div class="title-main archivo">
+<h2>
+BIBLIOTECA DE ARCHIVOS
+<img src="../static/images/icono-archivo.png"
+     th:src="@{/images/icono-archivo.png}"/>
+</h2>
+</div>
+
+<div class="formulario_capas">
+
+<form method="post"
+      enctype="multipart/form-data"
+      th:action="@{/archivador/subir}"
+      onsubmit="buildCategoryPath()">
+
+<input type="file" name="archivo" id="archivo" required>
+<span>Max. 100mb size</span>
+
+<input required
+       type="text"
+       maxlength="1000"
+       name="descripcion_archivo_libreria"
+       placeholder="Descripción del Archivo"/>
+
+<select name="usuario_libreria"
+        id="usuario_libreria"
+        style="display:none;">
+<option selected="selected"
+        th:value="${#request.userPrincipal.name}">
+<span th:text="${#request.userPrincipal.name}"></span>
+</option>
+</select>
+
+<!-- LEVEL 1 -->
+<label>Categoría principal</label>
+<select id="categoria_lvl1"></select>
+
+<!-- LEVEL 2 -->
+<label>Subcarpeta</label>
+<select id="categoria_lvl2"></select>
+<input type="text"
+       id="new_lvl2"
+       placeholder="Nueva subcarpeta (opcional)">
+
+<!-- LEVEL 3 -->
+<label>Subnivel</label>
+<input type="text"
+       id="new_lvl3"
+       placeholder="Subnivel opcional">
+
+<!-- Hidden final value -->
+<input type="hidden"
+       name="categoria_libreria"
+       id="categoria_libreria">
+
+<input type="hidden"
+       id="fecha_carga"
+       name="fecha_carga"
+       th:value="${#dates.format(#dates.createNow(),'dd/MM/yyyy HH:mm:ss')}">
+
+<button type="submit">Subir</button>
+
+</form>
+
+
+<table id="lista_capas_files" style="width:100%">
+<thead>
+<tr>
+<th style="display:none;">Id</th>
+<th>Nombre</th>
+<th>Descripción</th>
+<th>Usuario</th>
+<th>Fecha</th>
+<th>Categoria</th>
+<th>Descargar</th>
+</tr>
+</thead>
+
+<tbody>
+<tr th:each="archivo : ${archivos}">
+<td th:text="${archivo.id_libreria}" style="display:none"></td>
+<td th:text="${archivo.nombre_archivo_libreria}"></td>
+<td th:text="${archivo.descripcion_archivo_libreria}"></td>
+<td th:text="${archivo.usuario_libreria}"></td>
+<td th:text="${archivo.fecha_carga}"></td>
+<td th:text="${archivo.categoria_libreria}"></td>
+<td>
+<a th:href="@{/archivador/descargar/{categoria}/{id}
+(categoria=${archivo.categoria_libreria},
+ id=${archivo.id_libreria})}">
+Descargar
+</a>
+</td>
+</tr>
+</tbody>
+
+</table>
+
+</div>
+</div>
+</div>
+
+<div th:replace="layouts/base::footer"></div>
+
+<script th:inline="javascript">
+const ALL_FILES = /*[[${archivos}]]*/ [];
+</script>
+
+<script>
+
+function getCategories(){
+
+const categories = new Set();
+
+ALL_FILES.forEach(f=>{
+if(f.categoria_libreria){
+categories.add(f.categoria_libreria.split("/")[0]);
+}
+});
+
+return [...categories];
+}
+
+function populateLevel1(){
+
+const select=document.getElementById("categoria_lvl1");
+select.innerHTML="";
+
+getCategories().forEach(c=>{
+let o=document.createElement("option");
+o.value=c;
+o.text=c;
+select.appendChild(o);
+});
+
+populateLevel2();
+}
+
+function populateLevel2(){
+
+const lvl1=document.getElementById("categoria_lvl1").value;
+const select=document.getElementById("categoria_lvl2");
+select.innerHTML="";
+
+const subs=new Set();
+
+ALL_FILES.forEach(f=>{
+if(!f.categoria_libreria)return;
+
+const parts=f.categoria_libreria.split("/");
+if(parts[0]===lvl1 && parts[1]){
+subs.add(parts[1]);
+}
+});
+
+subs.forEach(s=>{
+let o=document.createElement("option");
+o.value=s;
+o.text=s;
+select.appendChild(o);
+});
+
+}
+
+function buildCategoryPath(){
+
+let lvl1=document.getElementById("categoria_lvl1").value;
+let lvl2=document.getElementById("new_lvl2").value ||
+document.getElementById("categoria_lvl2").value;
+
+let lvl3=document.getElementById("new_lvl3").value;
+
+let path=lvl1;
+
+if(lvl2) path+="/"+lvl2;
+if(lvl3) path+="/"+lvl3;
+
+document.getElementById("categoria_libreria").value=path;
+
+}
+
+populateLevel1();
+
+document
+.getElementById("categoria_lvl1")
+.addEventListener("change",populateLevel2);
+
+</script>
+
+</body>
+</html>

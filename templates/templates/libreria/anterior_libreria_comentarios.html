@@ -1,0 +1,67 @@
+	<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Comentarios Archivososss</title>
+    <link rel="stylesheet" th:href="@{/css/coopilot.css}">
+</head>
+<body>
+
+<header th:replace="layouts/base_libreria::header"></header>
+
+<div class="main">
+<div class="container">
+
+    <h2 th:text="${archivo.nombre_archivo_libreria}"></h2>
+
+    <a th:href="@{/archivador/descargar/{categoria}/{id}(
+        categoria=${archivo.categoria_libreria},
+        id=${archivo.id_libreria})}">
+        Descargar
+    </a>
+
+    <hr>
+
+    <div th:each="comentario : ${comentarios}" style="margin-bottom:25px;">
+
+        <div>
+            <strong th:text="${comentario.nombreCompleto}"></strong>
+            <span th:text="${#dates.format(comentario.fechaCreacion,'dd/MM/yyyy HH:mm')}"></span>
+        </div>
+
+        <div th:text="${comentario.comentarioTexto}"></div>
+
+        <form th:action="@{/libreria/{id}/comentario(id=${archivo.id_libreria})}" method="post">
+            <input type="hidden" name="parentId" th:value="${comentario.idComentario}">
+            <textarea name="texto" required style="width:100%; margin-top:8px;"></textarea>
+            <button type="submit">Responder</button>
+        </form>
+
+        <div th:each="reply : ${comentario.replies}" style="margin-left:40px; margin-top:10px;">
+
+            <div>
+                <strong th:text="${reply.nombreCompleto}"></strong>
+                <span th:text="${#dates.format(reply.fechaCreacion,'dd/MM/yyyy HH:mm')}"></span>
+            </div>
+
+            <div th:text="${reply.comentarioTexto}"></div>
+
+        </div>
+
+        <hr>
+    </div>
+
+    <h3>Nuevo Comentarioioio</h3>
+
+    <form th:action="@{/archivador/libreria/{id}/comentario(id=${archivo.id_libreria})}" method="post">
+        <textarea name="texto" required style="width:100%;"></textarea>
+        <button type="submit">Enviar</button>
+    </form>
+
+</div>
+</div>
+
+<div th:replace="layouts/base::footer"></div>
+
+</body>
+</html>

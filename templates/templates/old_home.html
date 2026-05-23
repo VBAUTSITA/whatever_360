@@ -1,0 +1,467 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">      
+<head th:replace="layouts/base::head">
+</head>
+
+<body class="home_base">
+<header th:replace="layouts/base_home::header"></header>
+
+<div class="main home_secciones">
+	<div class="container">
+		<!-- <h3>Bienvenido : <span th:utext="${#request.userPrincipal.name}"></span></h3> -->
+		
+		<!-- <div class="row-fluid stats-box">
+		
+           <div class="span6">	
+				
+				<div class="box_home">
+					<div class="box_img">
+						<img src="../static/images/ico-interferencia-12.jpg" th:src="@{/images/ico-interferencia-12.jpg}"/>
+					</div>		
+					<div class="box_content">	
+						<h3>CASOS DE INTERFERENCIA</h3>
+						<a class="btn btn-primary" href="#" th:href="@{/interferencia/list}" >Ingresar al módulo</a>
+					</div>
+				</div>
+				
+				<div class="box_home">
+					<div class="box_img">
+						<img src="../static/images/img-reporte111.jpg" th:src="@{/images/img-reporte111.jpg}"/>
+					</div>		
+					<div class="box_content">	
+						<h3>INFORMACION DE RADIO<br><span>(Reporte 111)</span></h3>
+						<a class="btn btn-primary" href="#" th:href="@{/reportes/seccion}" >Ingresar al módulo</a>
+					</div>
+				</div>
+				
+				<div class="box_home">
+					<div class="box_img">
+						<img src="../static/images/archivador-2.jpg" th:src="@{/images/archivador-2.jpg}"/>
+					</div>
+					<div class="box_content">
+						<h3>BIBLIOTECA DE ARCHIVOS<br><span>Reportes / Datasheet / Etc</span></h3>
+						<a class="btn btn-primary" href="#" th:href="@{/archivador/listar-categorias}" >Ingresar al módulo</a>
+					</div>
+				</div>			
+							
+				
+			</div>
+			
+			
+			<div class="span6">	
+				<div class="box_home">
+					<div class="box_img">
+						<img src="../static/images/capas-mapa-2.jpg" th:src="@{/images/capas-mapa-2.jpg}"/>
+					</div>
+					<div class="box_content">
+						<h3>CAPAS ACTUALIZADAS Y ARCHIVOS PLANIFICACION</h3>
+						<a class="btn btn-primary" href="#" th:href="@{/mapas/listar}" >Ingresar al módulo</a>
+					</div>
+				</div>
+			</div>
+			
+			<div class="span6">	
+			
+				<div class="box_home">
+					<div class="box_img">
+						<img src="../static/images/legal-interferencia.jpg" th:src="@{/images/legal-interferencia.jpg}"/>
+					</div>		
+					<div class="box_content">	
+						<h3>LEGAL INTERFERENCIA</h3>
+						<a class="btn btn-primary" href="#" th:href="@{/interferencia/legal}" >Ingresar al módulo</a>
+					</div>
+				</div>
+				
+				<div class="box_home">
+					<div class="box_img">
+						<img src="../static/images/cambios-radio2.jpg" th:src="@{/images/cambios-radio2.jpg}"/>
+					</div>
+					<div class="box_content">
+						<h3>SEGUIMIENTOS DE CAMBIOS FISICOS Y LOGICOS DE SITIOS</h3>
+						<a class="btn btn-primary" href="#" th:href="@{/seguimiento/list}" >Ingresar al módulo</a>
+					</div>
+				</div>	
+			</div>	
+			<div class="span6">	
+				<div class="box_home">
+					<div class="box_img">
+						<img src="../static/images/cambios-radio.jpg" th:src="@{/images/cambios-radio.jpg}"/>
+					</div>
+					<div class="box_content">
+						<h3>COMPARADOR BASELINE<br><span>Tool - Genera Scripts Homologación de la red</span></h3>
+						<a class="btn btn-primary" href="#" th:href="@{/baselinedata}" >Ingresar al módulo</a>
+					</div>
+				</div>
+			</div>
+			
+			<div class="span6">	
+			
+				<div class="box_home">
+					<div class="box_img">
+						<img src="../static/images/baseline-imagen-2.jpg" th:src="@{/images/baseline-imagen-2.jpg}"/>
+					</div>		
+					<div class="box_content">	
+						<h3>BASELINE DASHBOARD<br><span>Resumen Parametros Homologados</span></h3>
+						<a class="btn btn-primary" href="#" th:href="@{/baseline/dash}" >Ingresar al módulo</a>
+					</div>
+				</div>
+				
+				<div class="box_home">
+					<div class="box_img">
+						<img src="../static/images/formato-baseline-1.jpg" th:src="@{/images/formato-baseline-1.jpg}"/>
+					</div>		
+					<div class="box_content">	
+						<h3>FORMATO BASELINE</h3>
+						<a class="btn btn-primary" href="#" th:href="@{/baseline/formato}" >Ingresar al módulo</a>
+					</div>
+				</div>
+				
+			</div> 
+			
+			
+		</div>-->
+		
+		<h3 style="margin-top: 15px;margin-bottom: -10px;font-size: 25px;">Capas y Mapa de Sectores 4G</h3>
+			
+			<div class="row-fluid stats-box">
+					<div class="span6">	
+						<div class="box_home">
+							<div class="box_img">
+								<img src="../static/images/ico-mapa-sector.jpg" th:src="@{/images/ico-mapa-sector.jpg}"/>
+							</div>
+							<div class="box_content">
+								<h3>MAPA DE SECTORES Y DESCARGA DE CAPAS 4G</h3>
+								<a class="btn btn-primary" href="#" th:href="@{/mapa/sectores}" target="_blank">Ingresar al módulo</a>
+							</div>
+						</div>
+					</div>
+					
+					<div class="span6">	
+						<div class="box_home">
+							<div class="box_img">
+								<img src="../static/images/capas-mapa-2.jpg" th:src="@{/images/capas-mapa-2.jpg}"/>
+							</div>
+							<div class="box_content">
+								<h3>CAPAS ACTUALIZADAS Y ARCHIVOS PLANIFICACION</h3>
+								<a class="btn btn-primary" href="#" th:href="@{/mapas/listar}" >Ingresar al módulo</a>
+							</div>
+						</div>
+					</div>
+			</div>
+			
+		<h3 style="margin-top: 45px;margin-bottom: -10px;font-size: 25px;">Interferencia</h3>
+			
+			<div class="row-fluid stats-box">
+			
+				<div class="span6">	
+					
+					<div class="box_home">
+						<div class="box_img">
+							<img src="../static/images/ico-interferencia-12.jpg" th:src="@{/images/ico-interferencia-12.jpg}"/>
+						</div>		
+						<div class="box_content">	
+							<h3>CASOS DE INTERFERENCIA</h3>
+							<a class="btn btn-primary" href="#" th:href="@{/interferencia/list}" >Ingresar al módulo</a>
+						</div>
+					</div>
+				
+				</div>
+			
+				<div class="span6">	
+				
+					<div class="box_home">
+						<div class="box_img">
+							<img src="../static/images/legal-interferencia.jpg" th:src="@{/images/legal-interferencia.jpg}"/>
+						</div>		
+						<div class="box_content">	
+							<h3>LEGAL INTERFERENCIA</h3>
+							<a class="btn btn-primary" href="#" th:href="@{/interferencia/legal}" >Ingresar al módulo</a>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		
+		<h3 style="margin-top: 45px;margin-bottom: -10px;font-size: 25px;">Libreria de Archivos y Reportes</h3>
+			
+			<div class="row-fluid stats-box">
+			
+				<div class="span6">	
+					<div class="box_home">
+						<div class="box_img">
+							<img src="../static/images/img-reporte111.jpg" th:src="@{/images/img-reporte111.jpg}"/>
+						</div>		
+						<div class="box_content">	
+							<h3>INFORMACION DE RADIO<br><span>(Reporte 111)</span></h3>
+							<a class="btn btn-primary" href="#" th:href="@{/reportes/seccion}" >Ingresar al módulo</a>
+						</div>
+					</div>
+					
+					<div class="box_home" >
+						<div class="box_img">
+							<img src="../static/images/img-dash-contrucciones.jpg" th:src="@{/images/img-dash-contrucciones.jpg}"/>
+						</div>
+						<div class="box_content">
+							<h3>DASHBOARD - PROYECTOS CONSTRUCCION</h3>
+							<a class="btn btn-primary" href="#" th:href="@{/proyectos-construccion/data-1}" >Ingresar al módulo</a>
+						</div>
+					</div>	
+					
+					
+					<div class="box_home" style="margin-right: 40px;">
+						<div class="box_img">
+							<img src="../static/images/capas-mapa-3.jpg" th:src="@{/images/capas-mapa-3.jpg}"/>
+						</div>		
+						<div class="box_content">	
+							<h3>SECTORES CRITICOS / SITIOS NUEVOS</h3>
+							<a class="btn btn-primary" href="#" th:href="@{/sectores-sites-nuevos/matriz}" >Ingresar al módulo</a>
+						</div>
+					</div>
+					
+					
+					
+					
+				</div>
+				
+				
+				<div class="span6">	
+					<div class="box_home">
+						<div class="box_img">
+							<img src="../static/images/archivador-2.jpg" th:src="@{/images/archivador-2.jpg}"/>
+						</div>
+						<div class="box_content">
+							<h3>BIBLIOTECA DE ARCHIVOS<br><span>Reportes / Datasheet / Etc</span></h3>
+							<a class="btn btn-primary" href="#" th:href="@{/archivador/listar-categorias}" >Ingresar al módulo</a>
+							<!-- <a class="btn btn-primary" href="#" th:href="@{/archivador/listar-categorias-2}" >Ingresar al módulo preubas</a>
+							<a class="btn btn-primary" href="#" th:href="@{/archivador/listar-categorias-4}" >Ingresar al módulo yuji ant</a>
+							 -->
+						</div>
+					</div>	
+					
+					<div class="box_home">
+						<div class="box_img">
+							<img src="../static/images/cambios-radio2.jpg" th:src="@{/images/cambios-radio2.jpg}"/>
+						</div>
+						<div class="box_content">
+							<h3>SEGUIMIENTOS DE CAMBIOS FISICOS Y LOGICOS DE SITIOS</h3>
+							<a class="btn btn-primary" href="#" th:href="@{/seguimiento/list}" >Ingresar al módulo</a>
+						</div>
+					</div>	
+					
+					
+				</div>	
+				
+				<div class="span6" style="margin-left: 0;">	
+					
+				
+					<div class="box_home" style="margin-left: 25px;">
+						<div class="box_img">
+							<img src="../static/images/datafill.png" th:src="@{/images/datafill.png}"/>
+						</div>		
+						<div class="box_content">	
+							<h3>DATAFILL</h3>
+							<a class="btn btn-primary" href="#" th:href="@{/datafill/list}" >Ingresar al módulo</a>
+						</div>
+					</div>
+				
+				
+				
+				
+				</div>
+				
+							
+			</div>
+			
+		<h3 style="margin-top: 45px;margin-bottom: -10px;font-size: 25px;">Baseline 4G</h3>
+		
+			<div class="row-fluid stats-box">
+			
+				<div class="span6">	
+				
+					<div class="box_home">
+						<div class="box_img">
+							<img src="../static/images/baseline-imagen-2.jpg" th:src="@{/images/baseline-imagen-2.jpg}"/>
+						</div>		
+						<div class="box_content">	
+							<h3>BASELINE DASHBOARD<br><span>Resumen Parametros Homologados 4G</span></h3>
+							<a class="btn btn-primary" href="#" th:href="@{/baseline/dash}" >Ingresar al módulo</a>
+						</div>
+					</div>
+					
+					<div class="box_home">
+						<div class="box_img">
+							<img src="../static/images/formato-baseline-1.jpg" th:src="@{/images/formato-baseline-1.jpg}"/>
+						</div>		
+						<div class="box_content">	
+							<h3>FORMATO BASELINE 4G</h3>
+							<a class="btn btn-primary" href="#" th:href="@{/baseline/formato}" >Ingresar al módulo</a>
+						</div>
+					</div>
+				
+				</div>
+				
+				<div class="span6">	
+				
+					<div class="box_home">
+						<div class="box_img">
+							<img src="../static/images/cambios-radio.jpg" th:src="@{/images/cambios-radio.jpg}"/>
+						</div>
+						<div class="box_content">
+							<h3>COMPARADOR BASELINE 4G<br><span>Tool - Genera Scripts Homologación de la red</span></h3>
+							<a class="btn btn-primary" href="#" th:href="@{/baselinedata}" >Ingresar al módulo</a>
+						</div>
+					</div>
+					
+				</div>
+				
+			</div>
+			
+		<h3 style="margin-top: 25px;margin-bottom: 10px;font-size: 25px;">Baseline 5G</h3>	
+		
+		<h3 style="margin-top: 15px;margin-bottom: -10px;font-size: 21px;padding-left: 12px;">▶ Baseline 5G NR</h3>
+		
+			<div class="row-fluid stats-box">
+			
+				<div class="span6">	
+				
+					<div class="box_home">
+						<div class="box_img">
+							<img src="../static/images/baseline-imagen-2.jpg" th:src="@{/images/baseline-imagen-2.jpg}"/>
+						</div>		
+						<div class="box_content">	
+							<h3>BASELINE DASHBOARD 5G NR<br><span>Resumen Parametros Homologados</span></h3>
+							<a class="btn btn-primary" href="#" th:href="@{/baseline-graph-5g/dash}" >Ingresar al módulo</a>
+						</div>
+					</div>
+				
+				</div>
+				
+				<div class="span6">	
+				
+					<div class="box_home">
+						<div class="box_img">
+							<img src="../static/images/cambios-radio.jpg" th:src="@{/images/cambios-radio.jpg}"/>
+						</div>
+						<div class="box_content">
+							<h3>COMPARADOR BASELINE 5G NR<br><span>Tool - Genera Scripts Homologación de la red</span></h3>
+							<a class="btn btn-primary" href="#" th:href="@{/baseline-5g}" >Ingresar al módulo</a>
+						</div>
+					</div>
+					
+				</div>
+				
+			</div>
+		
+		<h3 style="margin-top: 15px;margin-bottom: -10px;font-size: 21px;padding-left: 12px;">▶ Baseline 5G NSA (4G Side)</h3>
+		
+			<div class="row-fluid stats-box">
+			
+				<div class="span6">	
+				
+					<div class="box_home">
+						<div class="box_img">
+							<img src="../static/images/baseline-imagen-2.jpg" th:src="@{/images/baseline-imagen-2.jpg}"/>
+						</div>		
+						<div class="box_content">	
+							<h3>BASELINE DASHBOARD 5G NSA<br><span>Resumen Parametros Homologados</span></h3>
+							<a class="btn btn-primary" href="#" th:href="@{/baseline-graph-5g-nsa/dash}" >Ingresar al módulo</a>
+						</div>
+					</div>
+				
+				</div>
+				
+				<div class="span6">	
+				
+					<div class="box_home">
+						<div class="box_img">
+							<img src="../static/images/cambios-radio.jpg" th:src="@{/images/cambios-radio.jpg}"/>
+						</div>
+						<div class="box_content">
+							<h3>COMPARADOR BASELINE 5G NSA<br><span>Tool - Genera Scripts Homologación de la red</span></h3>
+							<a class="btn btn-primary" href="#" th:href="@{/baseline-5g-nsa}" >Ingresar al módulo</a>
+						</div>
+					</div>
+					
+				</div>
+				
+			</div>
+		
+		<h3 style="margin-top: 35px;">Administradores</h3>
+		
+		<div class="row-fluid stats-box">
+			
+			<div class="span6">
+				<div class="box_home">
+					<div class="box_img">
+						<img src="../static/images/baseline-imagen-3.jpg" th:src="@{/images/baseline-imagen-3.jpg}"/>
+					</div>
+					<div class="box_content">
+						<h3>BASELINE - PLANIFICACIÓN</h3>
+						<a class="btn btn-primary" href="#" th:href="@{/baseline-admin}" >Ingresar al módulo</a>
+					</div>
+				</div>
+			</div>
+			
+			<div class="span6">
+				<div class="box_home">
+					<div class="box_img">
+						<img src="../static/images/baseline-imagen-3.jpg" th:src="@{/images/capas-mapa-3.jpg}"/>
+					</div>
+					<div class="box_content">
+						<h3>CAPAS Y ARCHIVOS - PLANIFICACIÓN</h3>
+						<a class="btn btn-primary" href="#" th:href="@{/mapas/listar-admin}" >Ingresar al módulo</a>
+					</div>
+				</div>
+			</div>
+			
+		
+		</div>
+		
+		
+	</div>
+</div>    
+
+<div id="content" style="display:none;">
+  <div id="browser-window">
+
+    <div id="browser-window-body">      
+      <div id="browser-window-content">                  
+        <div id="tool-implementation">
+          
+					<div id="tool-bcrypt">
+					  <div class="field">
+					    <div>
+					      Password: <input id="bcrypt-pass">
+					      Rounds: <input id="bcrypt-rounds" value="10" size="5">
+					    </div>
+					    <div>
+					    </div>
+					  </div>
+					  <div class="field">
+					    <div id="action-error" style="display: none;"></div>
+					  </div>
+					  <div class="field">
+					    <input type="submit" value="Bcrypt!" id="bcrypt-submit"> 
+					  </div>
+					  <div class="field">
+					    <textarea id="bcrypt-text"></textarea>
+					  </div>
+					</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+	
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/bcrypt/tools.js}"></script>
+<script type="text/javascript" th:src="@{/js/bcrypt/bcrypt.js}"></script>
+<script type="text/javascript" th:src="@{/js/bcrypt/tools-impl.js}"></script>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Acceso Denegado</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+ 
+<body>
+    <!-- Include _menu.html -->
+    <!-- <th:block th:include="loginBase/_menu"></th:block> -->
+
+    <h3 th:if="${message != null}" th:utext="${message}" style="color: red;"></h3>
+ 
+    <div th:if="${userInfo != null}" th:utext="${userInfo}"></div>
+     <div class="error-page">
+     
+		<div class="container">
+			<a class="btn btn-primary" href="#" 
+				th:href="@{'/home'}" role="button">
+				Regresar al inicio</a>
+		</div>
+	</div>
+
+</body>
+ 
+</html>

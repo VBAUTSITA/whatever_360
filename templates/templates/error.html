@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">      
+<head th:replace="layouts/base::head">
+</head>
+
+<body>
+
+
+<div class="error-page">
+	<div class="container">
+		<h1>403</h1>
+		
+		<h2>Acceso Denegado</h2>
+		<p>No cuenta con los privilegios para acceder a esta página.</p>
+		<a class="btn btn-primary" href="#" 
+			th:href="@{'/home'}" role="button">
+			Regresar al inicio</a>
+			
+		
+	</div>
+</div>
+		
+<div  th:replace="layouts/base::footer"></div>
+
+
+
+
+</body>
+</html>

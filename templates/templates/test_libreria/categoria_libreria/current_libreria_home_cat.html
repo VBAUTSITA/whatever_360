@@ -1,0 +1,210 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head th:replace="layouts/base::head">
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+<script>
+function getCsrf(){
+  var tMeta = document.querySelector('meta[name="_csrf"]');
+  var hMeta = document.querySelector('meta[name="_csrf_header"]');
+  return { token: tMeta ? tMeta.content : null, header: hMeta ? hMeta.content : null };
+}
+</script>
+</head>
+
+
+<link rel="stylesheet" th:href="@{/css/coopilot.css}"/>
+
+<body>
+
+<header th:replace="layouts/base_libreria::header"></header>
+
+<div class="main">
+<div class="container">
+
+<section style="text-align:center;margin-top:20px">
+<h2 style="font-size:36px;font-weight:800">
+CATEGORÍAS DE LA BIBLIOTECaAA
+</h2>
+</section>
+
+<section class="explorer">
+
+<div id="tree" class="tree"></div>
+
+</section>
+
+</div>
+</div>
+
+<div th:replace="layouts/base::footer"></div>
+
+<script th:inline="javascript">
+const ALL_FILES = /*[[${archivos}]]*/ [];
+</script>
+<script th:inline="javascript">
+const BASE_PATH = /*[[@{/}]]*/ "";
+</script>
+
+<script>
+
+function buildTree(){
+
+const root={};
+
+ALL_FILES.forEach(file=>{
+
+if(!file.categoria_libreria_final) return;
+
+const parts=file.categoria_libreria_final.split("/");
+
+let current=root;
+
+parts.forEach((p,i)=>{
+
+if(!current[p])
+current[p]={_files:[],_children:{}};
+
+if(i===parts.length-1)
+current[p]._files.push(file);
+
+current=current[p]._children;
+
+});
+
+});
+
+return root;
+
+}
+
+function createNode(name, fullPath){
+
+const node=document.createElement("div");
+node.className="tree-node";
+
+node.dataset.category=fullPath;
+
+const header=document.createElement("div");
+header.className="tree-header";
+header.innerHTML="📁 "+name;
+
+header.onclick=()=>node.classList.toggle("open");
+
+/* drag over highlight */
+header.addEventListener("dragover",e=>{
+e.preventDefault();
+header.style.background="#1e293b";
+});
+
+header.addEventListener("dragleave",()=>{
+header.style.background="";
+});
+
+/* drop upload */
+header.addEventListener("drop",e=>{
+
+console.log("DROP EVENT TRIGGERED");
+
+e.preventDefault();
+header.style.background="";
+
+const files=e.dataTransfer.files;
+
+console.log("FILES:",files);
+
+if(!files.length){
+console.log("NO FILES DETECTED");
+return;
+}
+
+const file=files[0];
+
+console.log("FILE NAME:",file.name);
+
+const formData=new FormData();
+formData.append("archivo",file);
+formData.append("descripcion_archivo_libreria","drag upload");
+formData.append("usuario_libreria","user");
+formData.append("fecha_carga",new Date().toISOString());
+formData.append("categoria_libreria_final",node.dataset.category);
+
+console.log("CATEGORY:",node.dataset.category);
+
+
+/* ADD THESE TWO LINES HERE */
+const token = document.querySelector('meta[name="_csrf"]').content;
+const headerName = document.querySelector('meta[name="_csrf_header"]').content;
+
+
+/* MODIFY FETCH */
+(function(){ const _c=getCsrf(); return fetch("/web-tracker/archivador/subir",{method:"POST", headers: (_c.token && _c.header) ? {[_c.header]: _c.token} : {}, body: formData}); })()
+.then(r=>{
+console.log("UPLOAD RESPONSE:",r.status);
+return r.text();
+})
+.then(()=>{
+console.log("UPLOAD FINISHED   reloading in 2 seconds");
+setTimeout(()=>location.reload(),8000);
+})
+.catch(err=>{
+console.error("UPLOAD FAILED:",err);
+});
+
+});
+
+
+
+node.appendChild(header);
+
+const children=document.createElement("div");
+children.className="tree-children";
+
+node.appendChild(children);
+
+return {node,children};
+
+}
+
+function renderTree(data,parent,path=""){
+
+Object.keys(data).forEach(cat=>{
+
+const obj=data[cat];
+
+const fullPath = path ? path + "/" + cat : cat;
+
+const {node,children}=createNode(cat,fullPath);
+
+parent.appendChild(node);
+
+renderTree(obj._children,children,fullPath);
+
+obj._files.forEach(file=>{
+
+const row=document.createElement("div");
+row.className="tree-file";
+
+row.innerHTML =
+"📄 " + file.nombre_archivo_libreria +
+`<a style="float:right"
+href="/web-tracker${file.archivo_libreria}">
+Descargar</a>`;
+
+children.appendChild(row);
+
+});
+
+});
+
+}
+
+const treeData=buildTree();
+renderTree(treeData,document.getElementById("tree"));
+
+</script>
+
+</body>
+</html>

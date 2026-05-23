@@ -1,0 +1,487 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head th:replace="layouts/base::head"></head>
+
+<link rel="stylesheet" th:href="@{/css/coopilot.css}"/>
+<style>
+  /* Make "Buscar:" visible */
+  #lista_capas_files_wrapper .dataTables_filter label {
+      color: white !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+  }
+
+  /* Make search box white and readable */
+  #lista_capas_files_wrapper .dataTables_filter input[type="search"] {
+      background: white !important;
+      color: black !important;
+      border: 2px solid #da272c !important;
+      padding: 6px 10px !important;
+      border-radius: 8px !important;
+      height: 34px !important;
+  }
+
+  /* On focus */
+  #lista_capas_files_wrapper .dataTables_filter input[type="search"]:focus {
+      outline: none !important;
+      border-color: #ff4f4f !important;
+      box-shadow: 0 0 4px rgba(255,0,0,0.4) !important;
+  }
+</style>
+<body>
+<header th:replace="layouts/base_libreria::header"></header>
+
+<div class="main">
+<div class="container">
+
+<section style="text-align:center; margin-top:20px;">
+  <h2 style="font-size:38px;font-weight:800;">CARPETAS DE LA BIBLIOTECA</h2>
+</section>
+
+<!-- ================= TREE ================= -->
+<section class="explorer">
+<div class="tree">
+
+<!-- ========= PLANIFICACION ========= -->
+<div class="tree-node">
+  <div class="tree-header" onclick="toggleNode(this)">
+    <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Planificación e Ingeniería
+  </div>
+  <div class="tree-children">
+    <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'planificacion')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Topología &amp; Geolocalización
+      </div>
+      <div class="tree-files"></div>
+    </div>
+    
+     <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'planificacion')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Estándares &amp; Baselines
+      </div>
+      <div class="tree-files"></div>
+    </div>
+    
+     <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'datasheet')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Datasheets
+      </div>
+      <div class="tree-files"></div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- ========= OPTIMIZACION ========= -->
+<div class="tree-node">
+  <div class="tree-header" onclick="toggleNode(this)">
+    <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Optimización y Performance
+  </div>
+  <div class="tree-children">
+    <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'optimizacion','optimizacion-1')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 KPIs
+      </div>
+      <div class="tree-files"></div>
+    </div>
+      <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'optimizacion-2')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Interferencias
+      </div>
+      <div class="tree-files"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========= REGULATORIO ========= -->
+<div class="tree-node">
+  <div class="tree-header" onclick="toggleNode(this)">
+    <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Regulatorio y Gestión
+  </div>
+  <div class="tree-children">
+  
+  
+  
+  
+  
+    
+    
+    
+    
+    <div class="tree-node level-2">
+    <div class="tree-header" onclick="toggleNode(this)">
+        <img class="arrow" th:src="@{/images/chevron_right.png}" /> 📁 Obligaciones & Reportes
+    </div>
+
+    <div class="tree-children">
+        
+        <!-- DIRECTORIO A -->
+        <div class="tree-node level-3">
+            <div class="tree-header" onclick="toggleFiles(this,'regulatorio-1-1')">
+                <img class="arrow" th:src="@{/images/chevron_right.png}" /> 📁 COI 4G
+            </div>
+            <div class="tree-files"></div>
+        </div>
+
+        <!-- DIRECTORIO B -->
+        <div class="tree-node level-3">
+            <div class="tree-header" onclick="toggleFiles(this,'regulatorio-1-2')">
+                <img class="arrow" th:src="@{/images/chevron_right.png}" /> 📁 COI 5G
+            </div>
+            <div class="tree-files"></div>
+        </div>
+
+    </div>
+</div>
+
+    
+    
+    
+    
+    <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'regulatorio-2')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Energía
+      </div>
+      <div class="tree-files"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========= PROYECTOS CORPORATIVOS ========= 
+<div class="tree-node">
+  <div class="tree-header" onclick="toggleNode(this)">
+    <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Proyectos coorporativos
+  </div>
+  <div class="tree-children">
+    <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'corporativo-1')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Minera Chancay
+      </div>
+      <div class="tree-files"></div>
+    </div>
+     <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'corporativo-2')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Minera Chinalco
+      </div>
+      <div class="tree-files"></div>
+    </div>
+    <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'corporativo-3')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Minera Las Bambas
+      </div>
+      <div class="tree-files"></div>
+    </div>
+    <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'corporativo-4')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Minera Poderosa
+      </div>
+      <div class="tree-files"></div>
+    </div>
+  </div>
+</div> -->
+
+
+<!-- ========= Soluciones privadas ========= -->
+<div class="tree-node">
+  <div class="tree-header" onclick="toggleNode(this)">
+    <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Soluciones privadas
+  </div>
+  <div class="tree-children">
+    <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'sol_privada-1')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Minera Southern
+      </div>
+      <div class="tree-files"></div>
+    </div>
+     <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'sol_privada-2')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Minera Antamina
+      </div>
+      <div class="tree-files"></div>
+    </div>
+    <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'sol_privada-3')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Minera Boroo
+      </div>
+      <div class="tree-files"></div>
+    </div>
+    <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'sol_privada-4')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Minera La Poderosa
+      </div>
+      <div class="tree-files"></div>
+    </div>
+    <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'sol_privada-5')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Minera Las Bambas
+      </div>
+      <div class="tree-files"></div>
+    </div>
+    <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'sol_privada-6')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Chinalco
+      </div>
+      <div class="tree-files"></div>
+    </div>
+    
+      <div class="tree-node level-2">
+      <div class="tree-header" onclick="toggleFiles(this,'sol_privada-7')">
+        <img class="arrow" th:src="@{/images/chevron_right.png}"/> 📁 Chancay
+      </div>
+      <div class="tree-files"></div>
+    </div>
+    
+  </div>
+</div>
+
+</div>
+
+
+</section>
+
+<!-- ###################################################### -->
+<table id="lista_capas_files" class="display" style="width:100%;">
+    <thead>
+      <tr>
+        <th style="display:none;">Id Archivo</th>
+        <th>Nombre Archivo</th>
+        <th>Descripción Archivo</th>
+        <th>Usuario</th>
+        <th>Fecha Carga</th>
+        <th>Categoria</th>
+        <th>Descargar</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr th:each="archivo : ${archivos}">
+        <td th:text="${archivo.id_libreria}" style="display:none;"></td>
+        <td th:text="${archivo.nombre_archivo_libreria}"></td>
+        <td th:text="${archivo.descripcion_archivo_libreria}"></td>
+        <td th:text="${archivo.usuario_libreria}"></td>
+        <td th:text="${archivo.fecha_carga}"></td>
+        <td th:text="${archivo.categoria_libreria}" style="text-transform:uppercase;"></td>
+        <td>
+                <a th:href="@{/archivador/descargar/{categoria}/{id}(
+				        categoria=${archivo.categoria_libreria},
+				        id=${archivo.id_libreria}
+				)}">Descargar</a>
+        </td>
+      </tr>
+    </tbody>
+
+    <tfoot style="display:none;">
+      <tr>
+        <th style="display:none;">Id Archivo</th>
+        <th>Nombre Archivo</th>
+        <th>Descripción Archivo</th>
+        <th>Usuario</th>
+        <th>Fecha Carga</th>
+        <th>Categoria</th>
+        <th>Descargar</th>
+      </tr>
+    </tfoot>
+  </table>
+
+<!-- ================= TABLE ================= 
+<table id="lista_capas_files" class="display" style="width:100%">
+<thead>
+<tr>
+  <th style="display:none">ID</th>
+  <th>Nombre</th>
+  <th>Descripcion</th>
+  <th>Usuario</th>
+  <th>Fecha</th>
+  <th>Categoria</th>
+  <th>Descargar</th>
+</tr>
+</thead>
+
+<tbody>
+<tr th:each="archivo : ${archivos}">
+  <td th:text="${archivo.id_libreria}" style="display:none"></td>
+  <td th:text="${archivo.nombre_archivo_libreria}"></td>
+  <td th:text="${archivo.descripcion_archivo_libreria}"></td>
+  <td th:text="${archivo.usuario_libreria}"></td>
+  <td th:text="${archivo.fecha_carga}"></td>
+  <td th:text="${archivo.categoria_libreria}"></td>
+  <td>
+    <a th:href="@{/archivador/descargar/{id}(id=${archivo.id_libreria})}">
+      Descargar
+    </a>
+  </td>
+</tr>
+</tbody>
+</table>		-->
+
+
+</div>
+</div>
+
+<div th:replace="layouts/base::footer"></div>
+
+<!-- ================= SCRIPTS ================= -->
+<!-- ===== CONTEXT PATH (CRITICAL) ===== -->
+<!-- Scripts necesarios de DataTables -->
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+<!-- 
+<script>
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#lista_capas_files tfoot th').each(function () {
+        var title = $(this).text();
+        $(this).html('<input type="text" placeholder="Search '+title+'" />');
+    });
+
+    // DataTable initialization
+    var table = $('#lista_capas_files').DataTable({
+        "aaSorting": [0, 'desc'],
+        dom: 'Bfrtip',
+        buttons: ['copy'],
+        scrollY: "400px",
+        scrollX: true,
+        scrollCollapse: true,
+        fixedColumns: true
+    });
+
+    // Apply the search
+    table.columns().every(function () {
+        var that = this;
+        $('input', this.footer()).on('keyup change clear', function () {
+            if (that.search() !== this.value) {
+                that.search(this.value).draw();
+            }
+        });
+    });
+});
+</script>-->
+
+
+<script>
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#lista_capas_files tfoot th').each(function () {
+        var title = $(this).text();
+        $(this).html('<input type="text" placeholder="Search '+title+'" />');
+    });
+
+    // DataTable initialization
+    var table = $('#lista_capas_files').DataTable({
+        "aaSorting": [0, 'desc'],
+        dom: 'Bfrtip',
+        buttons: ['copy'],
+        scrollY: "400px",
+        scrollX: true,
+        scrollCollapse: true,
+        fixedColumns: true
+    });
+
+    // Apply the search
+    table.columns().every(function () {
+        var that = this;
+        $('input', this.footer()).on('keyup change clear', function () {
+            if (that.search() !== this.value) {
+                that.search(this.value).draw();
+            }
+        });
+    });
+});
+</script>
+
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+const CONTEXT_PATH = /*[[@{/}]]*/ '';
+const ALL_FILES = /*[[${archivos}]]*/ [];
+/*]]>*/
+</script>
+
+<script>
+/* =========================
+   LEVEL 1 TOGGLE
+   ========================= */
+function toggleNode(header) {
+  header.parentElement.classList.toggle("open");
+}
+
+/* =========================
+   LEVEL 2 TOGGLE + DOWNLOAD
+   ========================= */
+   function toggleFiles(header, ...categorias) {
+	   const node = header.parentElement;
+	   const container = node.querySelector(".tree-files");
+
+	   node.classList.toggle("open");
+
+	   if (container.dataset.loaded === "true") {
+	     container.style.display =
+	       container.style.display === "none" ? "block" : "none";
+	     return;
+	   }
+
+	   const files = ALL_FILES.filter(f =>
+	     categorias.includes(f.categoria_libreria)
+	   );
+
+	   container.innerHTML = files.map(f => `
+	     <div class="tree-file"
+	          style="display:flex; align-items:center; gap:12px; padding:6px 0;">
+	       📄 <strong>${f.nombre_archivo_libreria}</strong>
+	       <a style="margin-left:auto" class="button-link"
+	           href="${CONTEXT_PATH}archivador/descargar/${f.categoria_libreria}/${f.id_libreria}">
+	           Descargar
+	        </a>
+	     </div>
+	   `).join("");
+
+	   container.dataset.loaded = "true";
+	   container.style.display = "block";
+	 }
+
+
+/*
+function toggleFiles(header, categoria) {
+  const node = header.parentElement;
+  const container = node.querySelector(".tree-files");
+
+  node.classList.toggle("open");
+
+  if (container.dataset.loaded === "true") {
+    container.style.display =
+      container.style.display === "none" ? "block" : "none";
+    return;
+  }
+
+  const files = ALL_FILES.filter(f =>
+    f.categoria_libreria === categoria
+  );
+
+  container.innerHTML = files.map(f => `
+    <div class="tree-file"
+         style="display:flex; align-items:center; gap:12px; padding:6px 0;">
+         📄<strong>${f.nombre_archivo_libreria}</strong>
+		
+      <a style="margin-left:auto" class="button-link"
+         href="${CONTEXT_PATH}archivador/descargar/${f.id_libreria}">
+         Descargar
+      </a>
+    </div>
+  `).join("");
+
+  container.dataset.loaded = "true";
+  container.style.display = "block";
+}*/
+
+
+</script>
+
+</body>
+</html>

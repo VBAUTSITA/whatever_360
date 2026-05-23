@@ -1,0 +1,174 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">      
+<head th:replace="layouts/base::head">
+
+</head>
+
+<body class="login-page">
+
+      <!-- Include _menu.html -->
+       <!-- <th:block th:include="loginBase/_menu"></th:block> -->     
+        
+      <div class="box-login">   
+		<div class="container">
+			<div class="box_register">
+				<div class="box_center tool-bcrypt">
+					
+				
+					<form action="#" th:object="${cuentasFormSave}" th:action="@{/account}" 
+							method="post" class="form">
+								
+										
+						<h2>CREAR CUENTA</h2>	
+			
+							<div class="cols" style="width: 100%;">
+							
+								<div class="form-group codigo_user">
+									<label for="codigo_usuario">Código Usuario*</label>
+									<input th:field="*{codigo_usuario}" class="form-control" id="codigo_usuario" required="required"/>		
+								</div>
+								
+								<div class="form-group">
+									<label for="nombre_usuario">Nombres Completos*</label>
+									<input th:field="*{nombre_usuario}" class="form-control" id="nombre_usuario" required="required"/>
+								</div>
+								
+								<div class="form-group">
+									<label for="apellidos_usuario">Apellidos Completos*</label>
+									<input th:field="*{apellidos_usuario}" class="form-control" id="apellidos_usuario" required="required"/>
+								</div>
+								
+								<div class="form-group">
+									<label for="correo_usuario">Correo Electrónico*</label>
+									<input th:field="*{correo_usuario}" class="form-control" id="correo_usuario" required="required"/>
+								</div>
+								
+				
+								<div class="field form-group">
+									<label for="clave_usuario">Contraseña*</label>
+									<input th:field="*{clave_usuario}" class="form-control" id="bcrypt-pass"/>
+								</div>
+								
+								<div class="field form-group" style="color: #fff;">
+								<input required type="checkbox" value="Bcrypt!" id="bcrypt-submit"/> Soy Colaborador
+								</div>
+								
+								<div class="field form-group" style="display: none;">
+									<label for="clave_usuario">Contraseña BCRYPT*</label>
+									<input th:field="*{clave_usuario_bcry}" id="bcrypt-text"/>
+								</div>
+								
+							</div>
+					
+							<button type="submit" class="btn btn-primary">Crear Cuenta</button>
+					</form>	
+
+					<!-- <div id="tool-bcrypt">
+					  <div class="field">
+					    <div>
+					      Contraseña: <input type="password" id="bcrypt-pass">
+					      Rondas: <input type="number" id="bcrypt-rounds" value="10" size="5">
+					    </div>
+					    <div>
+					      <input type="checkbox" value="Bcrypt!" id="bcrypt-submit" /> Hashear Contraseña					      
+					    </div>
+					  </div>
+					  <div class="field">
+					    <div id="action-error" style="display: none;"></div>
+					  </div>
+					  <div class="field">
+					    <textarea id="bcrypt-text"></textarea>
+					  </div>
+					</div>-->
+
+				</div>							
+			</div>
+		</div>
+		
+					
+      </div> 
+		
+<div  th:replace="layouts/base::footer"></div>
+<!--<script language="JavaScript" type="text/javascript">
+        setTimeout("window.history.go(-1)",0);
+</script>-->
+
+<style>
+.readonly {
+background-color: #e9ecef;
+cursor: not-allowed;
+}
+</style>
+<script type="text/javascript" th:src="@{/js/bcrypt/tools.js}"></script>
+<script type="text/javascript" th:src="@{/js/bcrypt/bcrypt.js}"></script>
+<script type="text/javascript" th:src="@{/js/bcrypt/tools-impl.js}"></script>
+<script>
+const bcryptPassInput = document.getElementById('bcrypt-pass');
+const bcryptRoundsInput = document.getElementById('bcrypt-rounds');
+const bcryptTextInput = document.getElementById('bcrypt-text');
+const bcryptActionCheckbox = document.getElementById('bcrypt-submit');
+const actionError = document.getElementById('action-error');
+
+bcryptActionCheckbox.addEventListener('change', function() {
+  if (this.checked) {
+    const password = bcryptPassInput.value;
+    const rounds = parseInt(bcryptRoundsInput.value);
+
+    // Implemente su lógica de hash de Bcrypt aquí
+    // (por ejemplo, usando una biblioteca como bcrypt.js)
+    // ...
+
+    if (hashedPassword) { // Reemplazar con el resultado real del hash
+      bcryptTextInput.value = hashedPassword;
+      actionError.style.display = 'none';
+    } else {
+      actionError.textContent = 'Error: Falló el Hashing.';
+      actionError.style.display = 'block';
+    }
+  } else {
+    // Limpiar el área de texto si la casilla de verificación no está marcada
+    bcryptTextInput.value = '';
+  }
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+const checkbox = document.getElementById('bcrypt-submit');
+const inputs = document.querySelectorAll('.form-control');
+
+checkbox.addEventListener('change', function() {
+if (checkbox.checked) {
+let allFieldsFilled = true;
+
+inputs.forEach(input => {
+if (input.value.trim() === '') {
+allFieldsFilled = false;
+}
+});
+
+if (!allFieldsFilled) {
+alert('Todos los campos deben estar llenos.');
+checkbox.checked = false;
+} else {
+inputs.forEach(input => {
+input.setAttribute('readonly', 'readonly');
+input.classList.add('readonly');
+});
+}
+} else {
+inputs.forEach(input => {
+input.removeAttribute('readonly');
+input.classList.remove('readonly');
+});
+}
+});
+});
+</script>
+</body>
+</html>

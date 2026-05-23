@@ -1,0 +1,185 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      
+<head th:replace="layouts/base::head">
+</head>
+<body>
+<header th:replace="layouts/base::header"></header>
+
+<div class="miga breadcrumb">
+	<div class="container">
+		<a class="btn btn-primary" href="#" 
+			th:href="@{'/seguimiento/list/'}" role="button">
+			Regresar</a>
+	</div>
+</div>
+
+<div class="main">	
+	<div class="container">
+		<div class="title-main crud">
+			<h2>Actualizar Sitio 
+				<div style="display: inline-block" th:object="${seguimientoFormUpdate}" 
+				method="get">		
+						<span th:text="*{code_site}" class="form-control" id="code_site"></span>
+				</div>	
+			</h2>
+		</div>
+		<form action="#" th:object="${seguimientoFormUpdate}" th:action="@{/seguimiento/actualiza}" 
+				method="post" class="form">
+			
+			<!-- <input type="hidden" th:object="${seguimientoId}" /> -->
+			<div class="form_cols">
+				<div class="cols" style="width: 100%;">
+					<div class="form-group">
+						<label for="estado_cambio">ESTADO DE CAMBIO</label>
+						<select th:field="*{estado_cambio}" class="form-control" id="estado_cambio">				    
+						        <option selected="selected" value="Encontrado">Encontrado</option>
+						        <option value="Realizado">Realizado</option>				    
+						</select>	
+						<span class="estado_cambio_user">Por el Usuario</span>			
+					</div>
+				</div>
+			</div>
+					
+			<div class="form_cols update_col">
+				<div class="cols">
+					<div class="form-group" style="display: none;">
+						<!-- <label for="code_site">Sitio ID</label> -->
+						<input type="hidden" th:field="*{site_id}" class="form-control" id="site_id" />
+					</div>
+			
+					<div class="form-group">
+						<label for="cellname">CELLNAME</label>
+						<input readonly="readonly" th:field="*{cellname}" class="form-control" id="cellname" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="code_site">SITIO</label>
+						<input readonly="readonly" th:field="${seguimientoFormUpdate.code_site}" class="form-control" id="code_site" required="required"/>
+					</div>
+			
+					<div class="form-group">
+						<label for="site_address">SITE_ADDRESS</label>
+						<input readonly="readonly" th:field="*{site_address}" class="form-control" id="site_address" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="longitud">LONGITUD</label>
+						<input th:field="*{longitud}" class="form-control" id="longitud"/>
+					</div>
+			
+					<div class="form-group">
+						<label for="latitud">LATITUD</label>
+						<input th:field="*{latitud}" class="form-control" id="latitud"/>
+					</div>
+			
+					<div class="form-group">
+						<label for="sector">SECTOR</label>
+						<input readonly="readonly" th:field="*{sector}" class="form-control" id="sector" />				
+					</div>
+					
+					<div class="form-group">
+						<label for="band">BANDA</label>
+						<input readonly="readonly" th:field="*{band}" class="form-control" id="band" />			
+					</div>
+					
+					<div class="form-group">
+						<label for="tecnologia">TECNOLOGIA</label>
+						<input readonly="readonly" th:field="*{tecnologia}" class="form-control" id="tecnologia" />			
+					</div>
+					
+					<div class="form-group fecha_cambio">
+						<label class="label_title" for="date_change">ULTIMA FECHA / HORA CAMBIO</label>
+						<label th:text="*{#dates.format(date_change, 'dd-MM-yyyy HH:mm:ss a')}" class="fecha"></label>
+					</div>
+					
+				</div>
+				<div class="cols">
+					<!--<div class="form-group">
+						<label for="band">BANDA</label>
+						<input th:field="*{band}" class="form-control" id="band" required="required"/>				
+					</div>-->
+					
+
+					<div class="form-group">
+						<label for="tilt_electric_field">TILT ELECTRICO</label>
+						<input th:field="*{tilt_electric_field}" class="form-control" id="tilt_electric_field" />
+					</div>
+					
+					<div class="form-group">
+						<label for="azimuth">AZIMUTH</label>
+						<input th:field="*{azimuth}" class="form-control" id="azimuth" />
+					</div>
+					
+					<div class="form-group">
+						<label for="height">ALTURA</label>
+						<input th:field="*{height}" class="form-control" id="height" />
+					</div>
+					
+					<div class="form-group">
+						<label for="tilt_mecanic_field">TILT MECANICO</label>
+						<input th:field="*{tilt_mecanic_field}" class="form-control" id="tilt_mecanic_field" />
+					</div>
+					
+					<div class="form-group">
+						<label for="tipo_antena">TIPO ANTENA</label>
+						<input th:field="*{tipo_antena}" class="form-control" id="tipo_antena" />
+					</div>
+					
+					<div class="form-group">
+						<label for="potencia">POTENCIA</label>
+						<input th:field="*{potencia}" class="form-control" id="potencia" />
+					</div>	
+					
+					<div class="form-group">
+						<label for="modo_transmision_celda">MODO TRANSMISION CELDA</label>
+						<input th:field="*{modo_transmision_celda}" class="form-control" id="modo_transmision_celda" />
+					</div>
+					
+					
+					
+
+					
+				</div>
+				<div class="cols">
+					
+					<div class="form-group">
+						<label for="logic_changes">CAMBIOS LOGICOS</label>
+						<textarea th:field="*{logic_changes}" class="form-control" id="logic_changes"></textarea>
+					</div>
+				
+					<div class="form-group">
+						<label for="cambio_coment">COMENTARIO DEL CAMBIO</label>
+						<textarea th:field="*{cambio_coment}" class="form-control" id="cambio_coment"></textarea>
+					</div>
+					
+				</div>	
+			</div>	
+							
+			<!-- <div class="form-group">
+				<label for="date_change">ULTIMA FECHA / HORA CAMBIO</label>
+				<input th:field="*{date_change}" class="form-control" id="date_change" />
+			</div>-->
+			
+			<div class="form-group usuario_keep">
+				<label for="usuario">USUARIO</label>
+				<select th:field="*{usuario}" class="form-control" id="tecnologia">				    
+				        <option selected="selected" th:value="${#request.userPrincipal.name}">
+				        	<span th:utext="${#request.userPrincipal.name}"></span>	
+				        </option>			    
+				</select>	
+				<!-- <input th:field="*{usuario}" class="form-control" id="usuario" required="required" />
+				<span th:utext="${#request.userPrincipal.name}"></span>		 -->						
+			</div>
+	
+			<button type="submit" class="btn btn-primary">ACTUALIZAR</button>
+		</form>	
+	</div>
+</div>
+		
+<div  th:replace="layouts/base::footer"></div>
+
+</body>
+</html>

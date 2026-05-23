@@ -1,0 +1,184 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head th:replace="layouts/base::head"></head>
+
+<body class="home_base">
+<header th:replace="layouts/base_home::header"></header>
+
+<style>
+    .section-main {
+        min-height: calc(100vh - 140px);
+        padding: 28px 0 50px;
+        position: relative;
+        background: #000 url('../images/bg-home.jpg') no-repeat center top fixed;
+        background-size: cover;
+    }
+
+    .section-main:before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.62);
+        pointer-events: none;
+    }
+
+    .section-container {
+        position: relative;
+        z-index: 2;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 30px;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        margin: 18px auto 42px;
+    }
+
+    .section-title .line {
+        width: 110px;
+        height: 2px;
+        background: rgba(255,255,255,0.85);
+    }
+
+    .section-title h2 {
+        margin: 0;
+        color: #fff;
+        font-size: 30px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .section-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(280px, 1fr));
+        gap: 34px;
+        justify-items: center;
+    }
+
+    .section-link {
+        text-decoration: none !important;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .section-circle {
+        width: 290px;
+        height: 290px;
+        border-radius: 50%;
+        border: 5px solid #c40000;
+        background: rgba(0,0,0,0.86);
+        box-shadow: 0 16px 34px rgba(0,0,0,0.45);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 24px 22px;
+        transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .section-link:hover .section-circle {
+        transform: translateY(-5px);
+        border-color: #ef2020;
+        box-shadow: 0 22px 40px rgba(0,0,0,0.55);
+    }
+
+    .section-circle-img {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 18px;
+    }
+
+    .section-circle-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+        display: block;
+    }
+
+    .section-circle-label {
+        color: #fff;
+        font-size: 24px;
+        line-height: 1.12;
+        font-weight: 700;
+        text-transform: uppercase;
+        max-width: 220px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+        .section-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-circle {
+            width: 250px;
+            height: 250px;
+        }
+
+        .section-circle-img {
+            width: 78px;
+            height: 78px;
+        }
+
+        .section-circle-label {
+            font-size: 20px;
+            max-width: 180px;
+        }
+
+        .section-title .line {
+            width: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<div class="main section-main">
+    <div class="section-container">
+
+        <div class="section-title">
+            <span class="line"></span>
+            <h2>Interferencia</h2>
+            <span class="line"></span>
+        </div>
+
+        <div class="section-grid">
+
+            <a class="section-link" href="#" th:href="@{/interferencia/list}">
+                <div class="section-circle">
+                    <div class="section-circle-img">
+                        <img src="../static/images/ico-interferencia-12.jpg" th:src="@{/images/ico-interferencia-12.jpg}" alt="Casos de Interferencia">
+                    </div>
+                    <div class="section-circle-label">Casos de Interferencia</div>
+                </div>
+            </a>
+
+            <a class="section-link" href="#" th:href="@{/interferencia/legal}">
+                <div class="section-circle">
+                    <div class="section-circle-img">
+                        <img src="../static/images/legal-interferencia.jpg" th:src="@{/images/legal-interferencia.jpg}" alt="Legal Interferencia">
+                    </div>
+                    <div class="section-circle-label">Legal Interferencia</div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+</div>
+
+<div th:replace="layouts/base::footer"></div>
+</body>
+</html>

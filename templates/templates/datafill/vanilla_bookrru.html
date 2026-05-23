@@ -1,0 +1,247 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head th:replace="layouts/base::head"></head>
+
+<body>
+<header th:replace="layouts/base::header"></header>
+
+<div class="main">
+<div class="container">
+
+    <!-- Breadcrumb / steps indicator matching the old portal style -->
+    <div class="title-main">
+        <h2>Book RRUUUUUU —
+            <span th:text="${general.siteName}"></span>
+            (<span th:text="${general.siteCode}"></span>)
+        </h2>
+        <small class="text-muted">
+            DataField ID: <strong th:text="${general.idDataField}"></strong>
+            &nbsp;|&nbsp; eNodeB: <strong th:text="${general.site4g}"></strong>
+            &nbsp;|&nbsp; TAC: <strong th:text="${general.tac}"></strong>
+        </small>
+    </div>
+
+    <!-- No Book General yet -->
+    <div th:if="${bookGeneral == null}" class="alert alert-warning mt-3">
+        Este DataField aún no tiene un registro Book RRU en la base de datos.
+        Completa el paso 2.5 en el portal DataFill original primero, luego
+        regresa aquí para gestionar las tarjetas adicionales.
+    </div>
+
+    <!-- Book General info (read-only, mirrors Step 2.5 fields) -->
+    <div th:if="${bookGeneral != null}">
+
+        <div class="card mt-3 mb-4">
+            <div class="card-header bg-danger text-white">
+                <strong>Datos Book RRU (generados desde portal DataFill)</strong>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">ADDRESS BOOK RRU</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.siteAddressBook}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">BASEBANDEQMID</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.basebandeqmid}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">HSN</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.hsn}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">HPN</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.hpn}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">SRN</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.srn}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">RCN</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.rcn}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">PS</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.ps}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">SECTOR ID</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.sectorId}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">SECTOREQMID</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.sectoreqmid}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">¿Cascada?</label>
+                        <input type="text" class="form-control" readonly
+                               th:value="${bookGeneral.cascada == 1 ? 'Sí' : 'No'}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+             TARJETAS sub-table  (the new multi-tarjeta section)
+        ══════════════════════════════════════════════════════════ -->
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <strong>TARJETAS (Baseband Cards)</strong>
+                <span class="badge bg-light text-dark"
+                      th:text="${#lists.size(tarjetas)} + ' tarjeta(s) configurada(s)'"></span>
+            </div>
+            <div class="card-body">
+
+                <!-- Existing tarjetas table -->
+                <table class="table table-sm table-bordered mb-3" id="tbl_tarjetas">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>SLOT</th>
+                            <th>BBWS</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody_tarjetas">
+                        <tr th:each="t : ${tarjetas}" th:id="'row_' + ${t.idBookTarjeta}">
+                            <td th:text="${t.slot}"></td>
+                            <td th:text="${t.bbws}"></td>
+                            <td>
+                                <button class="btn btn-danger btn-sm"
+                                        th:onclick="'eliminarTarjeta(' + ${t.idBookTarjeta} + ')'">
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(tarjetas)}">
+                            <td colspan="3" class="text-center text-muted">
+                                No hay tarjetas configuradas. Agregar una abajo.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Add tarjeta form (inline, max 6 slots 0-5) -->
+                <div class="row g-2 align-items-end" id="form_agregar"
+                     th:if="${#lists.size(tarjetas) < 6}">
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">SLOT</label>
+                        <select id="inp_slot" class="form-select">
+                            <!-- Only show slots not yet used -->
+                            <option value="0" th:unless="${#lists.contains(tarjetas.![slot], 0)}">0</option>
+                            <option value="1" th:unless="${#lists.contains(tarjetas.![slot], 1)}">1</option>
+                            <option value="2" th:unless="${#lists.contains(tarjetas.![slot], 2)}">2</option>
+                            <option value="3" th:unless="${#lists.contains(tarjetas.![slot], 3)}">3</option>
+                            <option value="4" th:unless="${#lists.contains(tarjetas.![slot], 4)}">4</option>
+                            <option value="5" th:unless="${#lists.contains(tarjetas.![slot], 5)}">5</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">BBWS</label>
+                        <select id="inp_bbws" class="form-select">
+                            <option value="LTE_FDD-1">LTE_FDD-1</option>
+                            <option value="LTE_FDD-2">LTE_FDD-2</option>
+                            <option value="LTE_TDD-1">LTE_TDD-1</option>
+                            <option value="NR_FDD-1">NR_FDD-1</option>
+                            <option value="NR_TDD-1">NR_TDD-1</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" onclick="agregarTarjeta()">
+                            + Agregar
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <div id="msg_tarjeta" class="text-danger small"></div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-2 py-1 small"
+                     th:if="${#lists.size(tarjetas) >= 6}">
+                    Máximo de 6 slots alcanzado (0–5).
+                </div>
+
+            </div><!-- card-body -->
+        </div><!-- card -->
+
+        <!-- Export button — same green style as old portal -->
+        <div class="d-flex justify-content-between mt-2 mb-5">
+            <a th:href="@{/datafill/list}" class="btn btn-secondary">← Volver a lista</a>
+
+            <a class="btn btn-success px-4"
+               th:href="@{'/datafill/' + ${general.idDataField} + '/exportBookRRU'}"
+               target="_blank">
+                TXT Book RRU
+            </a>
+        </div>
+
+    </div><!-- th:if bookGeneral != null -->
+
+</div><!-- container -->
+</div><!-- main -->
+
+<!-- Hidden fields for JS -->
+<input type="hidden" id="idDataField"   th:value="${general.idDataField}"/>
+<input type="hidden" id="idBookGeneral" th:if="${bookGeneral != null}"
+       th:value="${bookGeneral.idBookGeneral}"/>
+
+<div th:replace="layouts/base::footer"></div>
+
+<script>
+function agregarTarjeta() {
+    var idDataField   = document.getElementById('idDataField').value;
+    var idBookGeneral = document.getElementById('idBookGeneral').value;
+    var slot          = document.getElementById('inp_slot').value;
+    var bbws          = document.getElementById('inp_bbws').value;
+    var msg           = document.getElementById('msg_tarjeta');
+
+    fetch('/datafill/' + idDataField + '/bookrru/tarjeta/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'idBookGeneral=' + idBookGeneral +
+              '&slot=' + slot +
+              '&bbws=' + encodeURIComponent(bbws)
+    })
+    .then(function(r) {
+        if (r.ok) {
+            // Reload page to refresh the tarjeta table and slot options
+            window.location.reload();
+        } else {
+            return r.text().then(function(t) { msg.textContent = t; });
+        }
+    })
+    .catch(function(e) { msg.textContent = 'Error de conexión: ' + e; });
+}
+
+function eliminarTarjeta(idBookTarjeta) {
+    if (!confirm('¿Eliminar esta tarjeta?')) return;
+
+    fetch('/datafill/bookrru/tarjeta/' + idBookTarjeta + '/delete', {
+        method: 'POST'
+    })
+    .then(function(r) {
+        if (r.ok) {
+            window.location.reload();
+        } else {
+            return r.text().then(function(t) { alert('Error: ' + t); });
+        }
+    })
+    .catch(function(e) { alert('Error de conexión: ' + e); });
+}
+</script>
+
+</body>
+</html>

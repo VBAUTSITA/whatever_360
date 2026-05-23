@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<body>
+<header th:replace="layouts/base_interferencia::header"></header>
+
+<div class="main">
+	<div class="container">
+		
+		<div class="title-main">
+			<h2>Lista de casos de interferencias - Legal</h2>
+		</div>
+		
+        
+		<!-- <a class="btn btn-primary add_btn" href="#" 
+			th:href="@{'/interferencia/add/'}" role="button">
+			Agregar Nueva interferencia</a>--> 
+	</div>
+	
+<div class="box-lista-interferencia">
+ 
+		<table id="lista_interferencia" class="table table-striped table-bordered list_results" style="width:100%">
+			<thead>
+				<tr>
+					<th>NRO_DE_CASO</th>
+					<th>CODIGO_DEL_SITE</th>
+					<th>NOMBRE_DEL_SITE</th>
+					<th>TIPO_DE_INTERFERENCIA</th>
+					<th>BANDA_AFECTADA</th> 
+					<th>UBICACION</th>
+					<th>NIVEL_DE_INTERFERENCIA</th>
+					<th>COORDENADAS</th>
+					<th>INFORMACION_TECNICA</th>
+					<th>DEPARTAMENTO</th> 
+					<th>CARTA_DMR</th>
+				</tr>
+			</thead>
+			<tbody>					
+					<tr th:each="interferencia : ${interferencia_legal}">
+						<td th:text="${interferencia.nro_caso }"></td>
+						<td th:text="${interferencia.site_code }"></td>
+						<td th:text="${interferencia.name_site }"></td>
+						<td th:text="${interferencia.tipo_fuente }"></td>
+						<td th:text="${interferencia.banda_afectada }"></td>
+						<td th:text="${interferencia.direccion_interferencia }"></td>
+						<td th:text="${interferencia.nivel_interferencia }"></td>
+						<td th:text="${interferencia.coordenadas_interferencia }"></td>
+						<td th:text="${interferencia.ruta_archivo }"></td>
+						<td th:text="${interferencia.departamento }"></td>
+						<td th:text="${interferencia.carta_denuncia }"></td>
+					</tr>
+			</tbody>	
+			<tfoot style="display: none;">
+				<tr>
+					<th scope="row">NRO_DE_CASO</th>
+					<th scope="row">CODIGO_DEL_SITE</th>
+					<th scope="row">NOMBRE_DEL_SITE</th>
+					<th scope="row">TIPO_DE_INTERFERENCIA</th>
+					<th scope="row">BANDA_AFECTADA</th> 
+					<th scope="row">UBICACION</th>
+					<th scope="row">NIVEL_DE_INTERFERENCIA</th>
+					<th scope="row">COORDENADAS</th>
+					<th scope="row">INFORMACION_TECNICA</th>
+					<th scope="row">DEPARTAMENTO</th> 
+					<th scope="row">CARTA_DMR</th>
+				</tr>
+	        </tfoot> 
+		</table>
+		
+</div>
+
+</div>
+		
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+<script>
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#lista_interferencia tfoot th').each( function () {
+        var title = $(this).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+ 
+    // DataTable
+    var table = $('#lista_interferencia').DataTable({
+    	"aaSorting": [],
+    	dom: 'Bfrtip',
+        buttons: ['copy','csv'],
+        scrollY:        "400px",
+        scrollX:        true,
+        scrollCollapse: true,
+        fixedColumns:  true	  
+    });
+
+ 
+    // Apply the search
+    table.columns().every( function () {
+        var that = this;
+ 
+        $( 'input', this.footer() ).on( 'keyup change clear', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+    } );
+} );
+</script>
+
+</body>
+</html>

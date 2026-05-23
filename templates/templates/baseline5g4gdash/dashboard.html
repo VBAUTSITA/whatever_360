@@ -1,0 +1,534 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base_baseline::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<style>
+/*#chart1, #chart2, #chart3, #chart4, #chart5 {
+    padding-top: 20px;
+    padding-left: 10px;
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 22px 35px -16px rgba(0,0,0, 0.1);
+}*/
+.main_baseline .row-fluid > div > [id*="chart"]{
+    padding-top: 20px;
+    padding-left: 10px;
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 22px 35px -16px rgba(0,0,0, 0.1);
+}
+.main_baseline .row-fluid > div > [id*="chart"] .highcharts-title tspan{
+	font-family: "Verdana";
+    font-size: 22px;
+    font-weight: 700;
+    display: inline-block;
+	color: #222!important;
+	fill: #222!important;
+}
+.main_baseline .row-fluid > div > [id*="chart"] .highcharts-axis-title tspan{
+    font-size: 14px;
+    font-weight: 700;
+    display: inline-block;
+    color: #222!important;
+	fill: #222!important;
+	text-transform: uppercase;
+}
+#chart3 .apexcharts-legend {
+    margin-top: 54px!important;
+}
+#chart4{
+	padding: 0;	
+	padding-top: 15px;
+	padding-bottom: 15px;
+	margin-top: 15px;
+}
+#chart4 #tbody{
+	display: flex;
+}
+#chart4 .col_1{
+	width: 50%;
+    background-color: rgb(195 57 61 / 85%);
+}
+#chart4 .col_2{
+	width: 50%;
+	background-color: rgb(195 57 61 / 85%);
+}
+#chart4 #tbody div{
+    margin: 0 15px;
+    border-radius: 16px;
+    padding: 15px 15px;
+    color: #fff;
+}
+#chart4 #tbody h2{
+	font-family: "Verdana";
+    font-size: 25px;
+    font-weight: 700;
+    display: inline-block;
+}
+#chart4 #tbody h3{
+    font-family: "Verdana";
+    font-size: 20px;
+    font-weight: 600;
+    text-shadow: 1px 1px 1px #8b8b8b;
+    line-height: 20px;
+}
+#chart4 #tbody h4{
+	font-family: "Verdana";
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 17px;
+    margin-top: 9px;
+}
+#chart4 #tbody div img{
+    position: relative;
+    top: -5px;
+    margin-right: 10px;
+    filter: brightness(0) invert(1);
+}
+</style>
+<style>
+.apexcharts-tooltip {
+pointer-events: auto !important;
+}
+.apexcharts-xaxistooltip, .apexcharts-yaxistooltip{
+pointer-events: auto !important;
+}
+</style>
+<body>
+<header th:replace="layouts/base_baseline5g4g::header"></header>
+<div class="main main_baseline">
+	<div class="container">
+	
+		
+		<div class="title-main">
+			<h2>DASHBOARD BASELINE 5G NSA (4G Side)</h2>
+		</div>
+		
+		
+		<div class="row-fluid stats-box" style="margin-bottom: 25px;">
+			
+			<div class="span4">	
+			
+			<div id="chart3"></div>
+			
+				<div id="chart4">
+				    <div id="tbody">
+				    <!-- <h2>ESTACIONES BASE</h2>
+				     -->
+				     </div>
+				</div>
+				
+				
+				
+			</div>
+			
+			<div class="span8">	
+				<div id="chart1"></div>
+			</div>
+			
+		</div>
+		
+		<div class="row-fluid stats-box">
+		
+           <div class="span12">	
+				<div id="chart2"></div>
+			</div>			
+			
+		</div>
+		
+	</div>
+</div>
+	
+		
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/bcrypt/tools.js}"></script>
+<script type="text/javascript" th:src="@{/js/bcrypt/bcrypt.js}"></script>
+<script type="text/javascript" th:src="@{/js/bcrypt/tools-impl.js}"></script>
+
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+<script type="text/javascript" th:src="@{/js/highchart/highcharts.js}"></script>
+<script type="text/javascript" th:src="@{/js/highchart/jquery.highchartTable-min.js}"></script>
+
+<!-- modulos adicionales highcharts -->
+<script type="text/javascript" th:src="@{/js/highchart/modules/no-data-to-display.js}"></script> 
+<script type="text/javascript" th:src="@{/js/highchart/modules/accessibility.js}"></script>
+<script type="text/javascript" th:src="@{/js/highchart/modules/exporting.js}"></script>
+<script type="text/javascript" th:src="@{/js/highchart/modules/export-csv.js}"></script> 
+
+<!-- funciones de cada grafica -->
+<!--  <script type="text/javascript" th:src="@{/js/highchart/funciones-chart.js}"></script> -->
+
+
+<script>
+$(document).ready(function() {
+	
+	var baseSiteUrl = window.location.origin;
+	//var baseSiteUrl = window.location.origin + "/web-tracker";
+
+//Cargar datos para graph03 y configurar el chart
+$.ajax({
+	//url: '/baseline-graph-5g-nsa/data/graph03',
+	url: baseSiteUrl + '/baseline-graph-5g-nsa/data/graph03',
+	method: 'GET',
+	success: function(data) {
+	var estadoData = [];
+	var cantidadData = [];
+	data.forEach(function(item) {
+	estadoData.push(item.estado);
+	cantidadData.push(item.cantidad);
+	});
+
+
+	var options =  {
+	        series: cantidadData,
+	          chart: {
+	          width: 350,
+	          type: 'pie',
+	        },
+	        labels: estadoData,
+	        responsive: [{
+	          breakpoint: 480,
+	          options: {
+	            chart: {
+	              width: 200
+	            },
+	            legend: {
+	              position: 'bottom'
+	            }
+	          }
+	        }],
+	        title: {
+		          text: "PARAMETROS EN EL BASELINE",
+		          align: 'center'
+		      },
+		    colors: ['#b2a4c4', '#c3393d', '#000' , '#da272c'],
+		    fill: {
+			       opacity: 1,
+			       colors: ['#b2a4c4', '#c3393d', '#000' , '#da272c']
+			      },
+			//informacion dentro
+			tooltip: {
+			          y: {
+			            formatter: function (val) {
+			              return "" + val + " %"
+			            }
+			          }
+			      },
+	        };
+
+	      var chart3 = new ApexCharts(document.querySelector("#chart3"), options);
+	      chart3.render();
+	      
+	}
+	});
+
+//Cargar datos para graph04 y configurar el chart
+$.ajax({
+  //url: '/baseline-graph-5g-nsa/data/graph04',
+  url: baseSiteUrl + '/baseline-graph-5g-nsa/data/graph04',
+  method: 'GET',
+  success: function(data) {
+    var tbody = $('#chart4 #tbody'); // Select tbody within chart4
+    //tbody.empty();
+
+    data.forEach(function(item) {
+      /*
+      var row = $('<div>');
+      row.append($('<h2>').text('MBTS'));      
+      row.append($('<h3>').text(item.cantidad_mbts));
+      row.append($('<h2>').text('Parametros'));
+      row.append($('<h3>').text(item.cantidad_parametros));        
+      tbody.append(row);
+      */
+      
+      const mbtsContainer = $('<div class="col_1">');
+      const parametrosContainer = $('<div class="col_2">');
+
+      // Append h2 and h3 elements to respective containers
+      mbtsContainer.append($('<img>').attr('src', '/images/ico-antena-bs.png'));
+      mbtsContainer.append($('<h2>').text(item.cantidad_mbts));
+      mbtsContainer.append($('<h3>').text('Estaciones Base'));
+      mbtsContainer.append($('<h4>').text('Total revisados'));
+      
+      parametrosContainer.append($('<img>').attr('src', '/images/ico-parametro-bs.png'));
+      parametrosContainer.append($('<h2>').text(item.cantidad_parametros));
+      parametrosContainer.append($('<h3>').text('Parametros Baseline'));
+      parametrosContainer.append($('<h4>').text('Total Parametros en Análisis'));
+      
+
+      // Append both containers to the parent div
+      tbody.append(mbtsContainer, parametrosContainer);
+      
+      
+    });
+  },
+  error: function(jqXHR, textStatus, errorThrown) {
+    console.error("Error:", textStatus, errorThrown);
+    // Handle errors appropriately, e.g., display an error message
+  }
+});
+
+
+
+/**/
+
+});
+
+
+//console.log(baseSiteUrl);
+//CLASE MO
+//Cargar datos para graph01 y configurar el chart 
+
+	var baseSiteUrl = window.location.origin;
+	//var baseSiteUrl = window.location.origin + "/web-tracker";
+$.ajax({	  
+	  url: baseSiteUrl + '/baseline-graph-5g-nsa/data/graph01',
+	  method: 'GET',
+	  success: function(data) {
+	    var claseData = [];
+	    var cantidadData = [];
+	    data.forEach(function(item) {
+	      claseData.push(item.clase);
+	      cantidadData.push(item.cantidad);
+	    });
+
+	    var chartOptions = {
+	      chart: {
+	        renderTo: 'chart1', // Replace with your chart container element id
+	        type: 'column', // Highcharts equivalent of 'bar'
+	        height: 369,
+	        events: {
+	          mouseEnter: function(event) {
+	            var point = event.point;
+	            var index = point.index;
+	            var name = claseData[index];
+	            var baseUrl = window.location.origin;
+	            //var baseUrl = window.location.origin + "/web-tracker";
+	            var fullUrl = baseUrl + "/" + name;
+	            var tooltip = `<a href="${fullUrl}" target="_blank">${name}</a>`;
+	            this.tooltip.update({ pointFormat: tooltip });
+	          },
+	          mouseLeave: function() {
+	            this.tooltip.update({ pointFormat: '' });
+	          }
+	        }
+	      },
+	      responsive: {
+	        rules: [{
+	          condition: {
+	            maxWidth: 240
+	          },
+	          chartOptions: {
+	            legend: {
+	              layout: 'vertical',
+	              align: 'center',
+	              verticalAlign: 'bottom',
+	              offsetX: 0,
+	              offsetY: 0
+	            }
+	          }
+	        }]
+	      },
+	      title: {
+	        text: "CLASES (MO) EN EL BASELINE",
+	        align: 'center'
+	      },
+	      xAxis: {
+	        categories: claseData,
+	        title: {
+	        	
+	        }
+	      },
+	      yAxis: {
+	        title: {
+	          text: 'Homologado %'
+	        }
+	      },
+	      /*tooltip: { 
+            useHTML: true,
+            formatter: function() { 
+                var index = this.point.index; 
+                var name = claseData[index]; 
+                var baseUrl = window.location.origin; 
+                var fullUrl = baseUrl + ""/"" + name; 
+                //return `<a href=""${fullUrl}"" target=""_blank"">${name}</a>`;
+                return `<a href=""${fullUrl}"" target=""_blank"">${name}</a>`;
+            }
+        }, */
+        tooltip: {
+            pointFormat: '<span style="font-size: small">{series.name}<br/>Homologado: {point.y:.1f} %</span><br/><span>click <span style="font-size: 15px;">⬇</span>   ver detalles</span>' // Use Highcharts tooltip format
+          },
+        plotOptions: { 
+            column: { 
+                dataLabels: { 
+                    enabled: true, 
+                    format: '{point.y:.1f} %' // Display percentage with one decimal place 
+                },
+                cursor: 'pointer',
+                point: {
+                    events: {
+                        click: function() {
+                            var index = this.index;
+                            var name = claseData[index];
+                            var baseUrl = window.location.origin;
+                            //var baseUrl = window.location.origin + "/web-tracker";                            
+                            var fullUrl = baseUrl + "/baseline-graph-5g-nsa/clase/" + name;
+                            window.open(fullUrl, '_blank');
+                        }
+                    }
+                }
+            } 
+        }, 
+	      series: [{
+	        name: "",
+	        data: cantidadData,
+	        color: '#c3393d' // Use single color for all bars
+	      }],
+	      legend: {
+	        enabled: false // Remove legend as it's not needed with single series
+	      },
+	      grid: {
+	        borderColor: '#f1f1f1'
+	      }
+	    };
+
+	    var chart = new Highcharts.Chart(chartOptions);
+	  }
+	});
+	
+	
+	
+//PARAMETROS
+//Cargar datos para graph02 y configurar el chart 
+
+	var baseSiteUrl = window.location.origin;
+	//var baseSiteUrl = window.location.origin + "/web-tracker";
+$.ajax({
+	  //url: '/baseline-graph-5g-nsa/data/graph02',
+	  url: baseSiteUrl + '/baseline-graph-5g-nsa/data/graph02',
+	  method: 'GET',
+	  success: function(data) {
+	    var parametroData = [];
+	    var cantidadData = [];
+	    data.forEach(function(item) {
+	      parametroData.push(item.parametro);
+	      cantidadData.push(item.cantidad);
+	    });
+
+	    var chartOptions = {
+	      chart: {
+	        renderTo: 'chart2', // Replace with your chart container element id
+	        type: 'column', // Highcharts equivalent of 'bar'
+	        height: 369,
+	        events: {
+	          mouseEnter: function(event) {
+	            var point = event.point;
+	            var index = point.index;
+	            var name = claseData[index];
+	            var baseUrl = window.location.origin;
+	            //var baseUrl = window.location.origin + "/web-tracker";
+	            var fullUrl = baseUrl + "/" + name;
+	            var tooltip = `<a href="${fullUrl}" target="_blank">${name}</a>`;
+	            this.tooltip.update({ pointFormat: tooltip });
+	          },
+	          mouseLeave: function() {
+	            this.tooltip.update({ pointFormat: '' });
+	          }
+	        }
+	      },
+	      responsive: {
+	        rules: [{
+	          condition: {
+	            maxWidth: 240
+	          },
+	          chartOptions: {
+	            legend: {
+	              layout: 'vertical',
+	              align: 'center',
+	              verticalAlign: 'bottom',
+	              offsetX: 0,
+	              offsetY: 0
+	            }
+	          }
+	        }]
+	      },
+	      title: {
+	        text: "PARAMETROS EN EL BASELINE",
+	        align: 'center'
+	      },
+	      xAxis: {
+	        categories: parametroData,
+	        title: {
+	        	
+	        }
+	      },
+	      yAxis: {
+	        title: {
+	          text: 'Homologado %'
+	        }
+	      },
+	      /*tooltip: { 
+              useHTML: true,
+              formatter: function() { 
+                  var index = this.point.index; 
+                  var name = claseData[index]; 
+                  var baseUrl = window.location.origin; 
+                  var fullUrl = baseUrl + ""/"" + name; 
+                  //return `<a href=""${fullUrl}"" target=""_blank"">${name}</a>`;
+                  return `<a href=""${fullUrl}"" target=""_blank"">${name}</a>`;
+              }
+          }, */
+          tooltip: {
+              pointFormat: '<span style="font-size: small">{series.name}<br/>Homologado {point.y:.1f} %</span><br/><span>click <span style="font-size: 15px;">⬇</span>   ver detalles</span>' // Use Highcharts tooltip format
+            },
+          plotOptions: { 
+              column: { 
+                  dataLabels: { 
+                      enabled: true, 
+                      format: '{point.y:.1f} %' // Display percentage with one decimal place 
+                  },
+                  cursor: 'pointer',
+                  point: {
+                      events: {
+                          click: function() {
+                              var index = this.index;
+                              var name = parametroData[index];
+                              var baseUrl = window.location.origin;
+                              //var baseUrl = window.location.origin + "/web-tracker";
+                              var fullUrl = baseUrl + "/baseline-graph-5g-nsa/parametros/" + name;
+                              window.open(fullUrl, '_blank');
+                          }
+                      }
+                  }
+              } 
+          }, 
+	      series: [{
+	        name: "",
+	        data: cantidadData,
+	        color: '#c3393d' // Use single color for all bars
+	      }],
+	      legend: {
+	        enabled: false // Remove legend as it's not needed with single series
+	      },
+	      grid: {
+	        borderColor: '#f1f1f1'
+	      }
+	    };
+
+	    var chart = new Highcharts.Chart(chartOptions);
+	  }
+	});
+</script>
+</body>
+</html>

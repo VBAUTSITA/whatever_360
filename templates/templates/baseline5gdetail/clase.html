@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Parametros List</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+<h1>CLASES (MO) No Homologados</h1>
+<ul>
+<li th:each="claseCount : ${claseCounts}">
+<a th:href="@{|/baseline-graph-5g/clase/${claseCount[0]}|}" th:text="${claseCount[0]} + ' (' + ${claseCount[1]} + ')'"></a>
+</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head th:replace="layouts/base::head"></head>
+
+<body class="home_base">
+<header th:replace="layouts/base_home::header"></header>
+
+<style>
+    .baseline-main {
+        min-height: calc(100vh - 140px);
+        padding: 28px 0 50px;
+        position: relative;
+        background: #000 url('../images/bg-home.jpg') no-repeat center top fixed;
+        background-size: cover;
+    }
+
+    .baseline-main:before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.62);
+        pointer-events: none;
+    }
+
+    .baseline-container {
+        position: relative;
+        z-index: 2;
+        max-width: 1480px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    .baseline-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        margin: 18px auto 36px;
+    }
+
+    .baseline-title .line {
+        width: 110px;
+        height: 2px;
+        background: rgba(255,255,255,0.85);
+    }
+
+    .baseline-title h2 {
+        margin: 0;
+        color: #fff;
+        font-size: 30px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .baseline-subtitle {
+        color: #fff;
+        font-size: 24px;
+        font-weight: 700;
+        text-transform: uppercase;
+        text-align: center;
+        margin: 10px 0 26px;
+    }
+
+    .baseline-row {
+        display: grid;
+        justify-items: center;
+        gap: 30px;
+        margin-bottom: 42px;
+    }
+
+    .baseline-row.row-4 {
+        grid-template-columns: repeat(4, minmax(220px, 1fr));
+    }
+
+    .baseline-row.row-3 {
+        grid-template-columns: repeat(3, minmax(220px, 1fr));
+    }
+
+    .baseline-link {
+        text-decoration: none !important;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .baseline-circle {
+        width: 245px;
+        height: 245px;
+        border-radius: 50%;
+        border: 5px solid #c40000;
+        background: rgba(0,0,0,0.86);
+        box-shadow: 0 16px 34px rgba(0,0,0,0.45);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px 18px;
+        transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .baseline-link:hover .baseline-circle {
+        transform: translateY(-5px);
+        border-color: #ef2020;
+        box-shadow: 0 22px 40px rgba(0,0,0,0.55);
+    }
+
+    .baseline-circle-img {
+        width: 82px;
+        height: 82px;
+        margin-bottom: 14px;
+    }
+
+    .baseline-circle-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+        display: block;
+    }
+
+    .baseline-circle-label {
+        color: #fff;
+        font-size: 19px;
+        line-height: 1.12;
+        font-weight: 700;
+        text-transform: uppercase;
+        max-width: 180px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 1280px) {
+        .baseline-row.row-4 {
+            grid-template-columns: repeat(2, minmax(220px, 1fr));
+        }
+
+        .baseline-row.row-3 {
+            grid-template-columns: repeat(2, minmax(220px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .baseline-title .line {
+            width: 50px;
+        }
+
+        .baseline-title h2 {
+            font-size: 24px;
+        }
+
+        .baseline-subtitle {
+            font-size: 21px;
+        }
+
+        .baseline-row.row-4,
+        .baseline-row.row-3 {
+            grid-template-columns: 1fr;
+        }
+
+        .baseline-circle {
+            width: 235px;
+            height: 235px;
+        }
+
+        .baseline-circle-img {
+            width: 74px;
+            height: 74px;
+        }
+
+        .baseline-circle-label {
+            font-size: 18px;
+            max-width: 170px;
+        }
+    }
+</style>
+
+<div class="main baseline-main">
+    <div class="baseline-container">
+
+        <div class="baseline-title">
+            <span class="line"></span>
+            <h2>Baseline</h2>
+            <span class="line"></span>
+        </div>
+
+        <div class="baseline-subtitle">Baseline 5G</div>
+        <div class="baseline-row row-4">
+
+            <a class="baseline-link" href="#" th:href="@{/baseline-graph-5g/dash}">
+                <div class="baseline-circle">
+                    <div class="baseline-circle-img">
+                        <img src="../static/images/baseline-imagen-2.jpg" th:src="@{/images/baseline-imagen-2.jpg}" alt="Baseline Dashboard 5G NR">
+                    </div>
+                    <div class="baseline-circle-label">Baseline Dashboard 5G NR</div>
+                </div>
+            </a>
+
+            <a class="baseline-link" href="#" th:href="@{/baseline-5g}">
+                <div class="baseline-circle">
+                    <div class="baseline-circle-img">
+                        <img src="../static/images/cambios-radio.jpg" th:src="@{/images/cambios-radio.jpg}" alt="Comparador Baseline 5G NR">
+                    </div>
+                    <div class="baseline-circle-label">Comparador Baseline 5G NR</div>
+                </div>
+            </a>
+
+            <a class="baseline-link" href="#" th:href="@{/baseline-graph-5g-nsa/dash}">
+                <div class="baseline-circle">
+                    <div class="baseline-circle-img">
+                        <img src="../static/images/baseline-imagen-2.jpg" th:src="@{/images/baseline-imagen-2.jpg}" alt="Baseline Dashboard 5G NSA">
+                    </div>
+                    <div class="baseline-circle-label">Baseline Dashboard 5G NSA</div>
+                </div>
+            </a>
+
+            <a class="baseline-link" href="#" th:href="@{/baseline-5g-nsa}">
+                <div class="baseline-circle">
+                    <div class="baseline-circle-img">
+                        <img src="../static/images/cambios-radio.jpg" th:src="@{/images/cambios-radio.jpg}" alt="Comparador Baseline 5G NSA">
+                    </div>
+                    <div class="baseline-circle-label">Comparador Baseline 5G NSA</div>
+                </div>
+            </a>
+
+        </div>
+
+        <div class="baseline-subtitle">Baseline 4G</div>
+        <div class="baseline-row row-3">
+
+            <a class="baseline-link" href="#" th:href="@{/baseline/dash}">
+                <div class="baseline-circle">
+                    <div class="baseline-circle-img">
+                        <img src="../static/images/baseline-imagen-2.jpg" th:src="@{/images/baseline-imagen-2.jpg}" alt="Baseline Dashboard">
+                    </div>
+                    <div class="baseline-circle-label">Baseline Dashboard</div>
+                </div>
+            </a>
+
+            <a class="baseline-link" href="#" th:href="@{/baselinedata}">
+                <div class="baseline-circle">
+                    <div class="baseline-circle-img">
+                        <img src="../static/images/cambios-radio.jpg" th:src="@{/images/cambios-radio.jpg}" alt="Comparador Baseline 4G">
+                    </div>
+                    <div class="baseline-circle-label">Comparador Baseline 4G</div>
+                </div>
+            </a>
+
+            <a class="baseline-link" href="#" th:href="@{/baseline/formato}">
+                <div class="baseline-circle">
+                    <div class="baseline-circle-img">
+                        <img src="../static/images/formato-baseline-1.jpg" th:src="@{/images/formato-baseline-1.jpg}" alt="Formato Baseline 4G">
+                    </div>
+                    <div class="baseline-circle-label">Formato Baseline 4G</div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+</div>
+
+<div th:replace="layouts/base::footer"></div>
+</body>
+</html>

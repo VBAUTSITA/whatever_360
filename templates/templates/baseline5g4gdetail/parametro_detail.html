@@ -1,0 +1,138 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+
+<body>
+<header th:replace="layouts/base_baseline5g4g::header"></header>
+
+<div class="main">
+	<div class="container">
+		
+		<div class="title-main">
+			<h2 style="text-transform: initial;">Parametro "<span th:text="${parametros}"></span>"</h2>
+			<h2 style="text-transform: initial;">Sites NO HOMOLOGADOS</h2>
+			<a class="link_bs_gn" href="/baselinedata">HERRAMIENTA BASELINE</a>
+		</div>
+		
+		<!-- <a class="btn btn-primary add_btn" href="/baseline/parametros">Regresar a la lista de Clases (MO)</a>
+		-->
+		
+	<div class="box-lista-seguimiento">			
+		<table id="lista_segui" class="table table-striped table-bordered list_results" style="width:100%">
+			<thead>
+				<tr>
+					<th scope="row">MBTS NAME</th>	
+					<th scope="row">DISTRITO</th>
+					<th scope="row">PROVINCIA</th>	
+					<th scope="row">SUB REGION</th>						
+					<th scope="row">REGION</th>		
+				</tr>
+			</thead>
+			<tbody>
+					<tr th:each="baselineSitesParametros : ${baselineSitesParametros}">
+						<!-- <td th:text="${seguimiento.site_id }"></td> -->						
+						<td th:text="${baselineSitesParametros.mbts_name}"></td>
+						<td th:text="${baselineSitesParametros.distrito}"></td>						
+						<td th:text="${baselineSitesParametros.provincia}"></td>						
+						<td th:text="${baselineSitesParametros.sub_region}"></td>
+						<td th:text="${baselineSitesParametros.region}"></td>
+						
+					</tr>
+					<tr th:if="${baselineSitesParametros.isEmpty()}">
+					    <td>No MBTS encontrados</td>
+					</tr>
+			</tbody>
+			<tfoot style="display: none;">
+	            <tr>
+	                <th scope="row">MBTS NAME</th>
+	                <th scope="row">DISTRITO</th>
+					<th scope="row">PROVINCIA</th>	
+					<th scope="row">SUB REGION</th>						
+					<th scope="row">REGION</th>	
+	            </tr>
+	        </tfoot>			 
+		</table>
+	</div>
+	
+	</div>
+</div>
+		
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+<script>
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#lista_segui tfoot th').each( function () {
+        var title = $(this).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+ 
+    // DataTable
+    var table = $('#lista_segui').DataTable({
+    	"aaSorting": [],
+    	dom: 'Bfrtip',
+        buttons: ['copy','csv'],
+        scrollY:        "400px",
+        scrollX:        true,
+        scrollCollapse: true,
+        fixedColumns:  true	  
+    });
+
+ 
+    // Apply the search
+    table.columns().every( function () {
+        var that = this;
+ 
+        $( 'input', this.footer() ).on( 'keyup change clear', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+    } );
+} );
+</script>
+
+
+
+
+</body>
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>MBTS Detail</title>
+</head>
+<body>
+<h4>SITES NO HOMOLOGADOS EN EL PARAMETRO <span th:text="${parametros}"></span></h4>
+<ul>
+  <li th:each="baselineSitesParametros : ${baselineSitesParametros}">
+    <span th:text="${baselineSitesParametros.mbts_name}"></span>
+  </li>
+  <li th:if="${baselineSitesParametros.isEmpty()}">
+    No MBTS encontrados
+  </li>
+</ul>
+
+<a href="/baseline/parametros">Back to List</a>
+
+</body>
+</html>
+
+ -->

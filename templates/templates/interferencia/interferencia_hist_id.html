@@ -1,0 +1,149 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">         
+<head th:replace="layouts/base::head">
+</head>
+<body>
+<header th:replace="layouts/base_interferencia::header"></header>
+
+<div class="miga breadcrumb">
+	<div class="container">
+		<a class="btn btn-primary"
+			href="#" onclick='javascript:window.history.back()' role="button">
+			Regresar</a>
+	</div>
+</div>
+
+<div class="main add blocked" style="padding-bottom: 15px;">	
+	<div class="container">
+		<div class="title-main crud">
+			<h2>Detalles del Sitio 					
+				<!-- <span th:object="${interferencia_hist_id}" th:text="*{cellname}" class="form-control" id="cellname" style="display: inline-block"></span> -->
+				<span th:text="*{interferencia_hist_id.cellname}" class="form-control" id="cellname" style="display: inline-block"></span>
+			</h2>
+		</div>
+		<form action="#" th:object="${interferencia_hist_id}" 
+				method="get" class="form">
+			
+			<div class="form_cols">
+				<div class="cols">
+				
+					<div class="form-group">
+						<label for="estado_cambio">ESTADO DE CAMBIO</label>
+						<input readonly="readonly" th:field="*{estado_cambio}" class="form-control" id="estado_cambio">
+						<span class="estado_cambio_user">Por el Usuario <span readonly="readonly" th:text="*{usuario}" id="usuario"></span></span>				
+					</div>
+				</div>
+				
+				<div class="cols">
+					<div class="form-group fecha_cambio">
+								<label class="label_title" for="date_change">ULTIMA FECHA / HORA CAMBIO</label>
+								<label th:text="*{#dates.format(date_change, 'dd-MM-yyyy HH:mm:ss a')}" class="fecha"></label>
+					</div>	
+				</div>
+
+				<div class="cols">
+					
+				</div>
+				
+			</div>
+			
+			<div class="form_cols">
+				<div class="cols">
+				
+					<div class="form-group">
+						<label for="code_site">SITIO</label>
+						<input readonly="readonly" th:field="*{code_site}" class="form-control" id="code_site" required="required"/>
+					</div>
+			
+					<div class="form-group">
+						<label for="site_address">SITE_ADRESS</label>
+						<input readonly="readonly" th:field="*{site_address}" class="form-control" id="site_address" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="cellname">CELLNAME</label>
+						<input readonly="readonly" th:field="*{cellname}" class="form-control" id="cellname" required="required"/>
+					</div>
+			
+					<div class="form-group">
+						<label for="longitud">LONGITUD</label>
+						<input readonly="readonly" th:field="*{longitud}" class="form-control" id="longitud" required="required"/>
+					</div>
+					<div class="form-group">
+						<label for="latitud">LATITUD</label>
+						<input readonly="readonly" th:field="*{latitud}" class="form-control" id="latitud" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="sector">SECTOR</label>
+						<input readonly="readonly" th:field="*{sector}" class="form-control" id="sector" />			
+					</div>
+										
+				</div>
+				
+				<div class="cols">				
+					
+					
+					
+					<div class="form-group">
+						<label for="band">BANDA</label>
+						<input readonly="readonly" th:field="*{band}" class="form-control" id="band" />			
+					</div>
+					
+					<div class="form-group">
+						<label for="tecnologia">TECNOLOGIA</label>
+						<input readonly="readonly" th:field="*{tecnologia}" class="form-control" id="tecnologia" />		
+					</div>	
+					
+				
+					<div class="form-group">
+						<label for="tilt_electric_field">TILT ELECTRICO</label>
+						<input readonly="readonly" th:field="*{tilt_electric_field}" class="form-control" id="tilt_electric_field" />
+					</div>
+					
+					<div class="form-group">
+						<label for="azimuth">AZIMUTH</label>
+						<input readonly="readonly" th:field="*{azimuth}" class="form-control" id="azimuth" />
+					</div>	
+					
+					<div class="form-group">
+						<label for="height">ALTURA</label>
+						<input readonly="readonly" th:field="*{height}" class="form-control" id="height" />
+					</div>
+					
+					<div class="form-group">
+						<label for="tilt_mecanic_field">TILT MECANICO</label>
+						<input readonly="readonly" th:field="*{tilt_mecanic_field}" class="form-control" id="tilt_mecanic_field" />
+					</div>
+					
+				</div>
+				
+				<div class="cols">
+					
+					<div class="form-group">
+						<label for="logic_changes">CAMBIOS LOGICOS</label>
+						<textarea readonly="readonly" th:field="*{logic_changes}" class="form-control" id="logic_changes"></textarea>
+					</div>
+					
+					<div class="form-group">
+						<label for="cambio_coment">COMENTARIO DEL CAMBIO</label>
+						<textarea readonly="readonly" th:field="*{cambio_coment}" class="form-control" id="cambio_coment"></textarea>
+					</div>
+					
+				</div>
+			</div>
+			
+		</form>	
+	</div>	 
+</div>
+	
+		
+<div  th:replace="layouts/base::footer"></div>
+
+
+</body>
+</html>

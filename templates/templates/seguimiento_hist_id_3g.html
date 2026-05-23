@@ -1,0 +1,784 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">         
+<head th:replace="layouts/base::head">
+</head>
+<body>
+<header th:replace="layouts/base::header"></header>
+
+<div class="miga breadcrumb">
+	<div class="container">
+		<a class="btn btn-primary"
+			href="#" onclick='javascript:window.history.back()' role="button">
+			Regresar</a>
+	</div>
+</div>
+
+<div class="main add blocked" style="padding-bottom: 15px;">	
+	<div class="container">
+		<div class="title-main crud">
+			<h2>Detalles del Sitio [[${seguimiento_hist_id_3g.cellname}]]
+			</h2>
+		</div>
+		<form action="#" th:object="${seguimiento_hist_id_3g}" 
+				method="get" class="form">
+			
+			<div class="form_cols">
+				<div class="cols">
+				
+					<div class="form-group">
+						<label for="estado_cambio">ESTADO DE CAMBIO</label>
+						<input readonly="readonly" th:field="*{estado_cambio}" class="form-control" id="estado_cambio">
+						<span class="estado_cambio_user">Por el Usuario <span th:text="*{usuario}" id="usuario"></span></span>				
+					</div>
+				</div>
+				
+				<div class="cols">
+					<div class="form-group fecha_cambio">
+								<label class="label_title" for="date_change">ULTIMA FECHA / HORA CAMBIO</label>
+								<label th:text="*{#dates.format(date_change, 'dd/MM/yyyy HH:mm:ss')}" class="fecha"></label>
+					</div>	
+				</div>
+
+				<div class="cols">
+					
+				</div>
+				
+			</div>
+			
+			<div class="form_cols">
+				<div class="cols">
+				
+					<div class="form-group">
+						<label for="code_site">SITIO</label>
+						<input readonly="readonly" th:field="*{code_site}" class="form-control" id="code_site" required="required"/>
+					</div>
+			
+					<div class="form-group">
+						<label for="site_address">SITE_ADRESS</label>
+						<input readonly="readonly" th:field="*{site_address}" class="form-control" id="site_address" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="cellname">CELLNAME</label>
+						<input readonly="readonly" th:field="*{cellname}" class="form-control" id="cellname" required="required"/>
+					</div>
+			
+					<div class="form-group">
+						<label for="longitud">LONGITUD</label>
+						<input readonly="readonly" th:field="*{longitud}" class="form-control" id="longitud" required="required"/>
+					</div>
+					<div class="form-group">
+						<label for="latitud">LATITUD</label>
+						<input readonly="readonly" th:field="*{latitud}" class="form-control" id="latitud" required="required"/>
+					</div>
+					
+					<div class="form-group">
+						<label for="sector">SECTOR</label>
+						<input readonly="readonly" th:field="*{sector}" class="form-control" id="sector" />			
+					</div>
+					
+					<div class="form-group">
+						<label for="band">BANDA</label>
+						<input readonly="readonly" th:field="*{band}" class="form-control" id="band" />			
+					</div>
+										
+				</div>
+				
+				<div class="cols">		
+					
+					<div class="form-group">
+						<label for="tecnologia">TECNOLOGIA</label>
+						<input readonly="readonly" th:field="*{tecnologia}" class="form-control" id="tecnologia" />		
+					</div>	
+					
+				
+					<div class="form-group">
+						<label for="tilt_electric_field">TILT ELECTRICO</label>
+						<input readonly="readonly" th:field="*{tilt_electric_field}" class="form-control" id="tilt_electric_field" />
+					</div>
+					
+					<div class="form-group">
+						<label for="azimuth">AZIMUTH</label>
+						<input readonly="readonly" th:field="*{azimuth}" class="form-control" id="azimuth" />
+					</div>	
+					
+					<div class="form-group">
+						<label for="height">ALTURA</label>
+						<input readonly="readonly" th:field="*{height}" class="form-control" id="height" />
+					</div>
+					
+					<div class="form-group">
+						<label for="tilt_mecanic_field">TILT MECANICO</label>
+						<input readonly="readonly" th:field="*{tilt_mecanic_field}" class="form-control" id="tilt_mecanic_field" />
+					</div>
+					
+					<div class="form-group">
+						<label for="tipo_antena">TIPO ANTENA</label>
+						<input readonly="readonly" th:field="*{tipo_antena}" class="form-control" id="tipo_antena" />
+					</div>
+										
+					<div class="form-group">
+						<label for="potencia">POTENCIA</label>
+						<input readonly="readonly" th:field="*{potencia}" class="form-control" id="potencia" />
+					</div>
+					
+				</div>
+				
+				<div class="cols">
+					
+					<div class="form-group">
+						<label for="modo_transmision_celda">MODO TRANSMISION CELDA</label>
+						<input readonly="readonly" th:field="*{modo_transmision_celda}" class="form-control" id="modo_transmision_celda" />
+					</div>
+					
+					<div class="form-group">
+						<label for="logic_changes">CAMBIOS LOGICOS</label>
+						<textarea readonly="readonly" th:field="*{logic_changes}" class="form-control" id="logic_changes"></textarea>
+					</div>
+					
+					<div class="form-group">
+						<label for="cambio_coment">COMENTARIO DEL CAMBIO</label>
+						<textarea readonly="readonly" th:field="*{cambio_coment}" class="form-control" id="cambio_coment"></textarea>
+					</div>
+					
+				</div>
+			</div>
+			
+		</form>	
+	</div>	 
+</div>
+		
+<div class="main chart-tab kpi">	
+	<div class="container">
+		<div class="title-main crud">
+			<h2>KPIs del Sitio 3G</h2>
+			<small style="position: relative;top: -20px;">los kpis se cargan, después de un tiempo al validarse la existencia del sitio y el rango de fechas**</small>
+		</div>	
+	</div>		
+	<div class="box-highchart container">	
+	<div class="tab">
+	  <button class="tablinks active" onclick="openChart(event, 'Accessibility_CS_PS')">Accessibility</button>
+	  <button class="tablinks" onclick="openChart(event, 'Retainability_CS_PS')">Retainability</button>  
+	  <button class="tablinks" onclick="openChart(event, 'Throuput_DL_UL')">Throuput</button>
+	  <button class="tablinks" onclick="openChart(event, 'DCH_Users')">DCH Users</button>
+	  <button class="tablinks" onclick="openChart(event, 'Tráfico_Datos_DL_UL')">Tráfico Datos</button>
+	  <button class="tablinks" onclick="openChart(event, 'Propagation_Delay')">Propagation Delay</button>
+	  
+	</div>
+		
+	<div id="Accessibility_CS_PS" class="tabcontent">
+		<!-- tabcontent -->
+		<div class="row-fluid stats-box">
+	       <div class="span12 kpi-table-span">
+	       <h2>Accessibility CS - PS</h2>
+		   <h3><span th:text="${seguimiento_kpi_id_3g_max_min.min_result_time}"></span> <span>Al</span> <span th:text="${seguimiento_kpi_id_3g_max_min.max_result_time}"></span></h3>
+	          <div class="box-container">
+				<table class="highchart acc_cs_ps" data-graph-container-before="1" data-graph-type="line" style="display:none" data-graph-datalabels-enabled="0" data-graph-datalabels-color="blue">
+				  <thead>
+				      <tr>
+				          <th>Fecha</th>
+				          <th>Accessibility CS</th>
+				          <th>Accessibility PS</th>					          		
+				          <th class="data-graph-line-id" data-graph-vline-x="72" data-graph-vline-height="100" th:data-graph-vline-name="'Accessibility CS - PS'">Cambio [[${seguimiento_hist_id_3g.estado_cambio}]]</th>		           
+				      </tr>
+				   </thead>
+				   <tbody> 
+				      <tr th:each="seguimiento : ${seguimiento_list_kpi_id_3g}">	
+				          <td th:text="${seguimiento.result_date}"></td>
+				          <td >
+					           <span th:text="${#numbers.formatDecimal(seguimiento.acc_cs, 1, 2, 'POINT')}"> </span>					      	   
+					      </td> 
+					      <td >					           
+					      	   <span th:text="${#numbers.formatDecimal(seguimiento.acc_ps, 1, 2, 'POINT')}"> </span>
+					      </td> 
+				      </tr>
+				  </tbody>
+				</table>
+				<img class="img-loading" src="../static/images/cargando_datos.gif" th:src="@{/images/cargando_datos.gif}"/>
+		      </div>
+			</div>
+		</div>
+	</div>	
+	
+	<div id="Retainability_CS_PS" class="tabcontent" style="display:none;">
+		<!-- tabcontent -->
+		<div class="row-fluid stats-box">
+	       <div class="span12 kpi-table-span">
+	       <h2>Retainability CS - PS</h2>
+		   <h3><span th:text="${seguimiento_kpi_id_3g_max_min.min_result_time}"></span> <span>Al</span> <span th:text="${seguimiento_kpi_id_3g_max_min.max_result_time}"></span></h3>
+	          <div class="box-container">
+				<table class="highchart ret_cs_ps" data-graph-container-before="1" data-graph-type="line" style="display:none" data-graph-datalabels-enabled="0" data-graph-datalabels-color="blue">
+				  <thead>
+				      <tr>
+				          <th>Fecha</th>
+				          <th>Retainability CS</th>
+				          <th>Retainability PS</th>					          		
+				          <th class="data-graph-line-id" data-graph-vline-x="72" data-graph-vline-height="100" th:data-graph-vline-name="'Retainability CS - PS'">Cambio [[${seguimiento_hist_id_3g.estado_cambio}]]</th>		           
+				      </tr>
+				   </thead>
+				   <tbody> 
+				      <tr th:each="seguimiento : ${seguimiento_list_kpi_id_3g}">	
+				          <td th:text="${seguimiento.result_date}"></td>
+				          <td >
+					           <span th:text="${#numbers.formatDecimal(seguimiento.ret_cs, 1, 2, 'POINT')}"> </span>					      	   
+					      </td> 
+					      <td >					           
+					      	   <span th:text="${#numbers.formatDecimal(seguimiento.ret_ps, 1, 2, 'POINT')}"> </span>
+					      </td> 
+				      </tr>
+				  </tbody>
+				</table>
+				<img class="img-loading" src="../static/images/cargando_datos.gif" th:src="@{/images/cargando_datos.gif}"/>
+		      </div>
+			</div>
+		</div>	
+	</div>
+	
+	<div id="Throuput_DL_UL" class="tabcontent" style="display:none;">
+		<!-- tabcontent -->
+		<div class="row-fluid stats-box">
+	       <div class="span12 kpi-table-span">
+	       <h2>Throuput DL - UL</h2>
+		   <h3><span th:text="${seguimiento_kpi_id_3g_max_min.min_result_time}"></span> <span>Al</span> <span th:text="${seguimiento_kpi_id_3g_max_min.max_result_time}"></span></h3>
+	          <div class="box-container">
+				<table class="highchart throuput" data-graph-container-before="1" data-graph-type="line" style="display:none" data-graph-datalabels-enabled="0" data-graph-datalabels-color="blue">
+				  <thead>
+				      <tr>
+				          <th>Fecha</th>
+				          <th>Throuput DL</th>
+				          <th>Throuput UL</th>					          		
+				          <th class="data-graph-line-id" data-graph-vline-x="72" th:data-graph-vline-height="${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.max_throuput, 1, 2, 'POINT')}" th:data-graph-vline-name="'Throuput DL - UL'">Cambio [[${seguimiento_hist_id_3g.estado_cambio}]]</th>		           
+				      </tr>
+				   </thead>
+				   <tbody> 
+				      <tr th:each="seguimiento : ${seguimiento_list_kpi_id_3g}">	
+				          <td th:text="${seguimiento.result_date}"></td>
+				          <td >
+					           <span th:text="${#numbers.formatDecimal(seguimiento.throuput_dl, 1, 2, 'POINT')}"> </span>					      	   
+					      </td> 
+					      <td >					           
+					      	   <span th:text="${#numbers.formatDecimal(seguimiento.throuput_ul, 1, 2, 'POINT')}"> </span>
+					      </td> 
+				      </tr>
+				  </tbody>
+				</table>
+				<img class="img-loading" src="../static/images/cargando_datos.gif" th:src="@{/images/cargando_datos.gif}"/>
+		      </div>
+			</div>
+		</div>	
+	</div>
+	
+	<div id="DCH_Users" class="tabcontent" style="display:none;">
+		<!-- tabcontent -->
+		<div class="row-fluid stats-box">
+	       <div class="span12 kpi-table-span">
+	       <h2>DCH Users</h2>
+		   <h3><span th:text="${seguimiento_kpi_id_3g_max_min.min_result_time}"></span> <span>Al</span> <span th:text="${seguimiento_kpi_id_3g_max_min.max_result_time}"></span></h3>
+	          <div class="box-container">
+				<table class="highchart dch_users" data-graph-container-before="1" data-graph-type="line" style="display:none" data-graph-datalabels-enabled="0" data-graph-datalabels-color="blue">
+				  <thead>
+				      <tr>
+				          <th>Fecha</th>
+				          <th>DCH Users</th>				          		
+				          <th class="data-graph-line-id" data-graph-vline-x="72" th:data-graph-vline-height="${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.max_dch_users, 1, 2, 'POINT')}" th:data-graph-vline-name="'DCH Users'">Cambio [[${seguimiento_hist_id_3g.estado_cambio}]]</th>		           
+				      </tr>
+				   </thead>
+				   <tbody> 
+				      <tr th:each="seguimiento : ${seguimiento_list_kpi_id_3g}">	
+				          <td th:text="${seguimiento.result_date}"></td>
+				          <td >
+					           <span th:text="${#numbers.formatDecimal(seguimiento.dch_users, 1, 2, 'POINT')}"> </span>					      	   
+					      </td> 
+				      </tr>
+				  </tbody>
+				</table>
+				<img class="img-loading" src="../static/images/cargando_datos.gif" th:src="@{/images/cargando_datos.gif}"/>
+		      </div>
+			</div>
+		</div>		
+	</div>
+	
+	<div id="Tráfico_Datos_DL_UL" class="tabcontent" style="display:none;">
+		<!-- tabcontent -->
+		<div class="row-fluid stats-box">
+	       <div class="span12 kpi-table-span">
+	       <h2>Tráfico Datos DL - UL</h2>
+		   <h3><span th:text="${seguimiento_kpi_id_3g_max_min.min_result_time}"></span> <span>Al</span> <span th:text="${seguimiento_kpi_id_3g_max_min.max_result_time}"></span></h3>
+	          <div class="box-container">
+				<table class="highchart trafico_datos" data-graph-container-before="1" data-graph-type="line" style="display:none" data-graph-datalabels-enabled="0" data-graph-datalabels-color="blue">
+				   <thead>
+				      <tr>
+				          <th>Fecha</th>
+				          <th>Tráfico Datos DL</th>	
+				          <th>Tráfico Datos UL</th>			          		
+				          <th class="data-graph-line-id" data-graph-vline-x="72" th:data-graph-vline-height="${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.max_trafico_datos, 1, 2, 'POINT')}" th:data-graph-vline-name="'Tráfico Datos DL - UL'">Cambio [[${seguimiento_hist_id_3g.estado_cambio}]] (Eje Referencia)</th>		           
+				      </tr>
+				   </thead>
+				   <tbody> 
+				      <tr th:each="seguimiento : ${seguimiento_list_kpi_id_3g}">	
+				          <td th:text="${seguimiento.result_date}"></td>
+					       <td >
+					           <span th:text="${#numbers.formatDecimal(seguimiento.trafico_datos_dl, 1, 2, 'POINT')}"> </span>					      	   
+					      </td>
+					      <td >
+					           <span th:text="${#numbers.formatDecimal(seguimiento.trafico_datos_ul, 1, 2, 'POINT')}"> </span>					      	   
+					      </td>  
+				      </tr>
+				  </tbody>
+				</table>
+				<img class="img-loading" src="../static/images/cargando_datos.gif" th:src="@{/images/cargando_datos.gif}"/>
+		      </div>
+			</div>
+		</div>	
+	</div>
+
+	<div id="Propagation_Delay" class="tabcontent" style="display:none;">
+		<!-- tabcontent -->
+		<div class="row-fluid stats-box">
+	       <div class="span12 kpi-table-span">
+	       <h2>Propagation Delay</h2>
+		   <h3><span th:text="${seguimiento_kpi_id_3g_max_min.min_result_time}"></span> <span>Al</span> <span th:text="${seguimiento_kpi_id_3g_max_min.max_result_time}"></span></h3>
+	          <div class="box-container">
+				<table class="highchart prop_delay" data-graph-container-before="1" data-graph-type="line" style="display:none" data-graph-datalabels-enabled="0" data-graph-datalabels-color="blue">
+				   <thead>
+				      <tr>
+				          <th>Fecha</th>
+				          <th>0 - 156 mts</th>	
+				          <th>156 - 390 mts</th>
+				          <th>390 - 624 mts</th>	
+				          <th>624 - 858 mts</th>
+				          <th>858 - 1092 mts</th>	
+				          <th>1092 - 1326 mts</th>
+				          <th>1326 - 2262 mts</th>	
+				          <th>2262 - 3666 mts</th>
+				          <th>3666 - 6006 mts</th>		
+				          <th>6006 - 8346 mts</th>
+				          <th>8346 - 13026 mts</th>
+				          <th>> 13026 mts</th>          		
+				          <th class="data-graph-line-id" data-graph-vline-x="72" th:data-graph-vline-height="${seguimiento_kpi_id_3g_max_min.max_vs_tp_ue}" th:data-graph-vline-name="'Propagation Delay'">Cambio [[${seguimiento_hist_id_3g.estado_cambio}]]</th>		           
+				      </tr>
+				   </thead>
+				   <tbody> 
+				      <tr th:each="seguimiento : ${seguimiento_list_kpi_id_3g}">	
+				          <td th:text="${seguimiento.result_date}"></td>
+					      <td >
+					           <span th:text="${seguimiento.vs_tp_ue_0}"> </span>					      	   
+					      </td>
+					      <td >
+					           <span th:text="${seguimiento.vs_tp_ue_1}"> </span>					      	   
+					      </td>  
+					      <td >
+					           <span th:text="${seguimiento.vs_tp_ue_2}"> </span>					      	   
+					      </td>  
+					      <td >
+					           <span th:text="${seguimiento.vs_tp_ue_3}"> </span>					      	   
+					      </td>  
+					      <td >
+					           <span th:text="${seguimiento.vs_tp_ue_4}"> </span>					      	   
+					      </td>  
+					      <td >
+					           <span th:text="${seguimiento.vs_tp_ue_5}"> </span>					      	   
+					      </td>  
+					      <td >
+					           <span th:text="${seguimiento.vs_tp_ue_6_9}"> </span>					      	   
+					      </td>  
+					      <td >
+					           <span th:text="${seguimiento.vs_tp_ue_10_15}"> </span>					      	   
+					      </td>  
+					      <td >
+					           <span th:text="${seguimiento.vs_tp_ue_16_25}"> </span>					      	   
+					      </td>  
+					      <td >
+					           <span th:text="${seguimiento.vs_tp_ue_26_35}"> </span>					      	   
+					      </td>  
+					      <td >
+					           <span th:text="${seguimiento.vs_tp_ue_36_55}"> </span>					      	   
+					      </td>  
+					      <td >
+					           <span th:text="${seguimiento.vs_tp_ue_more55}"> </span>					      	   
+					      </td>  
+				      </tr>
+				  </tbody>
+				</table>
+				<img class="img-loading" src="../static/images/cargando_datos.gif" th:src="@{/images/cargando_datos.gif}"/>
+		      </div>
+			</div>
+		</div>	
+	</div>
+	
+	</div>
+</div>
+		
+<div  th:replace="layouts/base::footer"></div>
+
+<script type="text/javascript" th:src="@{/js/highchart/highcharts.js}"></script>
+<script type="text/javascript" th:src="@{/js/highchart/jquery.highchartTable-min.js}"></script>
+
+<!-- modulos adicionales highcharts -->
+<script type="text/javascript" th:src="@{/js/highchart/modules/no-data-to-display.js}"></script> 
+<script type="text/javascript" th:src="@{/js/highchart/modules/accessibility.js}"></script>
+<script type="text/javascript" th:src="@{/js/highchart/modules/exporting.js}"></script>
+<script type="text/javascript" th:src="@{/js/highchart/modules/export-csv.js}"></script> 
+<script type="text/javascript" th:src="@{/js/tabs-vertical.js}"></script> 
+<!-- <script type="text/javascript" src="https://api.highcharts.com/highcharts/chart.events.selection"></script> 
+<script type="text/javascript" src="http://api.highcharts.com/highcharts/Axis.update"></script> 
+<script type="text/javascript" src="https://api.highcharts.com/highcharts/yAxis.tickPositions"></script> --> 
+
+
+
+
+<!-- funciones de cada grafica -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+//accesibilidad cs y ps
+$('table.highchart.acc_cs_ps')
+.bind('highchartTable.beforeRender', function(event, highChartConfig) {
+  highChartConfig.chart.style = {
+			  "height": "400px"
+  };
+  highChartConfig.yAxis = {
+	      title: {
+	    		text : 'Porcentual (%)'  
+	      },
+		  max: '[[${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.max_acc, 1, 2, 'POINT')}]]',
+		  min: '[[${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.min_acc, 1, 2, 'POINT')}]]'
+  };
+
+  highChartConfig.yAxis.title.style = {
+  	  "color": "#444",
+  	  "fontSize": "14px",
+  	  "fontWeight": "Bold",
+  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.xAxis.style = {
+	  	  "color": "#444",
+	  	  "fontSize": "10px",
+	  	  "fontWeight": "300",
+	  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.title = {
+	  	      text: 'acc_cs_ps_[[${seguimiento_hist_id_3g.cellname}]]'
+  };
+  highChartConfig.title.style = { 
+	    "fontWeight": "Bold",
+  		"color": "#444",
+  		"fontSize" : "20px",
+  		"visibility" : "hidden"
+  };
+  /*highChartConfig.lang = {
+	    noData: "No hay información seleccionada"
+  };*/
+  /*highChartConfig.chart = {
+		zoomType: 'xy'
+  };*/
+})
+.highchartTable();
+
+});
+
+</script> 
+
+<!--  -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+//retenilibidad cs y ps
+$('table.highchart.ret_cs_ps')
+.bind('highchartTable.beforeRender', function(event, highChartConfig) {
+  highChartConfig.chart.style = {
+			  "height": "400px"
+  };
+  highChartConfig.yAxis = {
+	      title: {
+	    		text : 'Porcentual (%)'  
+	      },
+		  max: '[[${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.max_ret, 1, 2, 'POINT')}]]',
+		  min: '[[${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.min_ret, 1, 2, 'POINT')}]]'
+  };
+  highChartConfig.yAxis.title.style = {
+  	  "color": "#444",
+  	  "fontSize": "14px",
+  	  "fontWeight": "Bold",
+  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.xAxis.style = {
+	  	  "color": "#444",
+	  	  "fontSize": "10px",
+	  	  "fontWeight": "300",
+	  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.title = {
+	  	      text: 'ret_cs_ps_[[${seguimiento_hist_id_3g.cellname}]]'
+  };
+  highChartConfig.title.style = { 
+	    "fontWeight": "Bold",
+  		"color": "#444",
+  		"fontSize" : "20px",
+  		"visibility" : "hidden"
+  };
+  /*highChartConfig.lang = {
+	    noData: "No hay información seleccionada"
+  };*/
+})
+.highchartTable();
+
+});
+
+</script> 
+
+
+<!--  -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+//throuput DL y UL
+$('table.highchart.throuput')
+.bind('highchartTable.beforeRender', function(event, highChartConfig) {
+  highChartConfig.chart.style = {
+			  "height": "400px"
+  };
+  highChartConfig.yAxis = {
+	      title: {
+	    		text : 'Kbits'  
+	      }/*,
+	      max: '[[${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.max_throuput, 1, 2, 'POINT')}]]',
+		  min: '[[${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.min_throuput, 1, 2, 'POINT')}]]'*/
+  };
+  highChartConfig.yAxis.title.style = {
+  	  "color": "#444",
+  	  "fontSize": "14px",
+  	  "fontWeight": "Bold",
+  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.xAxis.style = {
+	  	  "color": "#444",
+	  	  "fontSize": "10px",
+	  	  "fontWeight": "300",
+	  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.title = {
+	  	      text: 'throuput_dl_ul_[[${seguimiento_hist_id_3g.cellname}]]'
+  };
+  highChartConfig.title.style = { 
+	    "fontWeight": "Bold",
+  		"color": "#444",
+  		"fontSize" : "20px",
+  		"visibility" : "hidden"
+  };
+  /*highChartConfig.lang = {
+	    noData: "No hay información seleccionada"
+  };*/
+})
+.highchartTable();
+
+});
+
+</script>
+
+
+<!--  -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+//dch users
+$('table.highchart.dch_users')
+.bind('highchartTable.beforeRender', function(event, highChartConfig) {
+  highChartConfig.chart.style = {
+			  "height": "400px"
+  };
+  highChartConfig.yAxis = {
+	      title: {
+	    		text : 'Users'  
+	      },
+	      max: '[[${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.max_dch_users, 1, 2, 'POINT')}]]',
+		  min: '[[${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.min_dch_users, 1, 2, 'POINT')}]]'
+  };
+  highChartConfig.yAxis.title.style = {
+  	  "color": "#444",
+  	  "fontSize": "14px",
+  	  "fontWeight": "Bold",
+  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.xAxis.style = {
+	  	  "color": "#444",
+	  	  "fontSize": "10px",
+	  	  "fontWeight": "300",
+	  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.title = {
+	  	      text: 'dch_users_[[${seguimiento_hist_id_3g.cellname}]]'
+  };
+  highChartConfig.title.style = { 
+	    "fontWeight": "Bold",
+  		"color": "#444",
+  		"fontSize" : "20px",
+  		"visibility" : "hidden"
+  };
+  /*highChartConfig.lang = {
+	    noData: "No hay información seleccionada"
+  };*/
+})
+.highchartTable();
+
+});
+
+</script>
+
+<!--  -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+//trafico_voz_erlang
+$('table.highchart.trafico_voz_erlang')
+.bind('highchartTable.beforeRender', function(event, highChartConfig) {
+  highChartConfig.chart.style = {
+			  "height": "400px"
+  };
+  highChartConfig.yAxis = {
+	      title: {
+	    		text : 'Erlangs'  
+	      }/*,
+	      max: '[[${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.max_trafico_voz_erlang, 1, 2, 'POINT')}]]',
+		  min: '[[${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.min_trafico_voz_erlang, 1, 2, 'POINT')}]]'*/
+  };
+  highChartConfig.yAxis.title.style = {
+  	  "color": "#444",
+  	  "fontSize": "14px",
+  	  "fontWeight": "Bold",
+  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.xAxis.style = {
+	  	  "color": "#444",
+	  	  "fontSize": "10px",
+	  	  "fontWeight": "300",
+	  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.title = {
+	  	      text: 'trafico_voz_erlang_[[${seguimiento_hist_id_3g.cellname}]]'
+  };
+  highChartConfig.title.style = { 
+	    "fontWeight": "Bold",
+  		"color": "#444",
+  		"fontSize" : "20px",
+  		"visibility" : "hidden"
+  };
+  /*highChartConfig.lang = {
+	    noData: "No hay información seleccionada"
+  };*/
+})
+.highchartTable();
+
+});
+
+</script>
+
+<!--  -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+//trafico_datos
+$('table.highchart.trafico_datos')
+.bind('highchartTable.beforeRender', function(event, highChartConfig) {
+  highChartConfig.chart.style = {
+			  "height": "400px"
+  };
+  highChartConfig.yAxis = {
+	      title: {
+	    		text : 'Kbytes'  
+	      }/*,
+	      max: '[[${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.max_trafico_datos, 1, 2, 'POINT')}]]',
+		  min: '[[${#numbers.formatDecimal(seguimiento_kpi_id_3g_max_min.min_trafico_datos, 1, 2, 'POINT')}]]'*/
+  };
+  highChartConfig.yAxis.title.style = {
+  	  "color": "#444",
+  	  "fontSize": "14px",
+  	  "fontWeight": "Bold",
+  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.xAxis.style = {
+	  	  "color": "#444",
+	  	  "fontSize": "10px",
+	  	  "fontWeight": "300",
+	  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.title = {
+	  	      text: 'trafico_datos_[[${seguimiento_hist_id_3g.cellname}]]'
+  };
+  highChartConfig.title.style = { 
+	    "fontWeight": "Bold",
+  		"color": "#444",
+  		"fontSize" : "20px",
+  		"visibility" : "hidden"
+  };
+  /*highChartConfig.lang = {
+	    noData: "No hay información seleccionada"
+  };*/
+})
+.highchartTable();
+
+});
+
+</script>
+
+
+<!--  -->
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+//Propagation Delay
+$('table.highchart.prop_delay')
+.bind('highchartTable.beforeRender', function(event, highChartConfig) {
+  highChartConfig.chart.style = {
+			  "height": "400px"
+  };
+  highChartConfig.yAxis = {
+	      title: {
+	    		text : 'Cantidad'  
+	      }/*,
+	      max: '[[${seguimiento_kpi_id_3g_max_min.max_vs_tp_ue}]]',
+		  min: '[[${seguimiento_kpi_id_3g_max_min.min_vs_tp_ue}]]'*/
+  };
+  highChartConfig.yAxis.title.style = {
+  	  "color": "#444",
+  	  "fontSize": "14px",
+  	  "fontWeight": "Bold",
+  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.xAxis.style = {
+	  	  "color": "#444",
+	  	  "fontSize": "10px",
+	  	  "fontWeight": "300",
+	  	  "fontFamily": "Verdana"
+  };
+  highChartConfig.title = {
+	  	      text: 'propagation_delay_[[${seguimiento_hist_id_3g.cellname}]]'
+  };
+  highChartConfig.title.style = { 
+	    "fontWeight": "Bold",
+  		"color": "#444",
+  		"fontSize" : "20px",
+  		"visibility" : "hidden"
+  };
+  /*highChartConfig.lang = {
+	    noData: "No hay información seleccionada"
+  };*/
+})
+.highchartTable();
+
+});
+
+</script>
+</body>
+</html>

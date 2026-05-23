@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layouts/base_baseline::head">
+</head>
+<body>
+<header th:replace="layouts/base_baseline5g4g::header"></header>
+<div class="main">
+	<div class="container">
+	
+<div id="loading-home-baseline" style="display: none;">
+	<div id="loading-indicator" class="lds-roller">
+	<div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+		
+	</div>
+	<div class="export_bs">
+		<span>Exportando datos...</span>
+	    <span id="loading-time"></span>
+	</div>
+	
+</div>	
+	<div class="formulario_baseline">
+	
+		<h1>Comparador Baseline 5G NSA (4G Side)</h1>
+		
+		<div class="content">
+		<p>Cargar Archivo en Formato CSV con los MBTS que se requiere informacion del Baseline con sus Scripts 
+		</p>
+		</div>
+		
+		<form id="uploadForm" enctype="multipart/form-data">
+		<input type="file" name="file" accept=".csv" required />
+		<button type="submit">Exportar Resultados Baseline</button>
+		</form>
+		
+		<h2>Guia de uso</h2>
+		<div class="content">
+		<p>En el boton de arriba deberas cargar un csv con los mbts (MBTS_#### , etc).<br>Aqui podras descargar el archivo ejemplo para usar la herramienta.<br><strong style="color: red;">IMPORTANTE:</strong> Ademas la lista de sitios que pasaron el filtro de comparacion esta abajo (SITIOS PERMITIDOS).</p> 
+		</div>		
+		<a class="dlink" th:href="@{/files/baseline5gnsa_example.csv}">Descargar Archivo csv</a>
+		
+		
+		<h3>Sites Permitidos (MBTS)</h3>
+		<div class="content">
+		<p>Lista de MBTS que actualmente pasaron por los filtro del baseline.</p>
+		<a class="btn sites_link" href="#">Mostrar Sites</a>
+		</div>
+		
+		<h3>Archivos Baseline 5G parametros formato</h3>
+		<div class="content">
+		<p>Aqui podras descargar el Baseline 5G de donde se basa el generador</p> 
+		</div>		
+		<a class="dlink" th:href="@{/files/BASELINE_5G_NSA_RF.xlsx}">Descargar Archivo</a>
+		
+	</div>
+
+<p th:text="${message}"></p>
+	
+	<div id="sites_pop" class="sites_popup" style="display: none;">
+			<button id="download_button" class="btn">Descargar Sitios Permitidos</button>
+			<a class="btn sites_close" href="#">CERRAR</a>
+	
+			<table id="sites_data_table">
+				<thead>
+				<tr>
+				<th>LISTA DE MBTS NAME</th>
+				</tr>
+				</thead>
+				<tbody>
+				 <!-- Los datos se llenarán aquí usando AJAX --> 
+				</tbody>
+			</table>
+			
+	</div>
+	
+</div>
+</div>
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+<script>
+$('#uploadForm').on('submit', function(event) {
+event.preventDefault();
+
+// Limpiar intervalo previo
+if (intervalId) {
+clearInterval(intervalId);
+}
+
+// Reiniciar tiempo inicial
+var startTime = new Date();
+var timerElement = document.getElementById("loading-time"); // Cambie "loading-time" por el ID de su elemento de tiempo
+
+// Mostrar icono de carga
+$("#loading-home-baseline").show();
+
+var formData = new FormData(this);
+
+// Iniciar bucle temporal
+var intervalId = setInterval(function() {
+// Calcular tiempo transcurrido
+var elapsedTime = Math.floor((new Date() - startTime) / 1000);
+
+// Actualizar elemento del tiempo
+timerElement.textContent = `Cargando... ${elapsedTime} segundos`;
+}, 1000); // Actualizar cada segundo
+
+$.ajax({
+url: '/baseline-5g-nsa/upload',
+type: 'POST',
+data: formData,
+processData: false,
+contentType: false,
+xhrFields: {
+responseType: 'blob'
+},
+success: function(blob) {
+var date = new Date();
+var filename = `baselinedata_${date.getFullYear()}_${date.getMonth() + 1}_${date.getDate()}_${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.csv`;
+
+var url = window.URL.createObjectURL(blob);
+var a = document.createElement('a');
+a.href = url;
+a.download = filename;
+document.body.appendChild(a);
+a.click();
+window.URL.revokeObjectURL(url);
+
+// Detener contador de tiempo y calcular la duración
+var endTime = new Date();
+var elapsedTime = (endTime - startTime) / 1000; // Convertir milisegundos a segundos
+
+// Actualizar el elemento del tiempo con la duración
+timerElement.textContent = `Descarga completada en ${elapsedTime.toFixed(2)} segundos`; // Formatear a 2 decimales
+
+alert('CSV exportado exitosamente.');
+},
+error: function() {
+alert('Error al exportar el CSV.');
+
+// Detener contador en caso de error
+var endTime = new Date();
+var elapsedTime = (endTime - startTime) / 1000;
+timerElement.textContent = `Error. Tiempo transcurrido: ${elapsedTime.toFixed(2)} segundos`;
+}
+}).always(function() {
+// Detener bucle al finalizar la solicitud
+clearInterval(intervalId);
+
+// Ocultar icono de carga
+$("#loading-home-baseline").hide();
+});
+});
+</script>
+
+<script>
+$(document).ready(function() {
+	
+// Cargar datos para list sites
+$.ajax({
+url: '/baseline-5g-nsa/sites',
+method: 'GET',
+success: function(data) {
+var tbody = $('#sites_pop tbody');
+tbody.empty(); // Limpia cualquier dato existente
+data.forEach(function(item) {
+var row = $('<tr>');
+row.append($('<td>').text(item.mbts_name));
+tbody.append(row);
+});
+}
+});
+
+
+
+});
+
+/*btn popup abrir*/
+var showSitesButton = document.querySelector('.sites_link');
+var sitesPopup = document.getElementById('sites_pop');
+
+showSitesButton.addEventListener('click', function(event) {
+	
+  event.preventDefault();
+
+  sitesPopup.style.display = (sitesPopup.style.display === 'none') ? 'block' : 'none';
+  
+});
+
+/*btn popup cerrar*/
+var showSitesButton = document.querySelector('.sites_close');
+var sitesPopup = document.getElementById('sites_pop');
+
+
+showSitesButton.addEventListener('click', function(event) {
+
+  event.preventDefault();
+
+  sitesPopup.style.display = (sitesPopup.style.display === 'none') ? 'block' : 'none';
+  
+});
+/**/
+ 
+ 
+/*descargar**/
+$(document).ready(function() {
+	
+	const downloadButton = document.getElementById('download_button');
+	const sitesDataTable = document.getElementById('sites_data_table');
+
+	downloadButton.addEventListener('click', function() {
+	  const data = [];
+
+	  // Extraer los datos de las filas de la tabla
+	  const rows = sitesDataTable.querySelectorAll('tbody tr');
+	  for (const row of rows) {
+	    const cells = row.querySelectorAll('td');
+	    const rowData = [];
+	    for (const cell of cells) {
+	      rowData.push(cell.textContent);
+	    }
+	    data.push(rowData);
+	  }
+
+	  // Convertir los datos a formato CSV
+	  const csvString = data.map(row => row.join(',')).join('\n');
+
+	  // Descargar el archivo CSV
+	  const blob = new Blob([csvString], { type: 'text/csv' });
+	  
+	  var date = new Date();
+	  var filename = `baselinedata_${date.getFullYear()}_${date.getMonth() + 1}_${date.getDate()}_${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.csv`;
+	  
+	  //const filename = 'datos_tabla.csv';
+	  const downloadLink = document.createElement('a');
+	  downloadLink.href = URL.createObjectURL(blob);
+	  downloadLink.download = filename;
+	  downloadLink.click();
+	});
+	
+});
+</script>
+
+</body>
+</html>

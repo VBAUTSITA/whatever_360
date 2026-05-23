@@ -1,0 +1,190 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<body>
+<header th:replace="layouts/base_libreria::header"></header>
+
+<div class="main">
+	<div class="container">
+		
+		<div class="title-main archivo">
+			<h2>
+				CATEGORIA: REPORTES
+				<img src="../static/images/ico-libreria-cat.png" th:src="@{/images/ico-libreria-cat.png}"/>
+			</h2>
+		</div>
+		
+		<div class="formulario_capas">		
+		<form method="post" enctype="multipart/form-data" action="#" th:action="@{/archivador/subir}">
+				<input type="file" name="archivo" id="archivo" required>
+				<span>Max. 100mb size</span>
+				<input required type="text" maxlength="1000" name="descripcion_archivo_libreria" placeholder="Descripción del Archivo"/>
+				<select name="usuario_libreria" class="form-control" id="usuario_libreria" style="display:none;">				    
+						        <option selected="selected" th:value="${#request.userPrincipal.name}">
+						        	<span th:utext="${#request.userPrincipal.name}"></span>	
+						        </option>			    
+				</select>	
+				<select name="categoria_libreria" id="categoria_libreria" required="required">				    
+						        <option selected="selected" value="">Elegir Categoría</option>
+						        <option value="planificacion">Planificación</option>
+						        <option value="optimizacion">Optimización</option>
+						        <option value="reportes">Reportes</option>
+						        <option value="datasheet">Datasheet RF</option>
+						        <option value="otros">Otros</option>			    
+				</select>				
+				<input style="display:none;" type="text" id="fecha_carga" name="fecha_carga" th:value="${#dates.format(#dates.createNow() , 'dd/MM/yyyy HH:mm:ss')}">
+				<button type="submit">Subir</button>
+				
+			</form>	
+			
+		<table id="lista_capas_files" style="width:100%">
+			<thead>
+				<tr>
+					<th style="display: none;">Id Archivo</th>
+					<th>Nombre Archivo</th>
+					<th>Descripción Archivo</th>										
+					<th>Usuario</th>
+					<th>Fecha Carga</th>
+					<th>Categoria</th>
+					<th>Descargar</th>
+					<th>Eliminar</th>
+				</tr>
+			</thead>
+			<tbody>
+			  <sec:authorize access="hasAuthority('USER')">
+			    <th:block th:fragment="usuarioActualFiltrado">
+			 <!-- <tr th:each="archivo : ${archivos}" th:if="${#request.userPrincipal.name == 'c19543'}">-->
+			      <tr th:each="archivo : ${archivos}" th:if="${archivo.categoria_libreria == 'reportes'}">
+			        <td th:text="${archivo.id_libreria}" style="display: none;"></td>
+			        <td th:text="${archivo.nombre_archivo_libreria}"></td>
+			        <td th:text="${archivo.descripcion_archivo_libreria}"></td>							
+			        <td th:text="${archivo.usuario_libreria}"></td>	
+			        <!--<td th:text="${#dates.format(archivo.fecha_carga, 'dd/MM/yyyy HH:mm:ss')}"></td>-->
+					<td th:text="${archivo.fecha_carga}"></td>
+					<td th:text="${archivo.categoria_libreria}" style="text-transform: uppercase;"></td>
+			        <td>
+			          <a th:href="@{/archivador/descargar/{id}(id=${archivo.id_libreria})}">Descargar</a>
+			        </td>
+			        <td>			
+						<a class="btn_eliminar" th:href="@{/archivador/eliminar/{id}(id=${archivo.id_libreria})}" 
+						onclick="return confirmarEliminacion(this)">
+							Eliminar Archivo
+						</a>
+					</td>
+			      </tr>
+			    </th:block>
+			  </sec:authorize>
+			</tbody>			
+			<tfoot style="display: none;">
+				<tr>
+					<th scope="row" style="display: none;">Id Archivo</th>
+					<th scope="row">Nombre Archivo</th>
+					<th scope="row">Descripción Archivo</th>										
+					<th scope="row">Usuario</th>
+					<th scope="row">Fecha Carga</th>
+					<th scope="row">Categoria</th>
+					<th scope="row">Descargar</th>
+					<th scope="row">Eliminar</th>
+				</tr>
+	        </tfoot> 
+		</table>
+		</div>
+	</div>
+</div>
+	
+		
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/bcrypt/tools.js}"></script>
+<script type="text/javascript" th:src="@{/js/bcrypt/bcrypt.js}"></script>
+<script type="text/javascript" th:src="@{/js/bcrypt/tools-impl.js}"></script>
+<script>
+// Tamaño maximo del archivo
+const maxSize = 100000000; 
+
+// Obtener referencia al elemento
+const $miInput = document.querySelector("#archivo");
+
+$miInput.addEventListener("change", function () {
+    // si no hay archivos, regresamos
+    if (this.files.length <= 0) return;
+
+    // Validamos el primer archivo únicamente
+    const archivo = this.files[0];
+    if (archivo.size > maxSize) {
+        const tamanioEnMb = maxSize / 1000000;
+        alert(`El tamaño máximo es ${tamanioEnMb} MB`);
+        // Limpiar
+        $miInput.value = "";
+    } else {
+        // Validación pasada. Envía el formulario o haz lo que tengas que hacer
+    }
+});
+</script>
+
+<script>
+function confirmarEliminacion(enlace) {
+	  // Obtener el ID del archivo a eliminar
+	  const idArchivo = enlace.getAttribute("href").split("/").pop();
+
+	  // Mostrar un mensaje de confirmación al usuario
+	  //const confirmacion = confirm(`¿Estás seguro de eliminar el archivo con ID ${idArchivo}?`);
+	  const confirmacion = confirm(`¿Estás seguro de eliminar el archivo?`);
+
+	  // Si el usuario confirma, permitir la navegación al enlace
+	  if (confirmacion) {
+	    return true;
+	  }
+
+	  // Si el usuario no confirma, cancelar la acción y evitar la navegación
+	  return false;
+	}
+</script>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+<script>
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#lista_capas_files tfoot th').each( function () {
+        var title = $(this).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+ 
+    
+    // DataTable
+    var table = $('#lista_capas_files').DataTable({
+    	"aaSorting": [0, 'desc'],
+    	dom: 'Bfrtip',
+        buttons: ['copy'],
+        scrollY:        "400px",
+        scrollX:        true,
+        scrollCollapse: true,
+        fixedColumns:  true	  
+    });
+
+ 
+    // Apply the search
+    table.columns().every( function () {
+        var that = this;
+ 
+        $( 'input', this.footer() ).on( 'keyup change clear', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+    } );
+} );
+</script>
+</body>
+</html>

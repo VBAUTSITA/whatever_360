@@ -1,0 +1,155 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">   
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<body>
+<header th:replace="layouts/base::header"></header>
+<div class="preloader">
+   <div class="loader">
+        <div class="loader-inner"></div>
+   </div>
+</div>
+
+<div class="main">
+	<div class="container">
+		
+		<div class="title-main">
+			<h2>Lista de Seguimientos Masivos</h2>
+			<h6>(la carga de información puede tomar unos minutos, la cantidad de información es extensa)</h6>	
+		</div>
+		
+        
+		<a class="btn btn-primary add_btn" href="#" 
+			th:href="@{'/seguimiento/add/'}" role="button">
+			Agregar Nuevo Seguimiento</a>
+
+<div class="box-lista-seguimiento">			
+		<table id="lista_segui" class="table table-striped table-bordered list_results" style="width:100%">
+			<thead>
+				<tr>
+					<th scope="row">SITIO</th>
+					<th scope="row">CELLNAME</th>
+					<th scope="row">SECTOR</th>
+					<th scope="row">BANDA</th>
+					<th scope="row">TECNOLOGIA</th>					
+					<th scope="row">TILT_ELECTRICO</th>
+					<th scope="row">AZIMUTH</th>
+					<th scope="row">ALTURA</th>
+					<th scope="row">TILT_MECANICO</th>
+					<th scope="row">CAMBIOS_LOGICOS</th>
+					<th style="width: 70px;"  scope="row">FECHA</th>
+					<th scope="row">USUARIO</th>
+					<th scope="row">ESTADO_CAMBIO</th>
+					<th scope="row">EDITAR</th>
+					<th scope="row">HISTORIAL</th>
+				</tr>
+			</thead>
+			<tbody>
+						
+					<tr th:each="seguimiento : ${seguimiento_list_masivo}">
+						<td th:text="${seguimiento.code_site }"></td>
+						<td th:text="${seguimiento.cellname }"></td>
+						<td th:text="${seguimiento.sector }"></td>
+						<td th:text="${seguimiento.band }"></td>
+						<td th:text="${seguimiento.tecnologia }"></td>					
+						<td th:text="${seguimiento.tilt_electric_field }"></td>
+						<td th:text="${seguimiento.azimuth }"></td>
+						<td th:text="${seguimiento.height }"></td>
+						<td th:text="${seguimiento.tilt_mecanic_field }"></td>
+						<td><div th:text="${seguimiento.logic_changes }" class="limit_height"></div></td>
+						<td style="width: 58px;" th:text="${seguimiento.fecha}"></td>	
+											
+						<td th:text="${seguimiento.usuario }"></td>
+						<td th:text="${seguimiento.estado_cambio }"></td>
+						<td>
+							<a class="btn btn-primary" href="#" 
+								th:href="@{'/seguimiento/update/'+${seguimiento.site_id}}" role="button">
+								Actualizar</a>
+						</td>
+						<td>
+							<a class="btn btn-primary" href="#" 
+									th:href="@{'/seguimiento/hist/'+${seguimiento.site_id}}" role="button">
+									Detalles</a>
+						</td>
+					</tr>
+			</tbody>
+			<tfoot style="display: none;">
+	            <tr>
+	                <th scope="row">SITIO</th>
+					<th scope="row">CELLNAME</th>
+					<th scope="row">SECTOR</th>
+					<th scope="row">BANDA</th>
+					<th scope="row">TECNOLOGIA</th>					
+					<th scope="row">TILT_ELECTRICO</th>
+					<th scope="row">AZIMUTH</th>
+					<th scope="row">ALTURA</th>
+					<th scope="row">TILT_MECANICO</th>
+					<th scope="row">CAMBIOS_LOGICOS</th>
+					<th scope="row">FECHA</th>
+					<th scope="row">USUARIO</th>
+					<th scope="row">ESTADO_CAMBIO</th>
+					<th scope="row">Editar</th>
+					<th scope="row">Historial</th>
+	            </tr>
+	        </tfoot>			 
+		</table>
+</div>
+
+
+
+
+	</div>
+</div>
+		
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+<script>
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#lista_segui tfoot th').each( function () {
+        var title = $(this).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+ 
+    // DataTable
+    var table = $('#lista_segui').DataTable({
+    	"aaSorting": [],
+    	dom: 'Bfrtip',
+        buttons: ['copy','csv'],
+        scrollY:        "400px",
+        scrollX:        true,
+        scrollCollapse: true,
+        fixedColumns:  true	  
+    });
+
+ 
+    // Apply the search
+    table.columns().every( function () {
+        var that = this;
+ 
+        $( 'input', this.footer() ).on( 'keyup change clear', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+    } );
+} );
+</script>
+
+
+
+</body>
+</html>
