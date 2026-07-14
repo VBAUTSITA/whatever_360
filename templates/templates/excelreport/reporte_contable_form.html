@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- Reuse the app's shared head/header/footer fragments so this page keeps
+     the exact same look & navigation as the rest of the portal. -->
+<head th:replace="layouts/base_inventariostock::head">
+</head>
+
+<body>
+
+<header th:replace="layouts/base_inventariostock::header"></header>
+
+<div class="main maestro_baseline">
+	<div class="container">
+
+		<div class="title-main">
+			<h2 style="text-transform: initial;font-size: 27px;font-family: 'Verdana';">
+			REPORTE CONTABLE EXCEL
+				<br><span>MUESTRA — INVENTARIO VALORIZADO (APACHE POI)</span>
+			</h2>
+		</div>
+
+		<p style="max-width:720px;color:#555;">
+			Edite los campos y presione <b>Generar Excel</b>. El servidor toma los
+			datos existentes del m&oacute;dulo de inventario
+			(<code>InventarioInmovil2</code>, filtrado por semana), los valoriza con
+			el costo unitario indicado y construye un archivo <b>.xlsx</b> con
+			formato contable: cabecera, 3 tablas de 2 columnas, totales con
+			f&oacute;rmula <code>=SUM()</code> y doble subrayado contable.
+		</p>
+
+		<!-- Plain HTML POST: field names match the properties of
+		     ReporteContableParams, so Spring binds them automatically via
+		     @ModelAttribute. CSRF is disabled app-wide (WebSecurityConfig),
+		     so no hidden token is needed. -->
+		<form th:action="@{/excelreport/contable/download}" method="post"
+		      style="max-width:720px;background:#f7f7f9;border:1px solid #ddd;border-radius:6px;padding:18px 22px;">
+
+			<div style="display:flex;flex-wrap:wrap;gap:14px;">
+
+				<label style="flex:1 1 100%;font-size:13px;">
+					T&iacute;tulo del reporte
+					<input type="text" name="titulo" th:value="${params.titulo}"
+					       style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+				</label>
+
+				<label style="flex:1 1 100%;font-size:13px;">
+					Empresa (membrete)
+					<input type="text" name="empresa" th:value="${params.empresa}"
+					       style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+				</label>
+
+				<label style="flex:1 1 30%;font-size:13px;">
+					Semana (filtro de datos)
+					<input type="number" name="semana" min="1" th:value="${params.semana}"
+					       style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+				</label>
+
+				<label style="flex:1 1 30%;font-size:13px;">
+					Moneda
+					<select name="moneda"
+					        style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+						<option value="S/"  th:selected="${params.moneda == 'S/'}">S/ (Soles)</option>
+						<option value="US$" th:selected="${params.moneda == 'US$'}">US$ (D&oacute;lares)</option>
+					</select>
+				</label>
+
+				<label style="flex:1 1 30%;font-size:13px;">
+					Costo unitario referencial
+					<input type="number" name="costoUnitario" step="0.01" min="0"
+					       th:value="${params.costoUnitario}"
+					       style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+				</label>
+
+				<label style="flex:1 1 100%;font-size:13px;">
+					Elaborado por
+					<input type="text" name="elaboradoPor" th:value="${params.elaboradoPor}"
+					       style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+				</label>
+
+				<label style="flex:1 1 100%;font-size:13px;">
+					Notas al pie (opcional)
+					<textarea name="notas" rows="2" th:text="${params.notas}"
+					          style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;"></textarea>
+				</label>
+			</div>
+
+			<div style="margin-top:16px;">
+				<button type="submit" class="btn"
+				        style="padding:8px 22px;cursor:pointer;">Generar Excel</button>
+			</div>
+		</form>
+
+		<p style="max-width:720px;color:#888;font-size:12px;margin-top:14px;">
+			El archivo se descarga como
+			<code>reporte_contable_semana_N.xlsx</code>. La l&oacute;gica de
+			construcci&oacute;n (estilos, colores, formatos num&eacute;ricos,
+			bordes, f&oacute;rmulas) est&aacute; comentada paso a paso en
+			<code>com.tracker.web.excelreport.AccountantExcelBuilder</code>.
+		</p>
+
+	</div>
+</div>
+
+<div th:replace="layouts/base_inventariostock::footer"></div>
+
+</body>
+</html>
