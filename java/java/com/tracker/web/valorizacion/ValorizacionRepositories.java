@@ -17,16 +17,9 @@ import org.springframework.stereotype.Repository;
 interface PapValorizacionRepository extends JpaRepository<PapValorizacion, Long> {
 }
 
-/**
- * FAREND candidates. findAll() is used for the nearest-site search, which
- * is fine for a catalog of hundreds/thousands of sites. If the real table
- * is huge, replace with a native query that filters by a bounding box (or
- * SDO_NN / earthdistance depending on the database) before the exact
- * Haversine comparison.
- */
-@Repository
-interface FarendSiteRepository extends JpaRepository<FarendSite, String> {
-}
+// FAREND lookup is NOT a JpaRepository: it reads tm_conf_actual_celda_4g
+// through native SQL with a bounding-box pre-filter — see FarendTmConfDao,
+// which mirrors the recursos module's RedExistenteServiceImpl pattern.
 
 @Repository
 interface FormValorizacionIndoorRepository

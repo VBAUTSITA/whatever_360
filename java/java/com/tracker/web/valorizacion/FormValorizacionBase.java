@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -26,15 +27,19 @@ import javax.persistence.TemporalType;
  * the PAP data or the price list changes tomorrow, the numbers signed
  * today must stay reproducible.
  *
- * ID strategy: IDENTITY works on MySQL/Postgres/Oracle 12c+. If this app's
- * Oracle needs a sequence, switch to
- * @GeneratedValue(strategy = SEQUENCE, generator = "...") per subclass.
+ * ID strategy: SEQUENCE, because this app runs on Oracle 11g (ojdbc6),
+ * which does not support identity columns — the recursos module's entity
+ * (RECURSOS_SEQ) follows the same convention. The three subclasses share
+ * one sequence (create it with the DDL in the README); sharing is fine,
+ * ids just won't be consecutive per table.
  */
 @MappedSuperclass
 public abstract class FormValorizacionBase {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "FORM_VALORIZACION_SEQ")
+    @SequenceGenerator(name = "FORM_VALORIZACION_SEQ",
+            sequenceName = "FORM_VALORIZACION_SEQ", allocationSize = 1)
     @Column(name = "ID")
     private Long id;
 

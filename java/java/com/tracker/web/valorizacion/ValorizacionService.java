@@ -1,7 +1,6 @@
 package com.tracker.web.valorizacion;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -27,16 +26,16 @@ import com.tracker.web.valorizacion.ValorizacionResult.Linea;
 public class ValorizacionService {
 
     private final PapValorizacionRepository papRepo;
-    private final FarendSiteRepository farendRepo;
+    private final FarendTmConfDao farendDao;
     private final FormValorizacionIndoorRepository indoorRepo;
     private final FormValorizacionOutdoorRepository outdoorRepo;
 
     public ValorizacionService(PapValorizacionRepository papRepo,
-                               FarendSiteRepository farendRepo,
+                               FarendTmConfDao farendDao,
                                FormValorizacionIndoorRepository indoorRepo,
                                FormValorizacionOutdoorRepository outdoorRepo) {
         this.papRepo = papRepo;
-        this.farendRepo = farendRepo;
+        this.farendDao = farendDao;
         this.indoorRepo = indoorRepo;
         this.outdoorRepo = outdoorRepo;
     }
@@ -68,41 +67,16 @@ public class ValorizacionService {
         out.put("latitud", pap.getLatitud());
         out.put("longitud", pap.getLongitud());
 
-        FarendSite farend = farendMasCercano(pap.getLatitud(), pap.getLongitud());
+        FarendTmConfDao.FarendCercano farend =
+                farendDao.buscarMasCercano(pap.getLatitud(), pap.getLongitud());
         if (farend != null) {
             out.put("farend", farend.getCodigo());
             out.put("farendLatitud", farend.getLatitud());
             out.put("farendLongitud", farend.getLongitud());
             out.put("farendDistanciaKm",
-                    Math.round(haversineKm(pap.getLatitud(), pap.getLongitud(),
-                            farend.getLatitud(), farend.getLongitud()) * 100.0) / 100.0);
+                    Math.round(farend.getDistanciaKm() * 100.0) / 100.0);
         }
         return out;
-    }
-
-    /**
-     * Nearest FAREND by great-circle (air) distance. Linear scan over the
-     * catalog — simple and correct; see FarendSiteRepository's note for the
-     * scale-up path. Returns null when there is no catalog or no coords.
-     */
-    public FarendSite farendMasCercano(Double lat, Double lon) {
-        if (lat == null || lon == null) {
-            return null;
-        }
-        List<FarendSite> sitios = farendRepo.findAll();
-        FarendSite mejor = null;
-        double mejorDist = Double.MAX_VALUE;
-        for (FarendSite s : sitios) {
-            if (s.getLatitud() == null || s.getLongitud() == null) {
-                continue;
-            }
-            double d = haversineKm(lat, lon, s.getLatitud(), s.getLongitud());
-            if (d < mejorDist) {
-                mejorDist = d;
-                mejor = s;
-            }
-        }
-        return mejor;
     }
 
     /** Standard Haversine great-circle distance in kilometers. */
@@ -143,7 +117,10 @@ public class ValorizacionService {
         r.setRruLatitud(pap.getLatitud());
         r.setRruLongitud(pap.getLongitud());
 
-        FarendSite farend = farendMasCercano(pap.getLatitud(), pap.getLongitud());
+        // FAREND from the live network inventory (tm_conf_actual_celda_4g),
+        // same source the recursos planner reads the deployed 4G network from.
+        FarendTmConfDao.FarendCercano farend =
+                farendDao.buscarMasCercano(pap.getLatitud(), pap.getLongitud());
         if (farend != null) {
             r.setFarend(farend.getCodigo());
             r.setBbuLatitud(farend.getLatitud());

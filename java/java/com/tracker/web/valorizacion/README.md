@@ -22,7 +22,7 @@ POST /valorizacion/generar
 | Rule | Where |
 |---|---|
 | PAP fields consumed: IDVALORIZACION, NOMBRE_EMPRESA, DIRECCION, LAT/LON | `PapValorizacion` |
-| Nearest FAREND by coordinates (Haversine) | `ValorizacionService.farendMasCercano` |
+| Nearest FAREND by coordinates: native SQL on `tm_conf_actual_celda_4g` (bounding-box pre-filter + Haversine), same pattern as recursos' `RedExistenteServiceImpl`; lat/lon are VARCHAR2 → `TO_NUMBER` in SQL + defensive re-parse in Java | `FarendTmConfDao` |
 | Solution types as dropdown, with tech/frequencies fixed per type (INDOOR 4G 2600; OUTDOOR y COMBINADO 4G 1900/2600) | `TipoSolucion` + form |
 | INDOOR: #antenas = ceil(área/250), sectores = antenas; per BOOK RRU: 1 material + 2 celdas; planos por tramo de área; implementación por RRU; transporte item único; integración 0 | `PreciarioValorizacion`, `calcularIndoor` |
 | OUTDOOR: EMs typed (default 1); per EM: 1 material + 3 celdas; TI/energía/integración por EM; SAQ por poste; planos 0 | `calcularOutdoor` |
@@ -45,15 +45,18 @@ disabled. The reference workbooks live in `docs/valorizacion/`.
 --   PAP(IDVALORIZACION PK, NOMBRE_EMPRESA, DIRECCION_VALORIZACION,
 --       LATITUD, LONGITUD)
 
-CREATE TABLE FAREND_SITES (
-    CODIGO    VARCHAR(64) PRIMARY KEY,   -- e.g. 'LI0029_LOS_FLAMENCOS'
-    LATITUD   DOUBLE PRECISION,
-    LONGITUD  DOUBLE PRECISION
-);
+-- FAREND source: tm_conf_actual_celda_4g (already exists — live network
+-- inventory, also read by the recursos module). No new table needed.
+-- FarendTmConfDao reads SECTOR_NAME, LATITUD, LONGITUD from it; if the
+-- printed site code needs deriving from SECTOR_NAME, adjust
+-- FarendTmConfDao.normalizarSite().
+
+-- Shared id sequence (Oracle 11g has no identity columns):
+CREATE SEQUENCE FORM_VALORIZACION_SEQ;
 
 -- One per template version; identical core + type-specific extras.
 CREATE TABLE FORM_VALORIZACION_INDOOR (
-    ID                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ID                  BIGINT PRIMARY KEY,   -- fed by FORM_VALORIZACION_SEQ
     ID_VALORIZACION     BIGINT,
     AREA_TOTAL_M2       DOUBLE PRECISION,
     CANTIDAD_PISOS      INTEGER,
@@ -87,8 +90,9 @@ CREATE TABLE FORM_VALORIZACION_OUTDOOR_PLUSINDOOR (
 );
 ```
 
-(Oracle: use `NUMBER` types and a sequence + `@GeneratedValue(SEQUENCE)` if
-IDENTITY isn't available.)
+(Column types shown generically — on Oracle use `NUMBER`/`VARCHAR2`. The
+entities already use `@GeneratedValue(SEQUENCE)` against
+`FORM_VALORIZACION_SEQ`, matching the recursos module's convention.)
 
 ## Dependency
 
