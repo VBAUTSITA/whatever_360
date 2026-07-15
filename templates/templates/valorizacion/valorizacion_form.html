@@ -1,0 +1,210 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head th:replace="layouts/base_inventariostock::head">
+</head>
+
+<body>
+
+<header th:replace="layouts/base_inventariostock::header"></header>
+
+<div class="main maestro_baseline">
+	<div class="container">
+
+		<div class="title-main">
+			<h2 style="text-transform: initial;font-size: 27px;font-family: 'Verdana';">
+			PLATAFORMA DE VALORIZACIONES
+				<br><span>GENERADOR DE EXCEL — INDOOR (BOOKRRU) / OUTDOOR (EASY MACRO)</span>
+			</h2>
+		</div>
+
+		<div th:if="${errorValorizacion}" style="color:#b00;background:#fdecec;border:1px solid #f5b5b5;border-radius:4px;padding:8px 12px;max-width:760px;margin-bottom:12px;">
+			<b th:text="${errorValorizacion}">Error</b>
+		</div>
+
+		<form th:action="@{/valorizacion/generar}" method="post"
+		      style="max-width:760px;background:#f7f7f9;border:1px solid #ddd;border-radius:6px;padding:18px 22px;">
+
+			<!-- ============ 1. PAP lookup (auto-fill) ============ -->
+			<fieldset style="border:1px solid #ccc;border-radius:4px;margin-bottom:14px;padding:10px 14px;">
+				<legend style="font-size:13px;font-weight:bold;">1. Solicitud PAP</legend>
+
+				<div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+					<label style="font-size:13px;">
+						ID VALORIZACIÓN *
+						<input type="number" id="idValorizacion" name="idValorizacion" required
+						       th:value="${input.idValorizacion}"
+						       style="display:block;width:160px;padding:6px;border:1px solid #ccc;border-radius:4px;">
+					</label>
+					<button type="button" id="btnBuscarPap" class="btn" style="padding:7px 16px;cursor:pointer;">Buscar en PAP</button>
+					<span id="papEstado" style="font-size:12px;color:#888;"></span>
+				</div>
+
+				<!-- Read-only: these come from the PAP black box, never typed. -->
+				<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;">
+					<label style="flex:1 1 45%;font-size:12px;color:#555;">
+						Nombre empresa (PAP)
+						<input type="text" id="papEmpresa" readonly
+						       style="width:100%;padding:5px;border:1px solid #ddd;background:#eee;border-radius:4px;">
+					</label>
+					<label style="flex:1 1 45%;font-size:12px;color:#555;">
+						Dirección de valorización (PAP)
+						<input type="text" id="papDireccion" readonly
+						       style="width:100%;padding:5px;border:1px solid #ddd;background:#eee;border-radius:4px;">
+					</label>
+					<label style="flex:1 1 30%;font-size:12px;color:#555;">
+						Coordenadas (Lat / Lon)
+						<input type="text" id="papCoords" readonly
+						       style="width:100%;padding:5px;border:1px solid #ddd;background:#eee;border-radius:4px;">
+					</label>
+					<label style="flex:1 1 30%;font-size:12px;color:#555;">
+						FAREND más cercano
+						<input type="text" id="papFarend" readonly
+						       style="width:100%;padding:5px;border:1px solid #ddd;background:#eee;border-radius:4px;">
+					</label>
+				</div>
+			</fieldset>
+
+			<!-- ============ 2. Solution + RF inputs ============ -->
+			<fieldset style="border:1px solid #ccc;border-radius:4px;padding:10px 14px;">
+				<legend style="font-size:13px;font-weight:bold;">2. Datos RF</legend>
+
+				<div style="display:flex;gap:12px;flex-wrap:wrap;">
+					<label style="flex:1 1 45%;font-size:13px;">
+						Tipo de solución *
+						<!-- Dropdown on purpose: "para minimizar errores, estos se
+						     deben poner como opciones despegables". Values are the
+						     TipoSolucion enum names. -->
+						<select name="tipoSolucion" id="tipoSolucion"
+						        style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+							<option value="INDOOR"
+							        th:selected="${input.tipoSolucion.name() == 'INDOOR'}">
+								INDOOR — solución BOOKRRU — 4G (2600)</option>
+							<option value="OUTDOOR"
+							        th:selected="${input.tipoSolucion.name() == 'OUTDOOR'}">
+								OUTDOOR — solución POSTE/NAT (Easy Macro) — 4G (1900/2600)</option>
+							<option value="INDOOR_MAS_OUTDOOR" disabled>
+								INDOOR + OUTDOOR — template combinado (próximamente)</option>
+						</select>
+					</label>
+
+					<label style="flex:1 1 45%;font-size:13px;">
+						Área total de las zonas a valorizar (m2) *
+						<input type="number" name="areaTotalM2" step="0.01" min="1" required
+						       th:value="${input.areaTotalM2}"
+						       style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+						<small id="hintAntenas" style="color:#888;">
+							INDOOR: #antenas = área / 250 m2, redondeado hacia arriba.
+						</small>
+					</label>
+
+					<label style="flex:1 1 22%;font-size:13px;">
+						Cantidad de pisos
+						<input type="number" name="cantidadPisos" min="1"
+						       th:value="${input.cantidadPisos}"
+						       style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+					</label>
+
+					<label style="flex:1 1 40%;font-size:13px;">
+						Pisos a detalle
+						<input type="text" name="pisosDetalle" placeholder="Ej.: Piso 15 / Pisos 6-7 / SOTANO 1"
+						       th:value="${input.pisosDetalle}"
+						       style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+					</label>
+
+					<label style="flex:1 1 22%;font-size:13px;">
+						Departamento
+						<input type="text" name="departamento"
+						       th:value="${input.departamento}"
+						       style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+					</label>
+
+					<!-- Only meaningful for OUTDOOR; JS hides them otherwise. -->
+					<label style="flex:1 1 22%;font-size:13px;" class="soloOutdoor">
+						Antenas Easy Macro
+						<input type="number" name="antenasEm" min="1"
+						       th:value="${input.antenasEm}"
+						       style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+					</label>
+
+					<label style="flex:1 1 22%;font-size:13px;" class="soloOutdoor">
+						Cantidad de postes (SAQ)
+						<input type="number" name="cantidadPostes" min="1"
+						       th:value="${input.cantidadPostes}"
+						       style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+					</label>
+				</div>
+			</fieldset>
+
+			<div style="margin-top:16px;">
+				<button type="submit" class="btn" style="padding:8px 22px;cursor:pointer;">
+					Generar valorización (Excel)
+				</button>
+				<span style="font-size:12px;color:#888;margin-left:10px;">
+					Se guarda un registro en FORM_VALORIZACION_* y se descarga el .xlsx
+				</span>
+			</div>
+		</form>
+
+	</div>
+</div>
+
+<div th:replace="layouts/base_inventariostock::footer"></div>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+(function () {
+	// ---- PAP auto-fill: GET /valorizacion/api/pap/{id} -------------------
+	var btn = document.getElementById('btnBuscarPap');
+	var estado = document.getElementById('papEstado');
+
+	function buscarPap() {
+		var id = document.getElementById('idValorizacion').value;
+		if (!id) { estado.textContent = 'Ingrese un ID primero'; return; }
+		estado.textContent = 'Buscando…';
+		fetch(/*[[@{/valorizacion/api/pap/}]]*/ '/valorizacion/api/pap/' + '' + id,
+				{ headers: { 'Accept': 'application/json' } })
+			.then(function (r) { return r.json(); })
+			.then(function (d) {
+				if (!d.encontrado) {
+					estado.textContent = 'ID no encontrado en el PAP';
+					estado.style.color = '#b00';
+					return;
+				}
+				estado.textContent = 'OK — datos jalados del PAP';
+				estado.style.color = 'green';
+				document.getElementById('papEmpresa').value = d.nombreEmpresa || '';
+				document.getElementById('papDireccion').value = d.direccion || '';
+				document.getElementById('papCoords').value =
+					(d.latitud != null ? d.latitud : '') + ' / ' + (d.longitud != null ? d.longitud : '');
+				document.getElementById('papFarend').value =
+					(d.farend || '—') + (d.farendDistanciaKm != null ? '  (' + d.farendDistanciaKm + ' km)' : '');
+			})
+			.catch(function () { estado.textContent = 'Error consultando el PAP'; estado.style.color = '#b00'; });
+	}
+	btn.addEventListener('click', buscarPap);
+	document.getElementById('idValorizacion').addEventListener('change', buscarPap);
+
+	// ---- show/hide the outdoor-only inputs -------------------------------
+	var tipo = document.getElementById('tipoSolucion');
+	function toggleOutdoor() {
+		var esOutdoor = tipo.value === 'OUTDOOR';
+		var nodos = document.querySelectorAll('.soloOutdoor');
+		for (var i = 0; i < nodos.length; i++) {
+			nodos[i].style.display = esOutdoor ? '' : 'none';
+		}
+		document.getElementById('hintAntenas').textContent = esOutdoor
+			? 'OUTDOOR: generalmente 1 sola EM; ajuste las antenas si aplica.'
+			: 'INDOOR: #antenas = área / 250 m2, redondeado hacia arriba.';
+	}
+	tipo.addEventListener('change', toggleOutdoor);
+	toggleOutdoor();
+})();
+/*]]>*/
+</script>
+
+</body>
+</html>
