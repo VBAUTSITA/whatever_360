@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head th:replace="layouts/base_auditoriared::head"></head>
+
+<body>
+<header th:replace="layouts/base_auditoriared::header"></header>
+
+<div class="main">
+<div class="container" id="auditoria-red"
+     th:attr="data-sitios-url=@{/auditoria-red/api/sitios},data-ejecutar-url=@{/auditoria-red/api/ejecutar},data-sitio-url=@{/auditoria-red/api/sitio},data-radio-max=${radioMaxKm},data-reuso-max=${radioReusoKm}">
+
+	<div class="title-main">
+		<h2 id="ar-titulo">Auditoría de red 4G / 5G</h2>
+	</div>
+
+	<p class="ar-nota" id="ar-intro">
+		Solo lectura. Revisa colisiones PCI, colisiones RSI y confusión mod-3 entre celdas existentes,
+		con el mismo motor que usa la planificación. La auditoría corre solo al pulsar <b>Auditar</b>.
+	</p>
+
+	<form id="ar-form" autocomplete="off">
+	<table class="ar-form">
+		<tr>
+			<td class="ar-etq">Sitio o celda</td>
+			<td>
+				<div class="ar-buscador">
+					<input type="text" id="ar-sitio" class="ar-ancho" placeholder="Parte del nombre de celda, p. ej. LI0137">
+					<div id="ar-sugerencias" class="ar-sugerencias" hidden></div>
+				</div>
+				<span class="ar-nota">o haga clic en el mapa para fijar el centro</span>
+			</td>
+		</tr>
+		<tr>
+			<td class="ar-etq">Centro</td>
+			<td>
+				Lat <input type="number" id="ar-lat" step="any">
+				Lon <input type="number" id="ar-lon" step="any">
+			</td>
+		</tr>
+		<tr>
+			<td class="ar-etq">Radio (km)</td>
+			<td>
+				<input type="number" id="ar-radio" step="0.5" min="0.5" value="3">
+				<span class="ar-nota" id="ar-radio-nota"></span>
+			</td>
+		</tr>
+		<tr>
+			<td class="ar-etq">Radio de reuso (km)</td>
+			<td>
+				<input type="number" id="ar-reuso" step="0.5" min="0.5">
+				<span class="ar-nota" id="ar-reuso-nota"></span>
+			</td>
+		</tr>
+		<tr>
+			<td class="ar-etq">Tecnología</td>
+			<td>
+				<label class="checkbox inline"><input type="checkbox" id="ar-4g" checked> 4G</label>
+				<label class="checkbox inline"><input type="checkbox" id="ar-5g" checked> 5G</label>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>
+				<button type="submit" id="ar-auditar" class="btn btn-primary">Auditar</button>
+				<button type="button" id="ar-recalcular" class="btn">Recalcular sin caché</button>
+			</td>
+		</tr>
+	</table>
+	</form>
+
+	<div id="ar-estado"></div>
+	<div id="ar-tope" class="ar-aviso" hidden></div>
+
+	<div id="ar-sitio-panel" hidden>
+		<b>Celdas del sitio</b>
+		<span class="ar-nota">— elija una: el mapa muestra solo su carrier y banda, las únicas celdas que pueden
+			interferirla, con sus 30 vecinas existentes. Borde blanco: celda planificada; borde negro: celda con
+			hallazgo; línea negra: hallazgo de la celda elegida.</span>
+		<div id="ar-sitio-celdas"></div>
+	</div>
+
+	<div id="ar-mapa"></div>
+	<p class="ar-nota">
+		Cada sector se dibuja como en el paso 6 del motor: azimuth efectivo (MM_1..MM_4 desplazados −30/−10/+10/+30°),
+		ancho de haz según TXRX y radio según TA (donde el tráfico acumula el 80 %; sin TA, promedio de sus 30 vecinas).
+		Color = MOD (PCI mod 3), con el número dentro (con muchas celdas, al acercar). Borde negro: celda con hallazgo. Borde
+		discontinuo: celda del margen. Círculo amarillo: área auditada. Círculo naranja discontinuo: margen de reuso.
+	</p>
+
+	<h4>Hallazgos</h4>
+	<table class="ar-filtros">
+		<tr>
+			<td>Tipo<br><select id="ar-f-tipo"><option value="">Todos</option></select></td>
+			<td>Tecnología<br><select id="ar-f-tec"><option value="">Todas</option></select></td>
+			<td>Carrier<br><select id="ar-f-carrier"><option value="">Todos</option></select></td>
+			<td>Banda<br><select id="ar-f-banda"><option value="">Todas</option></select></td>
+			<td>Celda contiene<br><input type="text" id="ar-f-texto"></td>
+			<td><label class="checkbox"><input type="checkbox" id="ar-f-solo"> En el mapa, solo celdas con hallazgo</label></td>
+			<td><button type="button" id="ar-csv" class="btn" disabled>Exportar CSV</button></td>
+		</tr>
+	</table>
+	<div id="ar-conteo" class="ar-nota">Todavía no se ha ejecutado una auditoría.</div>
+
+	<table class="table table-bordered ar-tabla">
+		<thead>
+			<tr>
+				<th>Tipo</th><th>Valor</th><th>Celda A</th><th>Celda B</th><th>Tec.</th>
+				<th>Carrier / banda</th><th>Distancia (m)</th><th>Motivo</th>
+			</tr>
+		</thead>
+		<tbody id="ar-hallazgos"></tbody>
+	</table>
+
+</div>
+</div>
+
+<div th:replace="layouts/base_auditoriared::footer"></div>
+
+<script th:src="@{/js/leaflet/leaflet.js}"></script>
+<script th:src="@{/js/auditoriared.js}"></script>
+</body>
+</html>

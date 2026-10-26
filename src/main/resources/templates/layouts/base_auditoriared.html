@@ -1,0 +1,151 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head th:fragment="head">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>ActiTracker</title>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+
+	<script type="text/javascript" th:src="@{/js/jquery-3.3.1.min.js}"></script>
+
+	<!-- Bootstrap CSS -->
+	<link href="../static/css/boostrap-responsive.min.css" rel="stylesheet"
+		th:href="@{/css/boostrap-responsive.min.css}">
+
+	<link href="../static/css/bootstrap-theme.min.css" rel="stylesheet"
+		th:href="@{/css/bootstrap-theme.min.css}">
+
+	<link href="../static/css/bootstrap.min.css" rel="stylesheet"
+		th:href="@{/css/bootstrap.min.css}">
+
+	<link href="../static/css/estilos.css" rel="stylesheet"
+		th:href="@{/css/estilos.css}">
+
+	<link href="../static/css/font-awesome.min.css" rel="stylesheet"
+		th:href="@{/css/font-awesome.min.css}">
+
+	<link href="../static/js/leaflet/leaflet.css" rel="stylesheet"
+		th:href="@{/js/leaflet/leaflet.css}">
+
+	<!-- favicon -->
+	<link rel="apple-touch-icon" sizes="120x120" href="../static/images/favicon/apple-touch-icon.png" th:href="@{/images/favicon/apple-touch-icon.png}">
+	<link rel="icon" type="image/png" sizes="32x32" href="../static/images/favicon/favicon-32x32.png" th:href="@{/images/favicon/favicon-32x32.png}">
+	<link rel="icon" type="image/png" sizes="16x16" href="../static/images/favicon/favicon-16x16.png" th:href="@{/images/favicon/favicon-16x16.png}">
+	<meta name="theme-color" content="#ffffff">
+
+	<style>
+		[hidden] { display: none !important; }
+		.ar-form td { padding: 4px 10px 4px 0; vertical-align: middle; }
+		.ar-form td.ar-etq { font-weight: bold; white-space: nowrap; }
+		.ar-form input[type=text], .ar-form input[type=number] { width: 150px; margin: 0; }
+		.ar-form input.ar-ancho { width: 320px; }
+		.ar-buscador { position: relative; display: inline-block; }
+		.ar-sugerencias { position: absolute; z-index: 1000; top: 100%; left: 0; width: 320px;
+			max-height: 220px; overflow-y: auto; background: #fff; border: 1px solid #999; }
+		.ar-sugerencias div { padding: 3px 6px; cursor: pointer; font-size: 12px; }
+		.ar-sugerencias div:hover { background: #ddd; }
+		.ar-nota { color: #666; font-size: 12px; }
+		.ar-aviso { color: #a00; font-weight: bold; margin: 6px 0; }
+		#ar-mapa { height: 520px; border: 1px solid #999; margin: 8px 0 4px; }
+		.ar-filtros td { padding: 4px 10px 4px 0; vertical-align: bottom; }
+		.ar-filtros select, .ar-filtros input[type=text] { width: 140px; margin: 0; }
+		.ar-tabla td, .ar-tabla th { padding: 3px 6px !important; font-size: 12px; }
+		.ar-tabla tbody tr { cursor: pointer; }
+		.ar-tabla tbody tr.ar-sel td { background: #ffe9a8; }
+		.ar-leyenda-mod { background: #fff; padding: 4px 8px; border: 1px solid #999; font-size: 12px; line-height: 18px; }
+		.ar-leyenda-mod label { display: block; margin: 0; font-weight: normal; cursor: pointer; white-space: nowrap; }
+		/* estilos.css pone los input en bloque y a todo el ancho: aqui van en linea con su color. */
+		.ar-leyenda-mod input { display: inline-block !important; width: auto !important; height: auto !important;
+			float: none !important; margin: 0 4px 0 0 !important; vertical-align: middle; }
+		.ar-muestra { display: inline-block; width: 12px; height: 10px; vertical-align: middle; }
+		.ar-etiqueta-mod { color: #000; font: bold 11px Arial, sans-serif; text-align: center; line-height: 14px; }
+		#ar-sitio-panel { margin: 10px 0 4px; }
+		#ar-sitio-celdas .btn { margin: 4px 6px 4px 0; }
+		.ar-regla { background: #fff; font-size: 12px; line-height: 18px; max-width: 300px; }
+		.ar-regla-boton { border: 0; background: #fff; padding: 4px 10px; font-weight: bold; cursor: pointer; }
+		.ar-regla.activa .ar-regla-boton { background: #c00; color: #fff; }
+		.ar-regla-panel { padding: 4px 10px 6px; border-top: 1px solid #ccc; }
+		.ar-regla-panel .btn { margin: 4px 4px 0 0; }
+		.ar-regla-total { font-weight: bold; }
+		.ar-regla-rotulo span { color: #c00; font: bold 11px Arial, sans-serif; white-space: nowrap;
+			background: rgba(255,255,255,.85); padding: 0 3px; border-radius: 2px; }
+	</style>
+</head>
+
+<body>
+
+		<header th:fragment="header">
+            <div class="top-bar">
+                <div class="container">
+                    <div class="row-fluid stats-box">
+                        <div class="span6">
+                            <div class="logo">
+                                <img src="../static/images/claro-logo.png" th:src="@{/images/claro-logo.png}" width="128" height="128" alt="claro-logo"/>
+                            </div>
+                        	<div class="title-logo">
+                        		<a href="#" th:href="@{/home}"><h2>ActiTracker</h2></a>
+                        	</div>
+                        </div>
+                    	<div class="span6" style="text-align:right;">
+                            <div class="nav-collapse collapse">
+                                <div class="nav-user-setting">
+                                <div>
+                                    <ul class="nav superNav">
+                                        <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Bienvenid@, <span th:utext="${#request.userPrincipal?.name}"></span> <b class="caret"></b></a>
+                                            <ul class="dropdown-menu">
+                                                <li><a href="#"><i class="icon-cog"></i> Mi Cuenta</a></li>
+                                                <li class="divider"></li>
+                                                <li><a th:if="${#request.userPrincipal != null}" th:href="@{/logout}"><i class="icon-off"></i> Cerrar Sesión</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            	</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-head">
+                <div class="container">
+                <div class="row-fluid stats-box">
+                    <div class="span6">
+                       <div class="box-title-head">
+                           <a href="#" th:href="@{/auditoria-red}"><h4>Auditoría de Red</h4></a>
+                       </div>
+                    </div>
+                    <div class="span6">
+                        <div class="menu-pages">
+                             <ul>
+                                <li><a href="#" th:href="@{/home}" class="btn btn-secondary">Home</a></li>
+                                <li><a href="#" th:href="@{/auditoria-red}" class="btn btn-secondary">Auditar cluster</a></li>
+                             </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           </div>
+        </header>
+
+
+	<div th:fragment="footer">
+
+	<div class="footer">
+            <div class="footer-inner">
+                <div class="container">
+                    <div class="row">
+                        <div style="text-align:right;"> © 2024 Planificación de Radio </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+	        <script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+	</div>
+
+</body>
+</html>
