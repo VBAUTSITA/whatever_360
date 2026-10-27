@@ -242,3 +242,11 @@ Registro de trabajo del 2026-10-27 (America/Lima), destinado a integrarse al reg
 - Capturas finales inspeccionadas: `dense-selected-evidence-desktop.png`, `selected-evidence-mobile.png`, `sparse-unknown-range.png`, `overflow-unknown-range.png`, además de vacío e inicial. Las cuatro primeras se recapturaron con helper temporal en `target/browser/oracle/capture-stable.cjs` tras asentarse animación Leaflet y mosaicos, porque la primera captura instantánea coincidió con una transición de zoom. No se alteraron datos ni respuestas para estas capturas. Basemap OSM visible y atribuido.
 - Verificación adicional: el ensayo Oracle detectó URL de navegación reescrita con `;jsessionid`; se corrigió la comparación de ruta para que el enlace del panel conserve estado activo en sesiones con CSRF. El ensayo final lo comprueba. El buscador con múltiples resultados comprueba flecha arriba → último resultado, abajo → primero y Enter para elegir.
 - El login/identidad del fixture no es el login corporativo; los mosaicos externos no son evidencia RF ni Oracle. El esquema y datos corporativos continúan pendientes de validación productiva.
+
+## D-007 — Publicación en rama nueva (confirmada, 2026-10-27)
+
+- Solicitud explícita del usuario: publicar el trabajo en otra rama.
+- Rama nueva: feature/auditoria-red-oracle-validada, en VBAUTSITA/whatever_360. La primera publicación contiene el código verificado del commit fd89aad133c80220d70b2913384a93967d3cb07c; esta actualización sólo registra la publicación.
+- Se conserva la rama remota feature/auditoria-red-dashboard en d2f10fa51ac3e78b6c15d067001628bc29b09a99 y main en 2b4dd40a9cd3c7ead545b21fefb35c3f229516a5. Sin merge ni force-push.
+- La copia autoritativa continúa en auditoria-red-publicacion, ahora con checkout y seguimiento de feature/auditoria-red-oracle-validada. La rama indicada en la evaluación inicial describe el punto de partida histórico.
+- Verificación: push inicial completado; publicación final cotejada mediante git ls-remote y HEAD. Las pruebas de D-006 corresponden al mismo código; este registro no cambia lógica ni recursos ejecutables.
