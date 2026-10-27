@@ -26,16 +26,18 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/** Llama a PCIPlanner.auditarRed de los motores JS de produccion. Ninguna regla de PCI/RSI vive en Java. */
+/** Motores de referencia conservados y capa propia de auditoría; reglas y huellas explícitas. */
 @Component
 public class AdaptadorMotorAuditoria implements MotorAuditoria {
 
     /** Propio del modulo: solo usa funciones exportadas por el motor (PoolCarrier, DEFAULTS). */
     static final String RUTA_GEOMETRIA = "scripts/auditoriared/geometria_sectores.js";
+    static final String RUTA_MODELO = "scripts/auditoriared/auditoria_modelo.js";
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final Map<String, Script> scripts = new LinkedHashMap<>();
     private final Script scriptGeometria = Script.cargar(RUTA_GEOMETRIA);
+    private final Script scriptModelo = Script.cargar(RUTA_MODELO);
     private final Map<String, ScriptEngine> motores = new HashMap<>();
 
     public AdaptadorMotorAuditoria(
@@ -48,7 +50,7 @@ public class AdaptadorMotorAuditoria implements MotorAuditoria {
     @Override
     public String version(String tecnologia) {
         Script s = scripts.get(tecnologia);
-        return s == null ? "" : s.version();
+        return s == null ? "" : s.version() + " + " + scriptModelo.version() + " + " + scriptGeometria.version();
     }
 
     @Override
@@ -63,7 +65,7 @@ public class AdaptadorMotorAuditoria implements MotorAuditoria {
             // Los datos viajan como texto en una variable y se parsean dentro del motor:
             // nunca se concatenan al codigo fuente (evita inyeccion y el problema de U+2028).
             engine.put("__auditoriaFilas", mapper.writeValueAsString(porGrupo(tecnologia, celdas)));
-            Object bruto = engine.eval("JSON.stringify(PCIPlanner.auditarRed(JSON.parse(__auditoriaFilas), "
+            Object bruto = engine.eval("JSON.stringify(AuditoriaModelo.auditar(JSON.parse(__auditoriaFilas), "
                     + "{radioReuso: " + radioReusoMetros + ", cap: " + tope + "}))");
             if (!(bruto instanceof String)) {
                 throw new IllegalStateException("auditarRed no devolvio JSON");
@@ -93,11 +95,12 @@ public class AdaptadorMotorAuditoria implements MotorAuditoria {
                 Map.Entry<String, JsonNode> e = it.next();
                 JsonNode g = e.getValue();
                 Double az = nullable(g, "az"), haz = nullable(g, "hbeam"), radio = nullable(g, "radio");
-                if (az == null || haz == null || haz <= 0 || haz > 360 || radio == null || radio <= 0) {
+                if (az == null || haz == null || haz <= 0 || haz > 360 || (radio != null && radio <= 0)) {
                     throw new IllegalStateException("El motor devolvio geometria incompleta para " + e.getKey());
                 }
                 salida.put(e.getKey().trim().toUpperCase(Locale.ROOT), new GeometriaSector(
-                        az, haz, radio, g.path("sinTa").asBoolean(false)));
+                        az, haz, radio, g.path("sinTa").asBoolean(false), g.path("fuenteRadio").asText(),
+                        g.path("vecinasRespaldo").asInt(0)));
             }
             return salida;
         } catch (ScriptException | IOException e) {
@@ -111,7 +114,9 @@ public class AdaptadorMotorAuditoria implements MotorAuditoria {
             if (!tecnologia.equals(celda.getTecnologia())) {
                 throw new IllegalArgumentException("Celda de otra tecnologia en el motor " + tecnologia);
             }
-            String grupo = claveGrupo(celda);
+            // Un canal explícito coincidente puede cruzar etiquetas carrier. La compatibilidad
+            // de cada par se resuelve en el modelo; sin canal conserva el grupo candidato carrier/banda.
+            String grupo = "RED";
             List<Map<String, Object>> filas = porGrupo.get(grupo);
             if (filas == null) {
                 filas = new ArrayList<>();
@@ -128,6 +133,13 @@ public class AdaptadorMotorAuditoria implements MotorAuditoria {
         String banda = celda.getBanda() == null ? "" : celda.getBanda().trim().toUpperCase(Locale.ROOT);
         return carrier + "|" + banda;
     }
+
+    static boolean compatibles(CeldaAuditoriaDTO a, CeldaAuditoriaDTO b) {
+        if (!a.getTecnologia().equals(b.getTecnologia())) return false;
+        if (a.getCanalRadio() != null && b.getCanalRadio() != null) return a.getCanalRadio().equals(b.getCanalRadio());
+        return normalizar(a.getCarrier()).equals(normalizar(b.getCarrier())) && normalizar(a.getBanda()).equals(normalizar(b.getBanda()));
+    }
+    private static String normalizar(String valor) { return valor == null ? "" : valor.trim().toUpperCase(Locale.ROOT); }
 
     private ResultadoMotor leer(String tecnologia, String json) throws IOException {
         JsonNode raiz = mapper.readTree(json);
@@ -185,8 +197,9 @@ public class AdaptadorMotorAuditoria implements MotorAuditoria {
                 if (c == null) throw new IllegalStateException("La vecindad incluyo una celda desconocida");
                 c = c.copia();
                 Double radio = nullable(n, "radioM"), azimuth = nullable(n, "azimuthEfectivo"), haz = nullable(n, "hbeam");
-                if (radio != null && radio > 0 && azimuth != null && haz != null && haz > 0) {
-                    c.aplicarGeometria(new GeometriaSector(azimuth, haz, radio, n.path("sinTaVecina").asBoolean()));
+                if (azimuth != null && haz != null && haz > 0) {
+                    c.aplicarGeometria(new GeometriaSector(azimuth, haz, radio, n.path("sinTaVecina").asBoolean(),
+                            n.path("fuenteRadio").asText(), n.path("vecinasRespaldo").asInt(0)));
                 }
                 salida.add(new InteraccionVecinaDTO(c, n.path("distanciaMetros").asDouble(),
                         nullable(n, "areaInterseccionM2"), nullable(n, "interseccionNormalizadaM"),
@@ -216,6 +229,9 @@ public class AdaptadorMotorAuditoria implements MotorAuditoria {
                     + "La auditoria requiere Java 8 (Nashorn se retiro en JDK 15).");
         }
         engine.eval(script.fuente);
+        engine.eval(scriptModelo.fuente);
+        engine.put("__auditoriaTecnologia", tecnologia);
+        engine.eval("AuditoriaModelo.configurar(__auditoriaTecnologia)");
         engine.eval(scriptGeometria.fuente);
         motores.put(tecnologia, engine);
         return engine;

@@ -67,7 +67,7 @@ public class FiabilidadDashboardTest {
     @Test public void filtrarYPaginarNoCambiaElUniverso() {
         SolicitudDashboard s = solicitud(); s.setTamanoPagina(1); s.setPagina(2);
         Map<String,Object> r = panel.consultar(s); assertEquals(2,r.get("totalHallazgos")); assertEquals(2,r.get("totalPaginas"));
-        s.setPagina(1); s.getFiltros().put("tipo", Arrays.asList("Colision PCI"));
+        s.setPagina(1); s.getFiltros().put("tipo", Arrays.asList("Colisión PCI potencial"));
         s.getFiltros().put("celda", Arrays.asList("b"));
         r = panel.consultar(s); assertEquals(1,r.get("totalFiltrados")); assertEquals(2,r.get("totalHallazgos"));
         assertEquals(3,motor.llamadas.get(0).size()); assertEquals(1,motor.llamadas.size());

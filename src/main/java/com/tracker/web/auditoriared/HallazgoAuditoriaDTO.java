@@ -26,6 +26,10 @@ public final class HallazgoAuditoriaDTO {
     public String getValor() { return valor; }
     public double getDistanciaMetros() { return distanciaMetros; }
     public String getMotivo() { return motivo; }
+    public String getEvidenciaFrecuencia() {
+        return celdaA.getCanalRadio() != null && celdaA.getCanalRadio().equals(celdaB.getCanalRadio())
+                ? "CANAL_COINCIDENTE" : "FRECUENCIA_NO_VERIFICADA";
+    }
     public CeldaAuditoriaDTO getCeldaA() { return celdaA; }
     public CeldaAuditoriaDTO getCeldaB() { return celdaB; }
 }

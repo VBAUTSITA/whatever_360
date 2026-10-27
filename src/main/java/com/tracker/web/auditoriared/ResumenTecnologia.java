@@ -11,6 +11,12 @@ public final class ResumenTecnologia {
     private int filasLeidas;
     private int descartadasSinDatos;
     private int duplicadas;
+    private int duplicadasConflictivas;
+    private int celdasSinFrecuencia;
+    private int taAusente;
+    private int taInvalido;
+    private int taOverflow;
+    private int geometriaSinRadio;
     private int fueraDelCirculo;
     private int celdasEnArea;
     private int celdasEnMargen;
@@ -28,6 +34,18 @@ public final class ResumenTecnologia {
     public int getFilasLeidas() { return filasLeidas; }
     public int getDescartadasSinDatos() { return descartadasSinDatos; }
     public int getDuplicadas() { return duplicadas; }
+    public int getDuplicadasConflictivas() { return duplicadasConflictivas; }
+    public int getCeldasSinFrecuencia() { return celdasSinFrecuencia; }
+    public int getTaAusente() { return taAusente; }
+    public int getTaInvalido() { return taInvalido; }
+    public int getTaOverflow() { return taOverflow; }
+    public int getGeometriaSinRadio() { return geometriaSinRadio; }
+    void setDuplicadasConflictivas(int n) { duplicadasConflictivas = n; }
+    void setCeldasSinFrecuencia(int n) { celdasSinFrecuencia = n; }
+    void setTaAusente(int n) { taAusente = n; }
+    void setTaInvalido(int n) { taInvalido = n; }
+    void setTaOverflow(int n) { taOverflow = n; }
+    void setGeometriaSinRadio(int n) { geometriaSinRadio = n; }
     public int getFueraDelCirculo() { return fueraDelCirculo; }
     public int getCeldasEnArea() { return celdasEnArea; }
     public int getCeldasEnMargen() { return celdasEnMargen; }
@@ -60,6 +78,8 @@ public final class ResumenTecnologia {
         ResumenTecnologia r = new ResumenTecnologia(tecnologia);
         r.motor = motor; r.filasLeidas = filasLeidas; r.descartadasSinDatos = descartadasSinDatos;
         r.duplicadas = duplicadas; r.fueraDelCirculo = fueraDelCirculo; r.celdasEnArea = celdasEnArea;
+        r.duplicadasConflictivas = duplicadasConflictivas; r.celdasSinFrecuencia = celdasSinFrecuencia;
+        r.taAusente = taAusente; r.taInvalido = taInvalido; r.taOverflow = taOverflow; r.geometriaSinRadio = geometriaSinRadio;
         r.celdasEnMargen = celdasEnMargen; r.conflictosMotor = conflictosMotor;
         r.conflictosSoloMargen = conflictosSoloMargen; r.hallazgos = hallazgos;
         r.geometriaDisponible = geometriaDisponible; r.setCapped(capped, cappedTipos);

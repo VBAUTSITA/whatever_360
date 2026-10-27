@@ -30,6 +30,6 @@ Ejemplo de consulta:
 }
 ```
 
-La celda objetivo debe pertenecer al área consultada. La lista de vecinas no se filtra mediante los filtros de hallazgos. Una banda o un texto que oculta una fila no puede alterar las reglas del motor.
+La celda objetivo debe pertenecer al área consultada. La lista de vecinas no se filtra mediante los filtros de hallazgos. Una banda o un texto que oculta una fila no puede alterar las reglas del motor. Con ambos canales radio explícitos se exige igualdad de canal; sin ambos, carrier/banda delimita sólo el grupo candidato. El SQL actual no aporta canal RF. El filtro de calidad informa geometría no disponible cuando radio=null, incluso si el TA es válido pero P80 cae en el intervalo abierto.
 
 Para soportar polígonos de clúster, implemente otro `Alcance`, con pertenencia exacta, caja con margen y clave de caché que incluya la geometría completa. Después añada el DTO de solicitud y un selector respaldado por una fuente de clústeres. La versión actual usa `ClusterAlcance` circular y no ofrece un selector de clústeres ficticio.

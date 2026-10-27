@@ -17,6 +17,8 @@ public final class ResultadoAuditoria {
     private final boolean desdeCache;
     private final List<String> avisos;
     private final List<CeldaAuditoriaDTO> contexto;
+    private long generadoEnEpochMs;
+    private long edadMs;
 
     public ResultadoAuditoria(Alcance alcance, List<ResumenTecnologia> resumen,
             List<CeldaAuditoriaDTO> celdas, List<HallazgoAuditoriaDTO> hallazgos,
@@ -63,8 +65,10 @@ public final class ResultadoAuditoria {
         }
         List<ResumenTecnologia> nuevoResumen = new ArrayList<>();
         for (ResumenTecnologia r : resumen) nuevoResumen.add(r.copia());
-        return new ResultadoAuditoria(alcance, nuevoResumen, nuevasCeldas, nuevosHallazgos,
+        ResultadoAuditoria r = new ResultadoAuditoria(alcance, nuevoResumen, nuevasCeldas, nuevosHallazgos,
                 duracionMs, generadoEn, cache, avisos, nuevoContexto);
+        r.marcarTiempo(generadoEnEpochMs, edadMs);
+        return r;
     }
 
     /** Contexto completo para inspeccionar vecinos; nunca se envia entero por JSON. */
@@ -77,6 +81,10 @@ public final class ResultadoAuditoria {
     public List<HallazgoAuditoriaDTO> getHallazgos() { return hallazgos; }
     public long getDuracionMs() { return duracionMs; }
     public String getGeneradoEn() { return generadoEn; }
+    public long getGeneradoEnEpochMs() { return generadoEnEpochMs; }
+    public long getEdadSegundos() { return edadMs / 1000; }
+    public String getZonaHoraria() { return "America/Lima"; }
+    void marcarTiempo(long generadoMs, long edadMs) { this.generadoEnEpochMs = generadoMs; this.edadMs = edadMs; }
     public boolean isDesdeCache() { return desdeCache; }
     /** Lo que se dejo fuera y el usuario tiene que saber (p. ej. celdas 3G de un sitio). */
     public List<String> getAvisos() { return avisos; }

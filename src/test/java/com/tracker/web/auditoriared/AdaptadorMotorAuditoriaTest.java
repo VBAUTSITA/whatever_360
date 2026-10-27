@@ -43,7 +43,7 @@ public class AdaptadorMotorAuditoriaTest {
     @Test
     public void laVersionIdentificaArchivoYHuella() {
         AdaptadorMotorAuditoria adaptador = new AdaptadorMotorAuditoria(RUTA_4G, RUTA_5G);
-        assertTrue(adaptador.version("4G").matches("planner_4g_2_MIRROR_FIXED\\.js \\([0-9A-F]{8}\\)"));
+        assertTrue(adaptador.version("4G").matches("planner_4g_2_MIRROR_FIXED\\.js \\([0-9A-F]{8}\\) \\+ auditoria_modelo\\.js \\([0-9A-F]{8}\\) \\+ geometria_sectores\\.js \\([0-9A-F]{8}\\)"));
         assertTrue(adaptador.version("5G").startsWith("old_planner_5g.js ("));
     }
 
@@ -105,7 +105,7 @@ public class AdaptadorMotorAuditoriaTest {
         AdaptadorMotorAuditoria adaptador = new AdaptadorMotorAuditoria(RUTA_4G, RUTA_5G);
         List<CeldaAuditoriaDTO> celdas = new java.util.ArrayList<>(Arrays.asList(
                 conTa("LIL0001C1_MM_2", "4G", "32T32R", 100, -12.090, 0.5, 0.4, 0.1),
-                conTa("LIL0001C1", "4G", "4T4R", 100, -12.091, 0.9),
+                conTa("LIL0001C1", "4G", "4T4R", 100, -12.091, 0.9, 0.1),
                 conTa("LIL0002C1", "4G", "4T4R", 200, -12.095)));
         for (int i = 0; i < 40; i++) celdas.add(conTa("X" + i, "4G", "4T4R", 0, -12.10 - i * 0.003, 0, 0, 1));
 
@@ -127,7 +127,7 @@ public class AdaptadorMotorAuditoriaTest {
         assumeTrue(hayNashorn());
         AdaptadorMotorAuditoria adaptador = new AdaptadorMotorAuditoria(RUTA_4G, RUTA_5G);
         java.util.Map<String, GeometriaSector> g = adaptador.geometria("5G",
-                Arrays.asList(conTa("LIR0001C1_MM_2", "5G", "32T32R", 100, -12.09, 0.9)),
+                Arrays.asList(conTa("LIR0001C1_MM_2", "5G", "32T32R", 100, -12.09, 0.9, 0.1)),
                 Arrays.asList("LIR0001C1_MM_2"));
         assertEquals(90, g.get("LIR0001C1_MM_2").getAzimuthEfectivo(), 1e-9);
         assertEquals(100, g.get("LIR0001C1_MM_2").getHbeam(), 1e-9);   // en 5G el motor usa 100 tambien en MM

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.LongSupplier;
 
@@ -100,8 +101,8 @@ public class AuditoriaRedService {
     }
 
     /**
-     * Basta con el radio de reuso: el motor no marca colision a un par mas lejano que eso,
-     * asi que la pareja de una celda del area siempre cae dentro del margen. 0.1 km de holgura.
+     * Garantiza pares PCI/RSI dentro del radio. No certifica la cobertura del modelo PSS
+     * ni del promedio de 30 vecinas: éstos se limitan explícitamente al contexto cargado.
      */
     static double margenPara(double radioReusoKm) { return radioReusoKm + 0.1; }
 
@@ -135,11 +136,18 @@ public class AuditoriaRedService {
      */
     public ResultadoAuditoria auditarSitio(List<CeldaAuditoriaDTO> planificadas, List<String> avisos) {
         if (planificadas == null || planificadas.isEmpty()) throw new IllegalArgumentException("No hay celdas 4G/5G que auditar");
-        double lat = 0, lon = 0;
+        double x = 0, y = 0, z = 0;
         for (CeldaAuditoriaDTO c : planificadas) {
-            lat += c.getLatitud() / planificadas.size();
-            lon += c.getLongitud() / planificadas.size();
+            if (c == null || !TECNOLOGIAS.contains(c.getTecnologia()) || !Double.isFinite(c.getLatitud())
+                    || !Double.isFinite(c.getLongitud()) || Math.abs(c.getLatitud()) > 90 || Math.abs(c.getLongitud()) > 180) {
+                throw new IllegalArgumentException("Las celdas planificadas requieren tecnología 4G/5G y coordenadas válidas");
+            }
+            double p = Math.toRadians(c.getLatitud()), l = Math.toRadians(c.getLongitud());
+            x += Math.cos(p) * Math.cos(l); y += Math.cos(p) * Math.sin(l); z += Math.sin(p);
         }
+        if (Math.sqrt(x*x + y*y + z*z) < 1e-9) throw new IllegalArgumentException("Las coordenadas del sitio no definen un centro local");
+        double lat = Math.toDegrees(Math.atan2(z, Math.sqrt(x*x+y*y)));
+        double lon = Math.toDegrees(Math.atan2(y,x));
         double radioKm = 0.1;
         List<String> tecnologias = new ArrayList<>();
         for (CeldaAuditoriaDTO c : planificadas) {
@@ -169,11 +177,16 @@ public class AuditoriaRedService {
                 resumen.add(auditarTecnologia(tecnologia, alcance, radioReusoM, planificadas, celdas, hallazgos, contexto));
             }
             long duracionMs = (System.nanoTime() - inicio) / 1_000_000L;
-            String generadoEn = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(reloj.getAsLong()));
+            SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            formato.setTimeZone(TimeZone.getTimeZone("America/Lima"));
+            long generadoMs = reloj.getAsLong();
+            String generadoEn = formato.format(new Date(generadoMs));
             log.info("Auditoria de red {} {}{}: {} hallazgos en {} ms", alcance.getDescripcion(), tecnologias,
                     planificadas.isEmpty() ? "" : " con " + planificadas.size() + " celdas planificadas",
                     hallazgos.size(), duracionMs);
-            return new ResultadoAuditoria(alcance, resumen, celdas, hallazgos, duracionMs, generadoEn, false, avisos, contexto);
+            ResultadoAuditoria resultado = new ResultadoAuditoria(alcance, resumen, celdas, hallazgos, duracionMs, generadoEn, false, avisos, contexto);
+            resultado.marcarTiempo(generadoMs, 0);
+            return resultado;
         } finally {
             enCurso.unlock();
         }
@@ -192,6 +205,7 @@ public class AuditoriaRedService {
         // La caja SQL es un rectangulo: aqui se recorta al area exacta y se quitan duplicados,
         // que de otro modo el motor reportaria como colision de la celda consigo misma.
         Map<String, CeldaAuditoriaDTO> porNombre = new LinkedHashMap<>();
+        Set<String> conflictivas = new HashSet<>();
         int duplicadas = 0;
         int fueraDelCirculo = 0;
         int enArea = 0;
@@ -203,6 +217,11 @@ public class AuditoriaRedService {
             String nombre = normalizar(celda.getNombre());
             if (porNombre.containsKey(nombre)) {
                 duplicadas++;
+                if (!equivalentes(porNombre.get(nombre), celda)) conflictivas.add(nombre);
+                else if (firmaRepresentacion(celda).compareTo(firmaRepresentacion(porNombre.get(nombre))) < 0) {
+                    celda.setDentroArea(porNombre.get(nombre).isDentroArea()); celda.setConHallazgo(false);
+                    porNombre.put(nombre, celda);
+                }
                 continue;
             }
             celda.setDentroArea(planificadas.isEmpty() && alcance.contiene(celda.getLatitud(), celda.getLongitud()));
@@ -210,6 +229,9 @@ public class AuditoriaRedService {
             if (celda.isDentroArea()) enArea++;
             porNombre.put(nombre, celda);
         }
+        for (String nombre : conflictivas) porNombre.remove(nombre);
+        enArea = 0;
+        for (CeldaAuditoriaDTO c : porNombre.values()) if (c.isDentroArea()) enArea++;
         // Modo sitio: las planificadas son el "area", asi la regla de borde deja solo los pares en que
         // participa una de ellas. Reemplazan a la existente del mismo nombre (re-planificacion).
         for (CeldaAuditoriaDTO celda : planificadas) {
@@ -222,6 +244,10 @@ public class AuditoriaRedService {
             enArea++;
         }
         resumen.setDuplicadas(duplicadas);
+        resumen.setDuplicadasConflictivas(conflictivas.size());
+        resumen.setCeldasSinFrecuencia((int) porNombre.values().stream().filter(c -> c.getCanalRadio() == null).count());
+        resumen.setTaAusente((int) porNombre.values().stream().filter(c -> "AUSENTE".equals(c.getEstadoTa())).count());
+        resumen.setTaInvalido((int) porNombre.values().stream().filter(c -> "INVALIDO".equals(c.getEstadoTa())).count());
         resumen.setFueraDelCirculo(fueraDelCirculo);
         resumen.setCeldasEnArea(enArea);
         resumen.setCeldasEnMargen(porNombre.size() - enArea);
@@ -272,6 +298,8 @@ public class AuditoriaRedService {
         }
         resumen.setGeometriaDisponible(
                 aplicarGeometria(tecnologia, new ArrayList<>(porNombre.values()), mostradas));
+        resumen.setGeometriaSinRadio((int) mostradas.stream().filter(c -> c.getRadioM() == null).count());
+        resumen.setTaOverflow((int) mostradas.stream().filter(c -> "TA_DESBORDAMIENTO_DESCONOCIDO".equals(c.getFuenteRadio())).count());
         celdasSalida.addAll(mostradas);
         contexto.addAll(porNombre.values());
         return resumen;
@@ -286,13 +314,13 @@ public class AuditoriaRedService {
         Set<CeldaAuditoriaDTO> vecinas = new HashSet<>();
         for (final CeldaAuditoriaDTO p : planificadas) {
             if (!tecnologia.equals(p.getTecnologia())) continue;
-            String grupo = AdaptadorMotorAuditoria.claveGrupo(p);
             List<CeldaAuditoriaDTO> candidatas = new ArrayList<>();
             for (CeldaAuditoriaDTO c : celdas) {
-                if (!c.isPlanificada() && grupo.equals(AdaptadorMotorAuditoria.claveGrupo(c))) candidatas.add(c);
+                if (!c.isPlanificada() && AdaptadorMotorAuditoria.compatibles(p, c)) candidatas.add(c);
             }
             candidatas.sort(Comparator.comparingDouble((CeldaAuditoriaDTO c) ->
-                    ClusterAlcance.distanciaKm(p.getLatitud(), p.getLongitud(), c.getLatitud(), c.getLongitud())));
+                    ClusterAlcance.distanciaKm(p.getLatitud(), p.getLongitud(), c.getLatitud(), c.getLongitud()))
+                    .thenComparing(c -> normalizar(c.getNombre())));
             vecinas.addAll(candidatas.subList(0, Math.min(VECINAS_SITIO, candidatas.size())));
         }
         return vecinas;
@@ -312,7 +340,7 @@ public class AuditoriaRedService {
             }
             return true;
         } catch (RuntimeException e) {
-            log.warn("No se pudo calcular la geometria de sectores " + tecnologia + "; el mapa usara sectores genericos", e);
+            log.warn("No se pudo calcular la geometria de sectores " + tecnologia + "; el radio se entrega desconocido", e);
             return false;
         }
     }
@@ -363,6 +391,36 @@ public class AuditoriaRedService {
         return nombre == null ? "" : nombre.trim().toUpperCase(Locale.ROOT);
     }
 
+    /** Identidad = tecnología+nombre; sin timestamp autoritativo se excluyen configuraciones contradictorias. */
+    private static boolean equivalentes(CeldaAuditoriaDTO a, CeldaAuditoriaDTO b) {
+        return normalizar(a.getCarrier()).equals(normalizar(b.getCarrier()))
+                && normalizar(a.getBanda()).equals(normalizar(b.getBanda()))
+                && normalizar(a.getCanalRadio()).equals(normalizar(b.getCanalRadio()))
+                && Double.compare(a.getLatitud(), b.getLatitud()) == 0
+                && Double.compare(a.getLongitud(), b.getLongitud()) == 0
+                && Double.compare(a.getAzimuth(), b.getAzimuth()) == 0
+                && a.getPci() == b.getPci() && normalizar(a.getTxrxmode()).equals(normalizar(b.getTxrxmode()))
+                && taEquivalente(a,b);
+    }
+
+    private static boolean taEquivalente(CeldaAuditoriaDTO a, CeldaAuditoriaDTO b) {
+        double[] va=a.getTa(), vb=b.getTa();
+        if (a.getEstadoTa().startsWith("VALIDO") && b.getEstadoTa().startsWith("VALIDO")) {
+            double sa=Arrays.stream(va).sum(), sb=Arrays.stream(vb).sum();
+            if (va.length != vb.length || sa <= 0 || sb <= 0) return false;
+            for(int i=0;i<va.length;i++) if(Math.abs(va[i]/sa-vb[i]/sb)>1e-12) return false;
+            return true;
+        }
+        return a.getEstadoTa().equals(b.getEstadoTa()) && Arrays.equals(va,vb);
+    }
+
+    /** Desempate de representación, nunca de configuración contradictoria ni de actualidad. */
+    private static String firmaRepresentacion(CeldaAuditoriaDTO c) {
+        return String.valueOf(c.getNombre())+'\u0000'+String.valueOf(c.getCarrier())+'\u0000'+String.valueOf(c.getBanda())
+                +'\u0000'+String.valueOf(c.getTxrxmode())+'\u0000'+String.valueOf(c.getEstadoTa())
+                +'\u0000'+String.valueOf(c.getFuenteTa())+'\u0000'+String.valueOf(c.getFuenteFrecuencia())+'\u0000'+Arrays.toString(c.getTa());
+    }
+
     private ResultadoAuditoria deCache(String clave) {
         synchronized (cache) {
             EntradaCache entrada = cache.get(clave);
@@ -371,13 +429,18 @@ public class AuditoriaRedService {
                 cache.remove(clave);
                 return null;
             }
-            return entrada.resultado;
+            ResultadoAuditoria r = entrada.resultado.copia(true);
+            r.marcarTiempo(entrada.resultado.getGeneradoEnEpochMs(), Math.max(0, reloj.getAsLong() - entrada.resultado.getGeneradoEnEpochMs()));
+            return r;
         }
     }
 
     private void guardarEnCache(String clave, ResultadoAuditoria resultado) {
         synchronized (cache) {
-            if (cacheMs > 0) cache.put(clave, new EntradaCache(resultado.copia(false), reloj.getAsLong()));
+            EntradaCache anterior = cache.get(clave);
+            if (cacheMs > 0 && (anterior == null || anterior.resultado.getGeneradoEnEpochMs() <= resultado.getGeneradoEnEpochMs())) {
+                cache.put(clave, new EntradaCache(resultado.copia(false), reloj.getAsLong()));
+            }
         }
     }
 

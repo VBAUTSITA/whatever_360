@@ -107,7 +107,7 @@ public class AuditoriaRedControllerTest {
                 .andExpect(jsonPath("$.alcance.radioKm").value(2.0))
                 .andExpect(jsonPath("$.alcance.margenKm").value(10.1))
                 .andExpect(jsonPath("$.hallazgos.length()").value(1))
-                .andExpect(jsonPath("$.hallazgos[0].etiqueta").value("Colision PCI"))
+                .andExpect(jsonPath("$.hallazgos[0].etiqueta").value("Colisión PCI potencial"))
                 .andExpect(jsonPath("$.hallazgos[0].celdaA.latitud").isNumber())
                 .andExpect(jsonPath("$.hallazgos[0].celdaB.longitud").value(-77.0))
                 .andExpect(jsonPath("$.hallazgos[0].celdaB.dentroArea").value(false))

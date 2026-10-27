@@ -1,6 +1,7 @@
 package com.tracker.web.auditoriared;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -155,7 +156,7 @@ public class AuditoriaRedServiceTest {
         assertEquals("MARGEN_B", h.getCeldaB().getNombre());
         assertTrue(h.getCeldaA().isDentroArea());
         assertFalse(h.getCeldaB().isDentroArea());
-        assertEquals("Colision PCI", h.getEtiqueta());
+        assertEquals("Colisión PCI potencial", h.getEtiqueta());
         ResumenTecnologia t = r.getResumen().get(0);
         assertEquals(2, t.getConflictosMotor());
         assertEquals(1, t.getConflictosSoloMargen());
@@ -234,6 +235,61 @@ public class AuditoriaRedServiceTest {
 
         assertEquals(4, motor.llamadas.get(0).size());
         assertEquals(1, r.getResumen().get(0).getDuplicadas());
+    }
+
+    @Test public void identidadOficialContradictoriaSeExcluyeIndependientementeDelOrden() {
+        red4g.add(celda("dentro_a", "4G", norte(.5), LON, 101));
+        responder(repositorio,"4G",red4g);
+        ResultadoAuditoria a=service.auditar(solicitud(2,"4G"));
+        assertTrue(a.getContexto().stream().noneMatch(c -> c.getNombre().equalsIgnoreCase("DENTRO_A")));
+        assertEquals(1,a.getResumen().get(0).getDuplicadasConflictivas());
+        Collections.reverse(red4g);responder(repositorio,"4G",red4g);
+        SolicitudAuditoria s=solicitud(2,"4G");s.setRefrescar(true);
+        ResultadoAuditoria b=service.auditar(s);
+        assertEquals(a.getContexto().size(),b.getContexto().size());
+        assertTrue(b.getContexto().stream().noneMatch(c -> c.getNombre().equalsIgnoreCase("DENTRO_A")));
+    }
+
+    @Test public void duplicadosEquivalentesEligenRepresentacionEstableYConsolidanUnidadesTa() {
+        CeldaAuditoriaDTO primero=celda("dentro_a","4G",norte(.5),LON,100);
+        primero.setCarrier("c1");primero.setBanda("7 ");primero.setTa(new double[]{80,20,0,0,0,0,0,0});
+        CeldaAuditoriaDTO segundo=celda("DENTRO_A","4G",norte(.5),LON,100);
+        segundo.setTa(new double[]{.8,.2,0,0,0,0,0,0});
+        responder(repositorio,"4G",Arrays.asList(primero,segundo));
+        ResultadoAuditoria a=service.auditar(solicitud(2,"4G"));
+        responder(repositorio,"4G",Arrays.asList(segundo,primero));
+        SolicitudAuditoria s=solicitud(2,"4G");s.setRefrescar(true);ResultadoAuditoria b=service.auditar(s);
+        assertEquals(1,a.getContexto().size());assertEquals(0,a.getResumen().get(0).getDuplicadasConflictivas());
+        assertEquals("DENTRO_A",a.getContexto().get(0).getNombre());
+        assertEquals(a.getContexto().get(0).getNombre(),b.getContexto().get(0).getNombre());
+        assertEquals(a.getContexto().get(0).getCarrier(),b.getContexto().get(0).getCarrier());
+        assertEquals(a.getContexto().get(0).getBanda(),b.getContexto().get(0).getBanda());
+        assertArrayEquals(a.getContexto().get(0).getTa(),b.getContexto().get(0).getTa(),0);
+    }
+
+    @Test public void histogramasTaContradictoriosTambienExcluyenIdentidad() {
+        CeldaAuditoriaDTO a=red4g.get(0);a.setTa(new double[]{1,0,0,0,0,0,0,0});
+        CeldaAuditoriaDTO distinta=copia(a);distinta.setTa(new double[]{0,1,0,0,0,0,0,0});red4g.add(distinta);
+        responder(repositorio,"4G",red4g);
+        ResultadoAuditoria r=service.auditar(solicitud(2,"4G"));
+        assertEquals(1,r.getResumen().get(0).getDuplicadasConflictivas());
+        assertTrue(r.getContexto().stream().noneMatch(c -> c.getNombre().equalsIgnoreCase("DENTRO_A")));
+    }
+
+    @Test public void edadCacheCuentaDesdeCalculoYNoPrometeFechaDeLaRed() {
+        final long[] ahora={1_000_000};service.setReloj(()->ahora[0]);
+        ResultadoAuditoria primera=service.auditar(solicitud(2,"4G"));assertEquals(1_000_000,primera.getGeneradoEnEpochMs());
+        ahora[0]+=73_000;ResultadoAuditoria segunda=service.auditar(solicitud(2,"4G"));
+        assertTrue(segunda.isDesdeCache());assertEquals(73,segunda.getEdadSegundos());assertEquals("America/Lima",segunda.getZonaHoraria());
+    }
+
+    @Test public void sitioQueCruzaAntimeridianoTieneCentroLocalYRadioPequeno() {
+        responder(repositorio,"5G",Collections.emptyList());
+        CeldaAuditoriaDTO a=celda("A","5G",0,179.999,100), b=celda("B","5G",0,-179.999,101);
+        a.setPlanificada(true);b.setPlanificada(true);
+        ResultadoAuditoria r=service.auditarSitio(Arrays.asList(a,b),Collections.emptyList());
+        assertTrue(r.getAlcance().getDescripcion(),r.getAlcance().getDescripcion().contains("180.000000"));
+        assertEquals(2,r.getResumen().get(0).getCeldasEnArea());
     }
 
     @Test

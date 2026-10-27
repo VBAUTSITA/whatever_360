@@ -5,46 +5,48 @@
 <header th:replace="layouts/base_auditoriared::header"></header>
 <main class="ad-main" id="ad-panel"
       th:attr="data-query-url=@{/auditoria-red/dashboard/api/consultar},data-search-url=@{/auditoria-red/api/sitios},data-filters-url=@{/auditoria-red/dashboard/api/filtros},data-radio-max=${radioMaxKm},data-reuso-max=${radioReusoKm}">
-  <div class="ad-title"><div><p class="ad-eyebrow">ANÁLISIS DE VECINDAD</p><h1>Panel de planificación PCI</h1><p>Encuentre qué celdas requieren revisión y explore la evidencia de cada relación.</p></div><span class="ad-readonly">Solo lectura</span></div>
+  <div class="ad-title"><div><h1>Panel de planificación PCI</h1><p>Consulte un área, seleccione un hallazgo y revise la evidencia del par.</p></div><span class="ad-readonly">Solo lectura · 4G / 5G</span></div>
   <div class="ad-workspace">
     <aside class="ad-sidebar">
       <form id="ad-form" autocomplete="off">
-        <h2>Área de análisis</h2>
+        <h2>1. Área de análisis</h2>
         <label for="ad-site">Sitio o celda</label>
-        <div class="ad-search"><input id="ad-site" type="search" placeholder="Buscar por nombre" maxlength="60" aria-controls="ad-suggestions" aria-autocomplete="list"><div id="ad-suggestions" role="listbox" hidden></div></div>
+        <div class="ad-search"><input id="ad-site" type="search" placeholder="Buscar por nombre" maxlength="60" role="combobox" aria-expanded="false" aria-controls="ad-suggestions" aria-autocomplete="list"><div id="ad-suggestions" role="listbox" hidden></div></div>
         <p class="ad-hint">Seleccione un resultado o escriba las coordenadas.</p>
         <div class="ad-two"><div><label for="ad-lat">Latitud</label><input id="ad-lat" type="number" min="-90" max="90" step="any" required></div><div><label for="ad-lon">Longitud</label><input id="ad-lon" type="number" min="-180" max="180" step="any" required></div></div>
-        <div class="ad-two"><div><label for="ad-radius">Radio (km)</label><input id="ad-radius" type="number" min="0.1" step="0.1" value="3" required></div><div><label for="ad-reuse">Reuso (km)</label><input id="ad-reuse" type="number" min="0.5" step="0.1" required></div></div>
+        <div class="ad-two"><div><label for="ad-radius">Radio (km)</label><input id="ad-radius" type="number" min="0.1" step="0.1" value="3" required></div><div><label for="ad-reuse">Reuso (km)</label><input id="ad-reuse" type="number" min="0.5" step="0.1" aria-describedby="ad-reuse-note" required></div></div>
+        <p class="ad-hint" id="ad-reuse-note">Distancia de revisión configurable; no es un umbral RF.</p>
         <fieldset><legend>Tecnología</legend><label class="ad-inline"><input id="ad-4g" type="checkbox"> 4G</label><label class="ad-inline"><input id="ad-5g" type="checkbox" checked> 5G</label></fieldset>
         <button class="ad-primary" type="submit" id="ad-run">Consultar área</button><button class="ad-secondary" type="button" id="ad-refresh">Recalcular datos</button>
       </form>
-      <div class="ad-sidebar-note"><b>Contexto completo</b><p>El cálculo incluye un margen alrededor del área. Los filtros de hallazgos y el mapa no eliminan vecinos del análisis.</p></div>
+      <div class="ad-sidebar-note"><b>Área circular y margen</b><p>Los filtros y el mapa conservan el contexto del cálculo. El margen no garantiza cubrir toda interacción geométrica.</p><p>No incluye automáticamente reservas guardadas de Recursos.</p></div>
     </aside>
     <section class="ad-content" aria-label="Resultados">
       <div id="ad-status" role="status" aria-live="polite" class="ad-status">Seleccione el área para comenzar.</div>
       <div id="ad-incomplete" class="ad-incomplete" role="alert" hidden>Resultado incompleto: reduzca el área antes de tomar una decisión.</div>
-      <div class="ad-metrics">
-        <article><span>Celdas en el área</span><strong id="ad-count-cells">—</strong><small>Universo consultado</small></article>
-        <article><span>Hallazgos calculados</span><strong id="ad-count-findings">—</strong><small>Antes de filtros</small></article>
-        <article><span>Hallazgos visibles</span><strong id="ad-count-filtered">—</strong><small>Según sus filtros</small></article>
-        <article><span>Estimación sin TA</span><strong id="ad-count-no-ta">—</strong><small>Celdas del área</small></article>
+      <div class="ad-metrics" aria-label="Resumen del área">
+        <div><span>Celdas del área</span><strong id="ad-count-cells">—</strong></div>
+        <div><span>Hallazgos calculados</span><strong id="ad-count-findings">—</strong></div>
+        <div><span>Después de filtros</span><strong id="ad-count-filtered">—</strong></div>
+        <div><span>Sin TA utilizable</span><strong id="ad-count-no-ta">—</strong></div>
       </div>
-      <section class="ad-card"><div class="ad-card-heading"><div><h2>Hallazgos que requieren revisión</h2><p>Ordenados por distancia. Una coincidencia de reglas no confirma interferencia medida.</p></div><button id="ad-reset" class="ad-text-button" type="button">Limpiar filtros</button></div>
+      <div id="ad-evidence-warning" class="ad-evidence-warning" hidden></div>
+      <section class="ad-card"><div class="ad-card-heading"><div><h2>2. Hallazgos que requieren revisión</h2><p>Prioridad de revisión: PCI, PSS y RSI; después, menor distancia. No es una escala de severidad RF. Los filtros solo cambian las filas visibles.</p></div><button id="ad-reset" class="ad-text-button" type="button">Limpiar filtros</button></div>
         <div id="ad-filters" class="ad-filters"></div>
-        <div class="ad-table-wrap"><table class="ad-table"><thead><tr><th>Tipo</th><th>Celda A</th><th>Celda B</th><th>Carrier / banda</th><th>Distancia</th><th>Evidencia</th></tr></thead><tbody id="ad-findings"><tr><td colspan="6" class="ad-empty">Aquí aparecerán los hallazgos del área.</td></tr></tbody></table></div>
+        <div class="ad-table-wrap" tabindex="0" role="region" aria-label="Hallazgos, tabla desplazable"><table class="table table-bordered table-striped ad-table"><thead><tr><th scope="col">Tipo</th><th scope="col">Celda A</th><th scope="col">Celda B</th><th scope="col">Carrier / banda</th><th scope="col">Distancia</th><th scope="col">Evidencia</th></tr></thead><tbody id="ad-findings"><tr><td colspan="6" class="ad-empty">Aquí aparecerán los hallazgos del área.</td></tr></tbody></table></div>
         <div class="ad-pagination"><span id="ad-page-label">Sin consulta</span><div><button type="button" id="ad-prev" disabled>Anterior</button><button type="button" id="ad-next" disabled>Siguiente</button></div></div>
       </section>
       <div class="ad-detail-grid">
-        <section class="ad-card"><div class="ad-card-heading"><div><h2>Explorar una celda</h2><p>Incluye vecinos aunque no tengan un hallazgo.</p></div></div>
+        <section class="ad-card"><div class="ad-card-heading"><div><h2>3. Explorar una celda</h2><p>Incluye vecinas aunque no tengan un hallazgo.</p></div></div>
           <label for="ad-target">Celda objetivo</label><select id="ad-target"><option value="">Consulte un área primero</option></select>
           <div class="ad-neighbor-controls"><label for="ad-neighbor-limit">Vecinas más cercanas</label><input id="ad-neighbor-limit" type="number" min="1" max="200" value="30"></div>
           <p class="ad-hint">Mismo carrier y banda, dentro del contexto cargado. Seleccione una fila para verla en el mapa.</p>
-          <div class="ad-table-wrap"><table class="ad-table ad-neighbors"><thead><tr><th>Vecina</th><th>PCI / PSS</th><th>Distancia</th><th>Solapamiento / distancia¹</th><th>TA</th></tr></thead><tbody id="ad-neighbors"><tr><td colspan="5" class="ad-empty">Seleccione una celda objetivo.</td></tr></tbody></table></div>
+          <div class="ad-table-wrap" tabindex="0" role="region" aria-label="Vecinas, tabla desplazable"><table class="table table-bordered table-striped ad-table ad-neighbors"><thead><tr><th scope="col">Vecina</th><th scope="col">PCI / PSS</th><th scope="col">Distancia</th><th scope="col">Solapamiento / distancia¹</th><th scope="col">TA</th></tr></thead><tbody id="ad-neighbors"><tr><td colspan="5" class="ad-empty">Seleccione una celda objetivo.</td></tr></tbody></table></div>
           <p class="ad-hint">¹ Índice geométrico en metros (m²/m); no es potencia, porcentaje ni probabilidad de interferencia.</p>
         </section>
-        <section class="ad-card"><div class="ad-card-heading"><div><h2>Inspección en el mapa</h2><p id="ad-map-note">Seleccione un hallazgo o una vecina.</p></div><label class="ad-inline"><input type="checkbox" id="ad-map-context"> Contexto</label></div><div id="ad-map" aria-label="Mapa de la relación seleccionada"></div><div id="ad-pair-detail" class="ad-pair-detail">Se resaltarán solamente las celdas seleccionadas.</div></section>
+        <section class="ad-card"><div class="ad-card-heading"><div><h2>Relación seleccionada</h2><p id="ad-map-note">Seleccione un hallazgo o una vecina.</p></div><label class="ad-inline"><input type="checkbox" id="ad-map-context"> Contexto</label></div><div id="ad-map" aria-label="Mapa de la relación seleccionada"></div><p class="ad-map-legend"><span class="ad-legend-a" id="ad-legend-a">Celda A</span><span class="ad-legend-b" id="ad-legend-b">Celda B</span><span>Sectores estimados</span></p><p id="ad-context-note" class="ad-hint">Contexto opcional: hasta 200 marcadores del área.</p><div id="ad-pair-detail" class="ad-pair-detail" aria-live="polite">Se resaltarán solamente las celdas seleccionadas.</div><div id="ad-pair-evidence" class="ad-pair-evidence"></div></section>
       </div>
-      <details class="ad-card ad-trace"><summary>Datos, alcance y trazabilidad</summary><ul id="ad-notices"><li>Las geometrías son estimaciones de planificación.</li></ul><div id="ad-engines"></div></details>
+      <details class="ad-card ad-trace"><summary>Datos, alcance y trazabilidad</summary><p>Fuentes de red: TM_CONF_ACTUAL_CELDA_4G / 5G. TA: PLAN_MAP_SECT_CRIT_4GWEEK y VW_PLANI_RECURSOS_5G_TA_DIARIO. El momento de cálculo no acredita la fecha de actualización de esas fuentes.</p><ul id="ad-notices"><li>Las geometrías son estimaciones de planificación.</li></ul><div id="ad-engines"></div></details>
     </section>
   </div>
 </main>

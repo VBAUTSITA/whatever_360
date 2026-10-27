@@ -14,8 +14,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
- * Lee la red existente con las mismas tablas, joins y columnas que
- * RedExistenteServiceImpl / RedExistenteServiceImpl5G de produccion (recursos_v5).
+ * Lee las tablas/columnas documentadas por el Java de la referencia meg.
+ * La referencia no aporta DDL ni EARFCN/NR-ARFCN: carrier+banda no prueba igualdad de frecuencia.
  */
 @Repository
 public class AuditoriaRedRepository {
@@ -148,22 +148,26 @@ public class AuditoriaRedRepository {
                 || pci < 0 || pci > ("5G".equals(tecnologia) ? 1007 : 503)) {
             return null;
         }
-        double[] taCrudo = new double[8];
+        Object[] taCrudo = new Object[8];
         for (int i = 0; i < 8; i++) {
-            Double v = numero(rs.getObject(9 + i));
-            taCrudo[i] = v == null ? 0.0 : v;
+            taCrudo[i] = rs.getObject(9 + i);
         }
         Object banda = rs.getObject(4);
         Object carrier = rs.getObject(2);
         Object txrx = rs.getObject(5);
         if (carrier == null || String.valueOf(carrier).trim().isEmpty()
                 || banda == null || String.valueOf(banda).trim().isEmpty()) return null;
-        return new CeldaAuditoriaDTO(nombre.trim(), tecnologia,
+        LecturaTa lecturaTa = leerTa(taCrudo);
+        CeldaAuditoriaDTO celda = new CeldaAuditoriaDTO(nombre.trim(), tecnologia,
                 carrier == null ? null : String.valueOf(carrier).trim(),
                 banda == null ? null : String.valueOf(banda).trim(),
                 lat, lon, azimuth, (int) Math.round(pci),
                 txrx == null ? null : String.valueOf(txrx).trim(),
-                normalizarTA(taCrudo));
+                lecturaTa.valores);
+        celda.setEstadoTa(lecturaTa.estado);
+        celda.setFuenteTa("4G".equals(tecnologia) ? "PLAN_MAP_SECT_CRIT_4GWEEK:SECTOR_NAME" :
+                "VW_PLANI_RECURSOS_5G_TA_DIARIO:CELLNAME");
+        return celda;
     }
 
     /** Las columnas son VARCHAR2 y las de TA traen el % pegado ("39.82%"). */
@@ -181,23 +185,43 @@ public class AuditoriaRedRepository {
         }
     }
 
-    /**
-     * El motor espera 8 fracciones que suman ~1. Igual que produccion: si suman ~100 se dividen,
-     * y si no cuadran se envian en cero para que el motor use su respaldo (promedio de vecinas).
-     */
+    /** Ocho bins completos; tolerancia de redondeo de 1%, normalizada exactamente a uno. */
     static double[] normalizarTA(double[] crudo) {
         if (crudo == null || crudo.length != 8) return new double[8];
+        Object[] valores = new Object[8];
+        for (int i = 0; i < 8; i++) valores[i] = crudo[i];
+        return leerTa(valores).valores;
+    }
+
+    static final class LecturaTa {
+        final double[] valores;
+        final String estado;
+        LecturaTa(double[] valores, String estado) { this.valores = valores; this.estado = estado; }
+    }
+
+    static LecturaTa leerTa(Object[] crudo) {
+        if (crudo == null || crudo.length != 8) return new LecturaTa(new double[8], "INVALIDO");
+        int ausentes = 0;
+        boolean invalido = false, porcentajeExplicito = false;
+        double[] valores = new double[8];
         double suma = 0;
-        for (double v : crudo) {
-            if (!Double.isFinite(v) || v < 0) return new double[8];
+        for (int i = 0; i < 8; i++) {
+            Object valor = crudo[i];
+            if (valor == null || String.valueOf(valor).trim().isEmpty()) { ausentes++; continue; }
+            porcentajeExplicito |= String.valueOf(valor).trim().endsWith("%");
+            Double v = numero(valor);
+            if (v == null || v < 0) { invalido = true; continue; }
+            valores[i] = v;
             suma += v;
         }
-        double factor;
-        if (suma >= 0.5 && suma <= 1.5) factor = 1.0;
-        else if (suma >= 50 && suma <= 150) factor = 0.01;
-        else return new double[8];
-        double[] salida = new double[8];
-        for (int i = 0; i < 8; i++) salida[i] = crudo[i] * factor;
-        return salida;
+        if (ausentes == 8) return new LecturaTa(new double[8], "AUSENTE");
+        if (invalido || ausentes > 0) return new LecturaTa(new double[8], "INVALIDO");
+        if (suma == 0) return new LecturaTa(new double[8], "AUSENTE");
+        String estado;
+        if (!porcentajeExplicito && suma >= 0.99 && suma <= 1.01) estado = "VALIDO_FRACCION";
+        else if (suma >= 99 && suma <= 101) estado = "VALIDO_PORCENTAJE";
+        else return new LecturaTa(new double[8], "INVALIDO");
+        for (int i = 0; i < 8; i++) valores[i] /= suma;
+        return new LecturaTa(valores, estado);
     }
 }

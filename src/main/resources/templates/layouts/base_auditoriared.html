@@ -13,9 +13,9 @@
 </head>
 <body>
 <header th:fragment="header" class="ad-header">
-  <a class="ad-brand" th:href="@{/auditoria-red/dashboard}"><span class="ad-brand-mark">AR</span><span>ActiTracker <small>Planificación de radio</small></span></a>
-  <nav aria-label="Módulo de auditoría"><a th:href="@{/auditoria-red/dashboard}">Panel</a><a th:href="@{/auditoria-red}">Auditar cluster</a><a th:href="@{/home}">Home</a></nav>
+  <div class="ad-top-bar"><div class="ad-header-inner"><a class="ad-brand" th:href="@{/home}"><img th:src="@{/images/auditoriared/claro-logo.png}" width="45" height="45" alt="Claro"><span>ActiTracker</span></a><span class="ad-header-caption">Planificación de Radio</span></div></div>
+  <div class="ad-page-head"><div class="ad-header-inner"><strong>Auditoría de red</strong><nav aria-label="Módulo de auditoría"><a th:href="@{/auditoria-red/dashboard}">Panel PCI</a><a th:href="@{/auditoria-red}">Auditar área</a><a th:href="@{/home}">Home</a></nav></div></div>
 </header>
-<footer th:fragment="footer" class="ad-footer">Auditoría de red · Evidencia de planificación, con trazabilidad del motor y de los datos.</footer>
+<footer th:fragment="footer" class="ad-footer">ActiTracker · Planificación de Radio · Auditoría de red en modo consulta</footer>
 </body>
 </html>

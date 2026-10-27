@@ -15,9 +15,6 @@
     // celdas y poco zoom no se lee y solo estorba.
     var ZOOM_ETIQUETAS = 13;
     var MAX_ETIQUETAS_SIN_ZOOM = 250;
-    // Solo si el motor no pudo dar la geometria: sector generico de largo fijo en pantalla.
-    var APERTURA_GENERICA = 60;
-    var PIXELES_GENERICOS = 22;
 
     function $(id) { return document.getElementById(id); }
 
@@ -151,10 +148,6 @@
         return [f2 * 180 / Math.PI, l2 * 180 / Math.PI];
     }
 
-    function metrosPorPixel(lat) {
-        return 40075016.686 * Math.cos(lat * Math.PI / 180) / Math.pow(2, mapa.getZoom() + 8);
-    }
-
     // ---------- regla ----------
 
     function distanciaM(a, b) {
@@ -240,12 +233,13 @@
         }
     }
 
-    function tieneGeometria(c) { return c.radioM !== null && c.radioM !== undefined && c.radioM > 0; }
+    function tieneGeometria(c) { return c.radioM !== null && c.radioM !== undefined && c.radioM > 0
+        && Number.isFinite(c.azimuthEfectivo) && Number.isFinite(c.hbeam) && c.hbeam > 0; }
 
-    // Con geometria del motor: azimuth efectivo, ancho de haz y radio TA reales (paso 6).
+    // Geometria estimada del motor; nunca se inventa alcance cuando falta radio utilizable.
     function sector(c) {
         if (tieneGeometria(c)) return { az: c.azimuthEfectivo, haz: c.hbeam, radio: c.radioM };
-        return { az: c.azimuth, haz: APERTURA_GENERICA, radio: PIXELES_GENERICOS * metrosPorPixel(c.latitud) };
+        return { az: c.azimuth, haz: 0, radio: 0 };
     }
 
     // Mismo trazo que wedgeLatLon del motor: el centro y un arco de az - haz/2 a az + haz/2.
@@ -338,10 +332,13 @@
     function textoCelda(c) {
         var geo = tieneGeometria(c)
             ? '\nAzimuth efectivo ' + Math.round(c.azimuthEfectivo) + '° · haz ' + Math.round(c.hbeam) + '° · radio ' +
-              Math.round(c.radioM) + ' m' + (c.sinTa ? ' (sin TA: promedio de sus 30 vecinas)' : ' (por TA)')
-            : '\n(sector genérico: el motor no devolvió la geometría)';
+              Math.round(c.radioM) + ' m estimados' + (c.sinTa ? ' (respaldo por vecinas disponibles: ' + (c.vecinasRespaldo || 'sin conteo') + ')' : ' (por TA P80)')
+            : '\nSin alcance utilizable: solo ubicación, sin sector estimado';
         return c.nombre + '\n' + c.tecnologia + ' · carrier ' + (c.carrier || '-') + ' · banda ' +
             (c.banda || '-') + '\nPCI ' + c.pci + ' · MOD ' + c.mod + ' · azimuth ' + c.azimuth + '°' + geo +
+            '\nCanal radio: ' + (c.canalRadio || 'no informado; frecuencia no verificada') +
+            '\nFuente TA: ' + (c.fuenteTa || 'no informada') + ' · Estado: ' + (c.estadoTa || 'no informado') +
+            '\nRSI derivado de PCI; no es PRACH configurado' +
             (c.conHallazgo ? '\nTiene hallazgos' : '') +
             (c.planificada ? '\nPlanificada: PCI propuesto, todavía sin guardar' : c.dentroArea || estado.sitio ? '' : '\n(celda del margen)');
     }
@@ -356,13 +353,15 @@
     // El relleno es el MOD; el borde negro marca las celdas con hallazgo y el blanco, las planificadas.
     function dibujarCelda(c, capa, resaltada) {
         var color = COLOR_MOD[c.mod];
-        var poligono = L.polygon(contornoSector(c), {
+        var opciones = {
             color: resaltada ? '#000' : c.planificada ? '#fff' : c.conHallazgo ? '#000' : color,
             weight: resaltada ? 4 : c.planificada ? 3 : (c.conHallazgo ? 2 : 1),
             fillColor: color, fillOpacity: resaltada ? 0.75 : 0.45,
             dashArray: c.dentroArea || estado.sitio ? null : '4 4',
             bubblingMouseEvents: false
-        }).addTo(capa);
+        };
+        var poligono = (tieneGeometria(c) ? L.polygon(contornoSector(c), opciones)
+            : L.circleMarker([c.latitud, c.longitud], Object.assign({ radius: 5 }, opciones))).addTo(capa);
         // Midiendo, el clic ancla el punto en el sitio de la celda. Si no, abre sus datos (y una planificada,
         // además, pasa a ser la elegida). El popup no va atado al sector: así sobrevive al redibujo del zoom.
         poligono.on('click', function (e) {
@@ -460,7 +459,7 @@
             return t.tecnologia + ': ' + t.celdasEnArea + (estado.sitio ? ' celdas del sitio contra ' + t.celdasEnMargen +
                 ' existentes, ' : ' celdas en el área, ' + t.celdasEnMargen + ' en el margen, ') +
                 t.hallazgos + ' hallazgos (motor ' + t.motor + ')' +
-                (t.geometriaDisponible ? '' : ' [sin geometría del motor: sectores genéricos]');
+                (t.geometriaDisponible ? '' : ' [sin geometría del motor: solo ubicaciones]');
         });
         return partes.join('. ') + '. Calculado en ' + (r.duracionMs / 1000).toFixed(1) + ' s, ' +
             r.generadoEn + (r.desdeCache ? ', tomado de la caché' : '') + '.' +
@@ -638,7 +637,7 @@
         inSitio.value = '';
         nuevoCentro();
     });
-    // El largo del sector va en pixeles: al cambiar el zoom hay que recalcularlo.
+    // Al cambiar el zoom se ajusta la visibilidad de las etiquetas.
     mapa.on('zoomend', redibujar);
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && medicion.activa) alternarMedicion();
@@ -710,10 +709,10 @@
         form.hidden = true;
         $('ar-titulo').textContent = ['Sitio', consulta.get('sitio'), 'con los PCI propuestos'].filter(Boolean).join(' ');
         $('ar-intro').textContent = 'Vista previa: no se guarda nada. Cada celda del sitio, con el PCI que tiene ahora la ' +
-            'pantalla de asignación, se compara con la red existente con el mismo motor de la planificación (colisión PCI, ' +
-            'colisión RSI y riesgo PSS (mod-3)). Solo aparecen los hallazgos en que participa una celda del sitio.';
+            'pantalla de asignación, se compara con el contexto de red cargado (colisión PCI potencial, ' +
+            'coincidencia RSI derivada y riesgo PSS mod-3). Sin canal radio verificado, la coincidencia de frecuencia es provisional. Solo aparecen los hallazgos en que participa una celda del sitio.';
         $('ar-sitio-panel').hidden = false;
-        mensaje('Calculando la interferencia de las celdas del sitio...', false);
+        mensaje('Revisando reglas de planificación de las celdas del sitio...', false);
         fetch(URL_SITIO + location.search, { credentials: 'same-origin' }).then(leerRespuesta).then(function (r) {
             mostrar(r);
             // Arranca en la primera celda con hallazgos, que es lo que el usuario vino a ver. Sin hallazgos,

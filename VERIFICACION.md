@@ -1,4 +1,30 @@
-# Verificación de entrega — 2026-10-26
+# Verificación vigente — 2026-10-27
+
+La versión actual supera la línea base histórica de abajo. Decisiones, fórmulas, fuentes, objetos Oracle y límites: [DECISIONES-AUDITORIA-RED.md](DECISIONES-AUDITORIA-RED.md), con [detalle Oracle](DECISIONES-ORACLE.md) y [detalle visual](DECISIONES-UI.md).
+
+- Java 8u504 / Nashorn real, Spring Boot 2.1.7. **102 pruebas JUnit: 0 fallos, 0 errores, 0 omitidas.** Compilación y JAR correctos. Las mismas 102 pruebas pasan contra las clases/dependencias compiladas del host.
+- Una ejecución intermedia usó clases temporales defectuosas escritas por el IDE en target. La verificación final compiló una copia idéntica fuera del IDE; hashes confirmaron las mismas fuentes Java. Después sólo se actualizaron dos recursos de navegador y se reempaquetó el JAR, manteniendo Java intacto y ejecutando las pruebas visuales finales.
+- Oracle real: USERTEST/FREEPDB1, Oracle AI Database Free 23.26.3. Cinco tablas y una vista sintéticas, 59 columnas verificadas y cinco PK/índices. **71 comprobaciones pasan**, 1140 hallazgos sintéticos, 54 celdas de contexto (52 del área). La repetición del setup aplicó 123 INSERT con cero filas nuevas y cero objetos creados; no modificó las dos tablas preexistentes.
+- Consultas LEFT JOIN y conversiones Oracle reales; TA fracción/porcentaje/coma/ausente/inválido/abierto, celdas aisladas, duplicados idénticos/contradictorios, vecina del margen, búsqueda literal, límites JDBC/motor, autorización/jefatura, filtros/paginación sin recortar contexto.
+- Chrome/Playwright: **13 escenarios sobre Oracle** y **17 de regresión sintética**, escritorio 1500 px y móvil 390 px, cero errores JavaScript. Capturas inspeccionadas: identidad Claro/ActiTracker, tablas densas, selección/evidencia, vacío/incompleto, radio desconocido como punto, teclado, CSRF y sesión expirada. La simulación de estados de error/incompleto pertenece al ensayo sintético, no a la evidencia Oracle.
+- Host: compilan las **284 fuentes principales**. La compilación normal de tests sigue fallando exclusivamente en Planning4gTest por `updateSolution` ausente; no se modificó ese módulo ni se afirma que su suite global pase.
+- Sincronización: 67 archivos de Auditoría verificados, 34 actualizados; respaldo y manifiesto en `../web-tracker-migration/auditoria-red-2026-10-27`. La comparación de hashes de archivos ajenos dio cero diferencias; el host sigue en feature/mapa-osm.
+
+Evidencia local: `target/verification/module-verified-build.log`, `host-compile.log`, `host-audit-tests.log`, `host-test-compile.log`; `target/oracle/initial-all.log`, `verified-all.log`, `setup.log`; `target/browser/result.json` y `target/browser/oracle/result.json` con sus capturas. Estos artefactos generados están fuera de Git.
+
+```powershell
+# Java 8; entorno normal sin clases de error temporales del IDE:
+.\mvnw.cmd -B package dependency:build-classpath '-Dmdep.outputFile=target/test-classpath.txt'
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Run-OracleAudit.ps1 -Mode all
+# Con Node/Playwright disponible:
+node src/test/browser/dashboard-oracle.cjs
+```
+
+Dashboard de prueba: http://127.0.0.1:3299/tracker/auditoria-red/dashboard. Buscar AUDRED; centro −12,09 / −77,05, radio 1 km. La contraseña se ingresa sólo en el formulario local enmascarado.
+
+Persisten límites corporativos: no se conoce DDL completo, canal RF, RSI/PRACH real ni fechas de fuente; TA/haz/fallback son modelos documentados; no se demuestra confusión PCI real ni cobertura de toda interacción geométrica. No se midió capacidad a escala productiva. Las reservas guardadas no se incorporan automáticamente y el alcance soportado es circular 4G/5G.
+
+## Registro histórico de entrega — 2026-10-26
 
 - Java 8u504 / Nashorn real; Spring Boot 2.1.7; Maven 3.6.0.
 - 82 pruebas JUnit: 0 fallos, 0 errores, 0 omitidas, en el proyecto aislado.

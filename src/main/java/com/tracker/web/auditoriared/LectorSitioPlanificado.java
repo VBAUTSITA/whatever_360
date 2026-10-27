@@ -96,10 +96,12 @@ public class LectorSitioPlanificado {
                     || texto(f, "CARRIER") == null || texto(f, "FREQ_BAND_TEXT") == null) {
                 throw new IllegalArgumentException(nombre + ": coordenadas, azimuth, carrier o banda invalidos");
             }
-            // TA en cero: como en el paso 4 de la planificacion, el motor le da el radio promedio de sus 30 vecinas.
+            // No se dispone de TA en estas filas. El respaldo geometrico se informa como estimacion.
             CeldaAuditoriaDTO celda = new CeldaAuditoriaDTO(nombre, tecnologia, texto(f, "CARRIER"),
                     texto(f, "FREQ_BAND_TEXT"), lat, lon, azimuth, pci, texto(f, "TXRX_MODE"), new double[8]);
             celda.setPlanificada(true);
+            celda.setEstadoTa("AUSENTE");
+            celda.setFuenteTa("RECURSOS_FORMULARIO_SIN_TA");
             celdas.add(celda);
         }
         if (celdas.isEmpty()) {

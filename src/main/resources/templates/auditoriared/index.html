@@ -16,7 +16,7 @@
 	</div>
 
 	<p class="ar-nota" id="ar-intro">
-		Solo lectura. Revisa colisiones PCI, colisiones RSI y riesgo PSS (mod-3) entre celdas existentes,
+		Solo lectura. Revisa colisiones PCI potenciales, coincidencias RSI derivadas y riesgo PSS (mod-3) entre celdas existentes,
         con los motores de planificación incluidos en este módulo. La auditoría corre solo al pulsar <b>Auditar</b>.
 	</p>
 
@@ -75,8 +75,8 @@
 
 	<div id="ar-sitio-panel" hidden>
 		<b>Celdas del sitio</b>
-		<span class="ar-nota">— elija una: el mapa muestra solo su carrier y banda, las únicas celdas que pueden
-			interferirla, con sus 30 vecinas existentes. Borde blanco: celda planificada; borde negro: celda con
+		<span class="ar-nota">— elija una: el mapa muestra su grupo de planificación carrier/banda y hasta
+			30 vecinas existentes. Sin canal radio ni relaciones de vecindad verificadas, no acredita interferencia ni confusión. Borde blanco: celda planificada; borde negro: celda con
 			hallazgo; línea negra: hallazgo de la celda elegida.</span>
 		<div id="ar-sitio-celdas"></div>
 	</div>
@@ -84,9 +84,12 @@
 	<div id="ar-mapa"></div>
 	<p class="ar-nota">
 		Cada sector se dibuja como en el paso 6 del motor: azimuth efectivo (MM_1..MM_4 desplazados −30/−10/+10/+30°),
-		ancho de haz según TXRX y radio según TA (donde el tráfico acumula el 80 %; sin TA, promedio de sus 30 vecinas).
+		ancho de haz según TXRX y radio estimado TA P80; sin TA utilizable, respaldo por las vecinas disponibles (hasta 30).
+		Sin alcance utilizable, se muestra solamente el punto. Un intervalo TA abierto no determina un radio finito.
 		Color = MOD (PCI mod 3), con el número dentro (con muchas celdas, al acercar). Borde negro: celda con hallazgo. Borde
 		discontinuo: celda del margen. Círculo amarillo: área auditada. Círculo naranja discontinuo: margen de reuso.
+		Las coincidencias carrier/banda no acreditan frecuencia común. RSI procede de la tabla derivada de PCI,
+		sin configuración PRACH verificada. Estas reglas y geometrías no son mediciones RF.
 	</p>
 
 	<h4>Hallazgos</h4>

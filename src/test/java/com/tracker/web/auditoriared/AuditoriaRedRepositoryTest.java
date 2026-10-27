@@ -46,6 +46,7 @@ public class AuditoriaRedRepositoryTest {
         when(rs.getObject(8)).thenReturn("180");
         when(rs.getObject(9)).thenReturn("60%");
         when(rs.getObject(10)).thenReturn("40%");
+        for (int i = 11; i <= 16; i++) when(rs.getObject(i)).thenReturn("0%");
         return rs;
     }
 
@@ -58,6 +59,7 @@ public class AuditoriaRedRepositoryTest {
         assertEquals(-12.092056, c.getLatitud(), 1e-9);
         assertEquals(180, c.getAzimuth(), 1e-9);
         assertEquals(0.6, c.getTa()[0], 1e-9);
+        assertEquals("VALIDO_PORCENTAJE", c.getEstadoTa());
         assertEquals(0.6, c.paraMotor().get("ta_0_234_mts_porc"));
     }
 
@@ -76,5 +78,25 @@ public class AuditoriaRedRepositoryTest {
         assertEquals(-12.09,AuditoriaRedRepository.numero("-12,09"),1e-9);
         assertArrayEquals(new double[8],AuditoriaRedRepository.normalizarTA(new double[]{-1,2,0,0,0,0,0,0}),1e-9);
         assertArrayEquals(new double[8],AuditoriaRedRepository.normalizarTA(new double[]{Double.NaN,0,0,0,0,0,0,0}),1e-9);
+    }
+
+    @Test public void taParcialOMalformadoNoSeConvierteSilenciosamenteEnCero() throws SQLException {
+        ResultSet parcial = fila(100, "-12");
+        when(parcial.getObject(11)).thenReturn(null);
+        CeldaAuditoriaDTO c = AuditoriaRedRepository.aCelda("5G", parcial);
+        assertEquals("INVALIDO", c.getEstadoTa());
+        assertArrayEquals(new double[8], c.getTa(), 0);
+        when(parcial.getObject(11)).thenReturn("dato incorrecto");
+        assertEquals("INVALIDO", AuditoriaRedRepository.aCelda("5G", parcial).getEstadoTa());
+    }
+
+    @Test public void taRedondeadoSeNormalizaYLasUnidadesAmbiguasSeRechazan() {
+        double[] redondeado = {33.3,33.3,33.3,0,0,0,0,0};
+        assertEquals(1, java.util.Arrays.stream(AuditoriaRedRepository.normalizarTA(redondeado)).sum(), 1e-12);
+        assertArrayEquals(new double[8], AuditoriaRedRepository.normalizarTA(new double[]{.7,0,0,0,0,0,0,0}),0);
+        assertArrayEquals(new double[8], AuditoriaRedRepository.normalizarTA(new double[]{70,0,0,0,0,0,0,0}),0);
+        assertEquals("INVALIDO", AuditoriaRedRepository.leerTa(new Object[]{"0.5%","0.5%",0,0,0,0,0,0}).estado);
+        assertEquals("AUSENTE", AuditoriaRedRepository.leerTa(new Object[8]).estado);
+        assertEquals("AUSENTE", AuditoriaRedRepository.leerTa(new Object[]{0,0,0,0,0,0,0,0}).estado);
     }
 }

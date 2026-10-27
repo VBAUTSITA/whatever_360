@@ -21,6 +21,12 @@ public class CeldaAuditoriaDTO {
     private String tecnologia;
     private String carrier;
     private String banda;
+    private String canalRadio;
+    private String fuenteFrecuencia = "CARRIER_BANDA_SIN_CANAL";
+    private String estadoTa;
+    private String fuenteTa = "NO_IDENTIFICADA";
+    private String fuenteRadio;
+    private Integer vecinasRespaldo;
     private double latitud;
     private double longitud;
     private double azimuth;
@@ -62,6 +68,28 @@ public class CeldaAuditoriaDTO {
     public void setCarrier(String carrier) { this.carrier = carrier; }
     public String getBanda() { return banda; }
     public void setBanda(String banda) { this.banda = banda; }
+    public String getCanalRadio() { return canalRadio; }
+    public void setCanalRadio(String canal) {
+        this.canalRadio = canal == null || canal.trim().isEmpty() ? null : canal.trim().toUpperCase(java.util.Locale.ROOT);
+        this.fuenteFrecuencia = this.canalRadio == null ? "CARRIER_BANDA_SIN_CANAL" : "CANAL_EXPLICITO";
+    }
+    public String getFuenteFrecuencia() { return fuenteFrecuencia; }
+    public void setFuenteFrecuencia(String fuente) { this.fuenteFrecuencia = fuente; }
+    public String getEstadoTa() {
+        if (estadoTa != null) return estadoTa;
+        if (ta == null || ta.length != 8) return "INVALIDO";
+        double suma = 0;
+        for (double v : ta) { if (!Double.isFinite(v) || v < 0) return "INVALIDO"; suma += v; }
+        if (suma == 0) return "AUSENTE";
+        if (suma >= .99 && suma <= 1.01) return "VALIDO_FRACCION";
+        if (suma >= 99 && suma <= 101) return "VALIDO_PORCENTAJE";
+        return "INVALIDO";
+    }
+    public void setEstadoTa(String estado) { this.estadoTa = estado; }
+    public String getFuenteTa() { return fuenteTa; }
+    public void setFuenteTa(String fuente) { this.fuenteTa = fuente; }
+    public String getFuenteRadio() { return fuenteRadio; }
+    public Integer getVecinasRespaldo() { return vecinasRespaldo; }
     public double getLatitud() { return latitud; }
     public void setLatitud(double latitud) { this.latitud = latitud; }
     public double getLongitud() { return longitud; }
@@ -88,6 +116,8 @@ public class CeldaAuditoriaDTO {
         this.hbeam = g.getHbeam();
         this.radioM = g.getRadioM();
         this.sinTa = g.isSinTa();
+        this.fuenteRadio = g.getFuenteRadio();
+        this.vecinasRespaldo = g.getVecinasRespaldo();
     }
     @JsonIgnore public String getTxrxmode() { return txrxmode; }
     public void setTxrxmode(String txrxmode) { this.txrxmode = txrxmode; }
@@ -99,6 +129,8 @@ public class CeldaAuditoriaDTO {
                 longitud, azimuth, pci, txrxmode, ta);
         c.dentroArea = dentroArea; c.conHallazgo = conHallazgo; c.planificada = planificada;
         c.azimuthEfectivo = azimuthEfectivo; c.hbeam = hbeam; c.radioM = radioM; c.sinTa = sinTa;
+        c.canalRadio = canalRadio; c.fuenteFrecuencia = fuenteFrecuencia;
+        c.estadoTa = estadoTa; c.fuenteTa = fuenteTa; c.fuenteRadio = fuenteRadio; c.vecinasRespaldo = vecinasRespaldo;
         return c;
     }
 
@@ -113,8 +145,12 @@ public class CeldaAuditoriaDTO {
         fila.put("Latitud", latitud);
         fila.put("Longitud", longitud);
         fila.put("Azimuth", azimuth);
+        fila.put("_estado_ta", getEstadoTa());
+        fila.put("_canal_radio", canalRadio);
         String[] cols = "5G".equals(tecnologia) ? COLUMNAS_TA_5G : COLUMNAS_TA_4G;
-        for (int i = 0; i < cols.length; i++) fila.put(cols[i], ta[i]);
+        double suma = 0;
+        if (getEstadoTa().startsWith("VALIDO")) for (double v : ta) suma += v;
+        for (int i = 0; i < cols.length; i++) fila.put(cols[i], suma > 0 && i < ta.length ? ta[i] / suma : 0);
         return fila;
     }
 }

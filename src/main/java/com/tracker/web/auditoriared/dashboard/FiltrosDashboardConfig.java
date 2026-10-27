@@ -32,7 +32,7 @@ public class FiltrosDashboardConfig {
     }
     private static String calidad(HallazgoAuditoriaDTO h) {
         Boolean a = h.getCeldaA().getSinTa(), b = h.getCeldaB().getSinTa();
-        if (a == null || b == null) return "Geometria no disponible";
+        if (a == null || b == null || h.getCeldaA().getRadioM() == null || h.getCeldaB().getRadioM() == null) return "Geometria no disponible";
         return a || b ? "Incluye estimacion sin TA" : "Ambas celdas con TA";
     }
 }
