@@ -92,9 +92,12 @@ public class AdaptadorMotorAuditoria implements MotorAuditoria {
             while (it.hasNext()) {
                 Map.Entry<String, JsonNode> e = it.next();
                 JsonNode g = e.getValue();
+                Double az = nullable(g, "az"), haz = nullable(g, "hbeam"), radio = nullable(g, "radio");
+                if (az == null || haz == null || haz <= 0 || haz > 360 || radio == null || radio <= 0) {
+                    throw new IllegalStateException("El motor devolvio geometria incompleta para " + e.getKey());
+                }
                 salida.put(e.getKey().trim().toUpperCase(Locale.ROOT), new GeometriaSector(
-                        g.path("az").asDouble(), g.path("hbeam").asDouble(),
-                        g.path("radio").asDouble(), g.path("sinTa").asBoolean(false)));
+                        az, haz, radio, g.path("sinTa").asBoolean(false)));
             }
             return salida;
         } catch (ScriptException | IOException e) {
@@ -133,6 +136,12 @@ public class AdaptadorMotorAuditoria implements MotorAuditoria {
         }
         List<ConflictoMotor> conflictos = new ArrayList<>();
         for (JsonNode nodo : raiz.path("conflicts")) {
+            if (!nodo.path("type").isTextual() || nodo.path("type").asText().trim().isEmpty()
+                    || !nodo.path("aName").isTextual() || !nodo.path("bName").isTextual()
+                    || !nodo.path("dist").isNumber() || !Double.isFinite(nodo.path("dist").asDouble())
+                    || nodo.path("dist").asDouble() < 0) {
+                throw new IllegalStateException("El motor devolvio un conflicto incompleto o invalido");
+            }
             conflictos.add(new ConflictoMotor(
                     nodo.path("type").asText(), nodo.path("aName").asText(),
                     nodo.path("bName").asText(), nodo.path("dist").asDouble(),
@@ -150,6 +159,50 @@ public class AdaptadorMotorAuditoria implements MotorAuditoria {
             tipos.add(tecnologia + ":GLOBAL");
         }
         return new ResultadoMotor(conflictos, capped, tipos);
+    }
+
+    @Override
+    public synchronized List<InteraccionVecinaDTO> vecinos(String tecnologia, List<CeldaAuditoriaDTO> contexto,
+            String objetivo, int limite) {
+        if (limite < 1 || limite > 200 || objetivo == null || objetivo.trim().isEmpty()) {
+            throw new IllegalArgumentException("Indique una celda objetivo y entre 1 y 200 vecinas");
+        }
+        List<InteraccionVecinaDTO> salida = new ArrayList<>();
+        try {
+            ScriptEngine engine = motor(tecnologia);
+            engine.put("__auditoriaFilas", mapper.writeValueAsString(porGrupo(tecnologia, contexto)));
+            engine.put("__auditoriaObjetivo", objetivo);
+            engine.put("__auditoriaLimite", limite);
+            Object bruto = engine.eval("JSON.stringify(AuditoriaGeometria.vecinos("
+                    + "JSON.parse(__auditoriaFilas), __auditoriaObjetivo, __auditoriaLimite))");
+            if (!(bruto instanceof String)) throw new IllegalStateException("La vecindad no devolvio JSON");
+            JsonNode raiz = mapper.readTree((String) bruto);
+            if (!raiz.isArray()) throw new IllegalStateException("La vecindad no devolvio una lista");
+            Map<String, CeldaAuditoriaDTO> porNombre = new HashMap<>();
+            for (CeldaAuditoriaDTO c : contexto) porNombre.put(c.getNombre().trim().toUpperCase(Locale.ROOT), c);
+            for (JsonNode n : raiz) {
+                CeldaAuditoriaDTO c = porNombre.get(n.path("nombre").asText().trim().toUpperCase(Locale.ROOT));
+                if (c == null) throw new IllegalStateException("La vecindad incluyo una celda desconocida");
+                c = c.copia();
+                Double radio = nullable(n, "radioM"), azimuth = nullable(n, "azimuthEfectivo"), haz = nullable(n, "hbeam");
+                if (radio != null && radio > 0 && azimuth != null && haz != null && haz > 0) {
+                    c.aplicarGeometria(new GeometriaSector(azimuth, haz, radio, n.path("sinTaVecina").asBoolean()));
+                }
+                salida.add(new InteraccionVecinaDTO(c, n.path("distanciaMetros").asDouble(),
+                        nullable(n, "areaInterseccionM2"), nullable(n, "interseccionNormalizadaM"),
+                        n.path("mismoPci").asBoolean(), n.path("mismoMod3").asBoolean(),
+                        n.path("mismoRsi").asBoolean(), n.path("sinTaObjetivo").asBoolean(),
+                        n.path("sinTaVecina").asBoolean()));
+            }
+            return salida;
+        } catch (ScriptException | IOException e) {
+            throw new IllegalStateException("No se pudo inspeccionar la vecindad con el motor " + version(tecnologia), e);
+        }
+    }
+
+    private static Double nullable(JsonNode nodo, String campo) {
+        return nodo.path(campo).isNumber() && Double.isFinite(nodo.path(campo).asDouble())
+                ? nodo.path(campo).asDouble() : null;
     }
 
     private ScriptEngine motor(String tecnologia) throws ScriptException {

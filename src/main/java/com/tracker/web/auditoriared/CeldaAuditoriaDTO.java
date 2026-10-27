@@ -94,6 +94,14 @@ public class CeldaAuditoriaDTO {
     @JsonIgnore public double[] getTa() { return ta.clone(); }
     public void setTa(double[] ta) { this.ta = ta == null ? new double[8] : ta.clone(); }
 
+    CeldaAuditoriaDTO copia() {
+        CeldaAuditoriaDTO c = new CeldaAuditoriaDTO(nombre, tecnologia, carrier, banda, latitud,
+                longitud, azimuth, pci, txrxmode, ta);
+        c.dentroArea = dentroArea; c.conHallazgo = conHallazgo; c.planificada = planificada;
+        c.azimuthEfectivo = azimuthEfectivo; c.hbeam = hbeam; c.radioM = radioM; c.sinTa = sinTa;
+        return c;
+    }
+
     /** Fila con los nombres de campo que lee PoolCarrier._push del motor JS. */
     Map<String, Object> paraMotor() {
         Map<String, Object> fila = new LinkedHashMap<>();

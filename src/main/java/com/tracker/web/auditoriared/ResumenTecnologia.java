@@ -55,4 +55,14 @@ public final class ResumenTecnologia {
         this.cappedTipos.clear();
         this.cappedTipos.addAll(tipos);
     }
+
+    ResumenTecnologia copia() {
+        ResumenTecnologia r = new ResumenTecnologia(tecnologia);
+        r.motor = motor; r.filasLeidas = filasLeidas; r.descartadasSinDatos = descartadasSinDatos;
+        r.duplicadas = duplicadas; r.fueraDelCirculo = fueraDelCirculo; r.celdasEnArea = celdasEnArea;
+        r.celdasEnMargen = celdasEnMargen; r.conflictosMotor = conflictosMotor;
+        r.conflictosSoloMargen = conflictosSoloMargen; r.hallazgos = hallazgos;
+        r.geometriaDisponible = geometriaDisponible; r.setCapped(capped, cappedTipos);
+        return r;
+    }
 }

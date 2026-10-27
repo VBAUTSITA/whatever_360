@@ -42,6 +42,11 @@ public class LectorSitioPlanificado {
             throw new IllegalArgumentException("Tiene que llegar un PCI por cada id");
         }
         if (ids.size() > MAX_CELDAS) throw new IllegalArgumentException("Maximo " + MAX_CELDAS + " celdas por sitio");
+        for (int i = 0; i < ids.size(); i++) {
+            if (ids.get(i) == null || ids.get(i) <= 0 || pcis.get(i) == null) {
+                throw new IllegalArgumentException("Cada fila requiere un id positivo y un PCI valido");
+            }
+        }
         if (new HashSet<>(ids).size() != ids.size()) throw new IllegalArgumentException("Hay ids repetidos");
         // Antes de leer: sin jefatura declarada (ni ROLE_ADMIN) lanza AccessDeniedException.
         String jefaturaUsuario = jefaturas.jefaturaActual();
@@ -86,6 +91,10 @@ public class LectorSitioPlanificado {
             Double azimuth = AuditoriaRedRepository.numero(f.get("AZIMUTH"));
             if (lat == null || lon == null || azimuth == null) {
                 throw new IllegalArgumentException(nombre + ": faltan latitud, longitud o azimuth");
+            }
+            if (Math.abs(lat) > 90 || Math.abs(lon) > 180 || azimuth < 0 || azimuth > 360
+                    || texto(f, "CARRIER") == null || texto(f, "FREQ_BAND_TEXT") == null) {
+                throw new IllegalArgumentException(nombre + ": coordenadas, azimuth, carrier o banda invalidos");
             }
             // TA en cero: como en el paso 4 de la planificacion, el motor le da el radio promedio de sus 30 vecinas.
             CeldaAuditoriaDTO celda = new CeldaAuditoriaDTO(nombre, tecnologia, texto(f, "CARRIER"),

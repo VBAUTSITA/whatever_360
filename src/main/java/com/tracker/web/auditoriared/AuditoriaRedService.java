@@ -60,6 +60,10 @@ public class AuditoriaRedService {
             @Value("${auditoriared.max-celdas:8000}") int maxCeldas,
             @Value("${auditoriared.tope-hallazgos:8000}") int tope,
             @Value("${auditoriared.cache-minutos:15}") int cacheMinutos) {
+        if (radioReusoMetros < 500 || !Double.isFinite(radioMaxKm) || radioMaxKm <= 0
+                || maxCeldas < 1 || tope < 1 || cacheMinutos < 0) {
+            throw new IllegalArgumentException("Configuracion de auditoria invalida: revise radios, limites y cache");
+        }
         this.repositorio = repositorio;
         this.motor = motor;
         this.catalogo = catalogo;
@@ -76,6 +80,24 @@ public class AuditoriaRedService {
 
     /** Valor por defecto y maximo del radio de reuso que puede pedir el usuario. */
     public double getRadioReusoKm() { return radioReusoMetros / 1000.0; }
+
+    public List<InteraccionVecinaDTO> vecinos(ResultadoAuditoria resultado, String tecnologia,
+            String objetivo, int limite) {
+        if (!TECNOLOGIAS.contains(tecnologia) || objetivo == null || limite < 1 || limite > 200) {
+            throw new IllegalArgumentException("Celda objetivo, tecnologia o limite de vecinas invalidos");
+        }
+        List<CeldaAuditoriaDTO> contexto = new ArrayList<>();
+        boolean encontrada = false;
+        for (CeldaAuditoriaDTO c : resultado.getContexto()) {
+            if (!tecnologia.equals(c.getTecnologia())) continue;
+            contexto.add(c);
+            if (normalizar(c.getNombre()).equals(normalizar(objetivo)) && c.isDentroArea()) encontrada = true;
+        }
+        if (!encontrada) throw new IllegalArgumentException("Seleccione una celda del area auditada");
+        if (!enCurso.tryLock()) throw new AuditoriaOcupadaException();
+        try { return motor.vecinos(tecnologia, contexto, objetivo, limite); }
+        finally { enCurso.unlock(); }
+    }
 
     /**
      * Basta con el radio de reuso: el motor no marca colision a un par mas lejano que eso,
@@ -95,7 +117,7 @@ public class AuditoriaRedService {
         Alcance alcance = construirAlcance(solicitud, margenPara(radioReusoKm));
         List<String> tecnologias = tecnologias(solicitud);
         int radioReusoM = (int) Math.round(radioReusoKm * 1000);
-        String clave = alcance.clave() + "|" + String.join(",", tecnologias);
+        String clave = alcance.clave() + "|" + String.join(",", tecnologias) + "|" + radioReusoM;
 
         if (!solicitud.isRefrescar()) {
             ResultadoAuditoria guardado = deCache(clave);
@@ -112,7 +134,7 @@ public class AuditoriaRedService {
      * cache (el PCI cambia en cada llamada) pero con el mismo candado de una auditoria a la vez.
      */
     public ResultadoAuditoria auditarSitio(List<CeldaAuditoriaDTO> planificadas, List<String> avisos) {
-        if (planificadas.isEmpty()) throw new IllegalArgumentException("No hay celdas 4G/5G que auditar");
+        if (planificadas == null || planificadas.isEmpty()) throw new IllegalArgumentException("No hay celdas 4G/5G que auditar");
         double lat = 0, lon = 0;
         for (CeldaAuditoriaDTO c : planificadas) {
             lat += c.getLatitud() / planificadas.size();
@@ -141,16 +163,17 @@ public class AuditoriaRedService {
             long inicio = System.nanoTime();
             List<ResumenTecnologia> resumen = new ArrayList<>();
             List<CeldaAuditoriaDTO> celdas = new ArrayList<>();
+            List<CeldaAuditoriaDTO> contexto = new ArrayList<>();
             List<HallazgoAuditoriaDTO> hallazgos = new ArrayList<>();
             for (String tecnologia : tecnologias) {
-                resumen.add(auditarTecnologia(tecnologia, alcance, radioReusoM, planificadas, celdas, hallazgos));
+                resumen.add(auditarTecnologia(tecnologia, alcance, radioReusoM, planificadas, celdas, hallazgos, contexto));
             }
             long duracionMs = (System.nanoTime() - inicio) / 1_000_000L;
             String generadoEn = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(reloj.getAsLong()));
             log.info("Auditoria de red {} {}{}: {} hallazgos en {} ms", alcance.getDescripcion(), tecnologias,
                     planificadas.isEmpty() ? "" : " con " + planificadas.size() + " celdas planificadas",
                     hallazgos.size(), duracionMs);
-            return new ResultadoAuditoria(alcance, resumen, celdas, hallazgos, duracionMs, generadoEn, false, avisos);
+            return new ResultadoAuditoria(alcance, resumen, celdas, hallazgos, duracionMs, generadoEn, false, avisos, contexto);
         } finally {
             enCurso.unlock();
         }
@@ -158,7 +181,7 @@ public class AuditoriaRedService {
 
     private ResumenTecnologia auditarTecnologia(String tecnologia, Alcance alcance, int radioReusoM,
             List<CeldaAuditoriaDTO> planificadas, List<CeldaAuditoriaDTO> celdasSalida,
-            List<HallazgoAuditoriaDTO> hallazgos) {
+            List<HallazgoAuditoriaDTO> hallazgos, List<CeldaAuditoriaDTO> contexto) {
         ResumenTecnologia resumen = new ResumenTecnologia(tecnologia);
         resumen.setMotor(motor.version(tecnologia));
 
@@ -191,6 +214,8 @@ public class AuditoriaRedService {
         // participa una de ellas. Reemplazan a la existente del mismo nombre (re-planificacion).
         for (CeldaAuditoriaDTO celda : planificadas) {
             if (!tecnologia.equals(celda.getTecnologia())) continue;
+            if (porNombre.containsKey(normalizar(celda.getNombre()))
+                    && porNombre.get(normalizar(celda.getNombre())).isDentroArea()) enArea--;
             celda.setDentroArea(true);
             celda.setConHallazgo(false);
             porNombre.put(normalizar(celda.getNombre()), celda);
@@ -248,6 +273,7 @@ public class AuditoriaRedService {
         resumen.setGeometriaDisponible(
                 aplicarGeometria(tecnologia, new ArrayList<>(porNombre.values()), mostradas));
         celdasSalida.addAll(mostradas);
+        contexto.addAll(porNombre.values());
         return resumen;
     }
 
@@ -294,7 +320,7 @@ public class AuditoriaRedService {
     private double radioReuso(SolicitudAuditoria s) {
         if (s == null || s.getRadioReusoKm() == null) return getRadioReusoKm();
         double km = s.getRadioReusoKm();
-        if (!(km >= 0.5) || km > getRadioReusoKm()) {
+        if (!Double.isFinite(km) || !(km >= 0.5) || km > getRadioReusoKm()) {
             throw new IllegalArgumentException(String.format(Locale.ROOT,
                     "El radio de reuso debe estar entre 0.5 y %.1f km", getRadioReusoKm()));
         }
@@ -341,7 +367,7 @@ public class AuditoriaRedService {
         synchronized (cache) {
             EntradaCache entrada = cache.get(clave);
             if (entrada == null) return null;
-            if (reloj.getAsLong() - entrada.guardadoMs > cacheMs) {
+            if (cacheMs == 0 || reloj.getAsLong() - entrada.guardadoMs >= cacheMs) {
                 cache.remove(clave);
                 return null;
             }
@@ -351,7 +377,7 @@ public class AuditoriaRedService {
 
     private void guardarEnCache(String clave, ResultadoAuditoria resultado) {
         synchronized (cache) {
-            cache.put(clave, new EntradaCache(resultado, reloj.getAsLong()));
+            if (cacheMs > 0) cache.put(clave, new EntradaCache(resultado.copia(false), reloj.getAsLong()));
         }
     }
 

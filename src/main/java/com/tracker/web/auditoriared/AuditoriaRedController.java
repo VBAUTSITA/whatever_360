@@ -38,6 +38,7 @@ public class AuditoriaRedController {
     /** /sitio es la misma pagina: con ?ids=..&pci=.. (enlace de /recursos/asignar) el JS pasa a modo sitio. */
     @GetMapping({"", "/sitio"})
     public String pagina(Model model) {
+        SeguridadAuditoria.exigirLectura();
         model.addAttribute("radioMaxKm", service.getRadioMaxKm());
         model.addAttribute("radioReusoKm", service.getRadioReusoKm());
         return "auditoriared/index";
@@ -46,18 +47,21 @@ public class AuditoriaRedController {
     @GetMapping("/api/sitios")
     @ResponseBody
     public List<SitioDTO> buscarSitios(@RequestParam("q") String texto) {
+        SeguridadAuditoria.exigirLectura();
         return service.buscarSitios(texto);
     }
 
     @PostMapping("/api/ejecutar")
     @ResponseBody
     public ResultadoAuditoria ejecutar(@RequestBody SolicitudAuditoria solicitud) {
+        SeguridadAuditoria.exigirLectura();
         return service.auditar(solicitud);
     }
 
     @GetMapping("/api/sitio")
     @ResponseBody
     public ResultadoAuditoria auditarSitio(@RequestParam("ids") List<Long> ids, @RequestParam("pci") List<Integer> pcis) {
+        SeguridadAuditoria.exigirLectura();
         List<String> avisos = new ArrayList<>();
         return service.auditarSitio(lectorSitio.leer(ids, pcis, avisos), avisos);
     }
@@ -84,7 +88,8 @@ public class AuditoriaRedController {
     @ResponseBody
     public ResponseEntity<Map<String, String>> motorNoDisponible(IllegalStateException e) {
         log.error("Fallo el motor de auditoria de red", e);
-        return error(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+        return error(HttpStatus.SERVICE_UNAVAILABLE,
+                "No se pudo completar el calculo de auditoria. Revise el registro del servidor.");
     }
 
     @ExceptionHandler(DataAccessException.class)

@@ -87,7 +87,9 @@ public class AccesoJefaturaAuditoria {
 	 */
 	public String jefaturaActual() {
 		Authentication a = SecurityContextHolder.getContext().getAuthentication();
-		if (a == null || a.getName() == null) {
+        if (a == null || !a.isAuthenticated()
+                || a instanceof org.springframework.security.authentication.AnonymousAuthenticationToken
+                || a.getName() == null) {
 			throw new AccessDeniedException("Sin usuario autenticado");
 		}
 

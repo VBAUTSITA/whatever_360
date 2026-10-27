@@ -6,7 +6,6 @@ import java.util.Locale;
 public final class ClusterAlcance implements Alcance {
 
     private static final double RADIO_TIERRA_KM = 6371.0088;
-    private static final double KM_POR_GRADO_LAT = 111.32;
 
     private final double latitud;
     private final double longitud;
@@ -46,20 +45,24 @@ public final class ClusterAlcance implements Alcance {
     }
 
     @Override public CajaGeografica cajaConMargen() {
-        double radioTotal = radioKm + margenKm;
-        double deltaLat = radioTotal / KM_POR_GRADO_LAT;
-        // Se usa la latitud mas alejada del ecuador para que la caja no recorte el circulo.
-        double extrema = Math.min(89.9, Math.abs(latitud) + deltaLat);
-        double deltaLon = radioTotal / (KM_POR_GRADO_LAT
-                * Math.max(0.05, Math.cos(Math.toRadians(extrema))));
-        return new CajaGeografica(Math.max(-90, latitud - deltaLat),
-                Math.min(90, latitud + deltaLat),
-                Math.max(-180, longitud - deltaLon),
-                Math.min(180, longitud + deltaLon));
+        // Same sphere as contieneConMargen: 111.32 km/degree was clipping the north/south edge.
+        double angular = (radioKm + margenKm) / RADIO_TIERRA_KM;
+        if (angular >= Math.PI) return new CajaGeografica(-90, 90, -180, 180);
+        double deltaLat = Math.toDegrees(angular) + 1e-9;
+        double minLat = Math.max(-90, latitud - deltaLat), maxLat = Math.min(90, latitud + deltaLat);
+        if (minLat <= -90 || maxLat >= 90) return new CajaGeografica(minLat, maxLat, -180, 180);
+        double deltaLon = Math.toDegrees(Math.asin(Math.min(1,
+                Math.sin(angular) / Math.cos(Math.toRadians(latitud))))) + 1e-9;
+        // One SQL BETWEEN cannot represent a wrapped interval. Read all longitudes, then clip exactly.
+        if (longitud - deltaLon < -180 || longitud + deltaLon > 180) {
+            return new CajaGeografica(minLat, maxLat, -180, 180);
+        }
+        return new CajaGeografica(minLat, maxLat, longitud - deltaLon, longitud + deltaLon);
     }
 
     @Override public String clave() {
-        return String.format(Locale.ROOT, "CIRCULO|%.5f|%.5f|%.3f|%.3f", latitud, longitud, radioKm, margenKm);
+        return "CIRCULO|" + Double.toHexString(latitud) + "|" + Double.toHexString(longitud)
+                + "|" + Double.toHexString(radioKm) + "|" + Double.toHexString(margenKm);
     }
 
     public static double distanciaKm(double latA, double lonA, double latB, double lonB) {

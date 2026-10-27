@@ -1,0 +1,74 @@
+// Run against DashboardBrowserFixture (test scope), never against live production data.
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const base = process.env.AUDITORIA_FIXTURE_URL || 'http://127.0.0.1:3298/tracker';
+let browser;
+(async () => {
+  fs.mkdirSync('target/browser', { recursive: true });
+  browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const page = await browser.newPage({ viewport: { width: 1500, height: 1100 } });
+  const errors = []; page.on('pageerror', e => errors.push(e.message));
+  // Test does not depend on an external map server being reachable.
+  await page.route('**/*.tile.openstreetmap.org/**', r => r.abort());
+  await page.goto(base + '/auditoria-red/dashboard');
+  await page.locator('#ad-filter-tipo').waitFor();
+  assert.equal(await page.locator('#ad-filters .ad-filter').count(), 7);
+  await page.locator('#ad-site').fill('FIXTURE');
+  await page.locator('#ad-suggestions button').first().click();
+  assert.equal(await page.locator('#ad-lat').inputValue(), '-12.09');
+  await page.locator('#ad-run').click();
+  await page.waitForFunction(() => !document.getElementById('ad-run').disabled && document.getElementById('ad-count-findings').textContent !== '—', null, { timeout: 90000 });
+  const all = Number((await page.locator('#ad-count-findings').textContent()).replace(/\D/g,''));
+  assert(all > 25); assert.equal(await page.locator('#ad-findings tr').count(),25);
+  await page.locator('#ad-findings tr').first().click();
+  await page.waitForFunction(() => document.getElementById('ad-map-note').textContent.includes('↔'));
+  await page.locator('#ad-next').click(); await page.waitForFunction(() => document.getElementById('ad-page-label').textContent.includes('Página 2'));
+  await page.locator('#ad-filter-tipo').selectOption({ label: 'Colision PCI' });
+  await page.waitForFunction(() => document.getElementById('ad-page-label').textContent.includes('Página 1') && !document.getElementById('ad-run').disabled);
+  assert.equal(Number((await page.locator('#ad-count-findings').textContent()).replace(/\D/g,'')), all);
+  await page.locator('#ad-target').selectOption({ label: '5G · FIXTURE_A' });
+  await page.locator('#ad-neighbors tr[data-selectable]').first().waitFor({timeout:60000});
+  assert.equal(await page.locator('#ad-neighbors tr').count(),30);
+  assert.equal(await page.locator('#ad-neighbors img').count(),0);
+  await page.locator('#ad-neighbors tr').first().click();
+  assert((await page.locator('#ad-pair-detail').textContent()).includes('Solapamiento / distancia'));
+  await page.evaluate(() => scrollTo(0,0));
+  await page.screenshot({ path:'target/browser/dashboard-desktop.png',fullPage:true });
+  await page.locator('#ad-filter-celda').fill('NO_MATCH');
+  await page.waitForFunction(() => document.getElementById('ad-count-filtered').textContent === '0');
+  assert((await page.locator('#ad-findings').textContent()).includes('Sin hallazgos'));
+  assert.equal(await page.locator('#ad-neighbors tr').count(),30);
+  await page.locator('#ad-reset').click();
+  await page.waitForFunction(() => document.getElementById('ad-count-filtered').textContent !== '0' && !document.getElementById('ad-run').disabled);
+  await page.setViewportSize({width:390,height:844});
+  assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+  await page.screenshot({path:'target/browser/dashboard-mobile.png',fullPage:true});
+  // A capped response stays visibly incomplete, including with no visible findings.
+  await page.route('**/dashboard/api/consultar', async route => {
+    const response=await route.fetch(); const data=await response.json(); data.incompleto=true;
+    await route.fulfill({response,json:data});
+  });
+  await page.locator('#ad-filter-celda').fill('NO_MATCH');
+  await page.locator('#ad-incomplete').waitFor({state:'visible'});
+  assert((await page.locator('#ad-findings').textContent()).includes('incompleto'));
+  await page.unroute('**/dashboard/api/consultar');
+  // A login HTML response becomes a useful session error, not a JSON parsing failure.
+  await page.route('**/dashboard/api/consultar', route=>route.fulfill({status:200,contentType:'text/html',body:'<html>login</html>'}));
+  await page.locator('#ad-reset').click();
+  await page.waitForFunction(() => document.getElementById('ad-status').classList.contains('error'));
+  assert((await page.locator('#ad-status').textContent()).includes('sesión'));
+  await page.unroute('**/dashboard/api/consultar');
+  await page.goto(base+'/auditoria-red');
+  await page.locator('#ar-mapa .leaflet-pane').first().waitFor({state:'attached'});
+  assert((await page.locator('#ar-mapa').boundingBox()).height >= 340);
+  await page.screenshot({path:'target/browser/auditoria-mobile.png',fullPage:true});
+  assert.equal(await page.locator('#ar-auditar').count(),1);
+  assert(await page.evaluate(() => AuditoriaHttp.csv('=1+1').startsWith('"\'')));
+  const headers=await page.evaluate(() => { for(const [name,value] of [['_csrf','fixture-token'],['_csrf_header','X-CSRF-TOKEN']]) {const m=document.createElement('meta');m.name=name;m.content=value;document.head.appendChild(m);}return AuditoriaHttp.headers(true); });
+  assert.equal(headers['X-CSRF-TOKEN'],'fixture-token');
+  assert.deepEqual(errors,[]);
+  fs.writeFileSync('target/browser/result.json',JSON.stringify({passed:true,checks:24,findings:all,pageErrors:errors},null,2));
+  console.log('PASS: dashboard browser checks, desktop/mobile, pagination, filters, neighbors, escaping, cap, session, CSRF, legacy page');
+  await browser.close();
+})().catch(async e=>{console.error(e);if(browser) await browser.close();process.exitCode=1;});

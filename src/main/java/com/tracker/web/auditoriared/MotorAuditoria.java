@@ -19,4 +19,10 @@ public interface MotorAuditoria {
 
     /** Archivo y huella del motor, para dejar constancia de que version produjo el resultado. */
     String version(String tecnologia);
+
+    /** Read-only explanation using the same exported geometry functions as the audit engine. */
+    default List<InteraccionVecinaDTO> vecinos(String tecnologia, List<CeldaAuditoriaDTO> contexto,
+            String objetivo, int limite) {
+        throw new IllegalStateException("El motor no permite inspeccionar la vecindad");
+    }
 }

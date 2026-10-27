@@ -11,6 +11,7 @@ import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Lee la red existente con las mismas tablas, joins y columnas que
@@ -28,8 +29,8 @@ public class AuditoriaRedRepository {
             + "       m.ta_1950_3510_mts, m.ta_3510_6630_mts, m.ta_6630_14430_mts, m.ta_mayor_14430_mts "
             + "FROM tm_conf_actual_celda_4g r "
             + "LEFT JOIN PLAN_MAP_SECT_CRIT_4GWEEK m ON r.sector_name = m.sector_name "
-            + "WHERE TO_NUMBER(r.latitud) BETWEEN ? AND ? "
-            + "  AND TO_NUMBER(r.longitud) BETWEEN ? AND ?";
+            + "WHERE " + coordenadaSql("r.latitud") + " BETWEEN ? AND ? "
+            + "  AND " + coordenadaSql("r.longitud") + " BETWEEN ? AND ?";
 
     static final String SQL_5G =
             "SELECT a.cellname, a.carrier, a.physicalcellid, a.frequencyband freq_band, a.txrxmode, "
@@ -40,8 +41,8 @@ public class AuditoriaRedRepository {
             + "       b.ta_7215_15015_mts_porc, b.ta_mayor_a_15015_mts_porc "
             + "FROM tm_conf_actual_celda_5g a "
             + "LEFT JOIN vw_plani_recursos_5g_ta_diario b ON UPPER(a.cellname) = UPPER(b.cellname) "
-            + "WHERE TO_NUMBER(a.latitud) BETWEEN ? AND ? "
-            + "  AND TO_NUMBER(a.longitud) BETWEEN ? AND ?";
+            + "WHERE " + coordenadaSql("a.latitud") + " BETWEEN ? AND ? "
+            + "  AND " + coordenadaSql("a.longitud") + " BETWEEN ? AND ?";
 
     // INSTR busca el texto literal: % y _ del usuario no actuan como comodines.
     static final String SQL_SITIOS_4G =
@@ -59,6 +60,16 @@ public class AuditoriaRedRepository {
             + "GROUP BY a.latitud, a.longitud ORDER BY MIN(a.cellname)) WHERE ROWNUM <= ?";
 
     private final JdbcTemplate jdbc;
+    @Value("${auditoriared.max-filas-leidas:100000}")
+    private int maxFilasLeidas = 100000;
+
+    /** CASE short-circuits conversion: a dirty VARCHAR2 coordinate cannot abort the entire query. */
+    private static String coordenadaSql(String columna) {
+        String texto = "REPLACE(TRIM(CAST(" + columna + " AS VARCHAR2(4000))), ',', '.')";
+        return "(CASE WHEN REGEXP_LIKE(" + texto + ", '^[+-]?[0-9]{1,3}([.][0-9]{1,15})?$') "
+                + "THEN TO_NUMBER(" + texto + ", '999999999999999D999999999999999', "
+                + "'NLS_NUMERIC_CHARACTERS=''.,''') END)";
+    }
 
     public AuditoriaRedRepository(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
@@ -89,6 +100,9 @@ public class AuditoriaRedRepository {
                     @Override
                     public void processRow(ResultSet rs) throws SQLException {
                         contadores[0]++;
+                        if (maxFilasLeidas < 1 || contadores[0] > maxFilasLeidas) {
+                            throw new IllegalArgumentException("La lectura excede el limite de filas; reduzca el area auditada");
+                        }
                         CeldaAuditoriaDTO celda = aCelda(tecnologia, rs);
                         if (celda == null) contadores[1]++;
                         else celdas.add(celda);
@@ -113,7 +127,8 @@ public class AuditoriaRedRepository {
                 Double lat = numero(rs.getObject(2));
                 Double lon = numero(rs.getObject(3));
                 String nombre = rs.getString(1);
-                if (lat == null || lon == null || nombre == null) return;
+                if (lat == null || lon == null || Math.abs(lat) > 90 || Math.abs(lon) > 180
+                        || nombre == null || nombre.trim().isEmpty()) return;
                 String clave = String.format(Locale.ROOT, "%.5f|%.5f", lat, lon);
                 if (!destino.containsKey(clave)) destino.put(clave, new SitioDTO(nombre, lat, lon, tecnologia));
             }
@@ -128,7 +143,9 @@ public class AuditoriaRedRepository {
         Double azimuth = numero(rs.getObject(8));
         Double pci = numero(rs.getObject(3));
         if (nombre == null || nombre.trim().isEmpty() || lat == null || lon == null
-                || azimuth == null || pci == null) {
+                || azimuth == null || pci == null || Math.abs(lat) > 90 || Math.abs(lon) > 180
+                || azimuth < 0 || azimuth > 360 || pci != Math.rint(pci)
+                || pci < 0 || pci > ("5G".equals(tecnologia) ? 1007 : 503)) {
             return null;
         }
         double[] taCrudo = new double[8];
@@ -139,6 +156,8 @@ public class AuditoriaRedRepository {
         Object banda = rs.getObject(4);
         Object carrier = rs.getObject(2);
         Object txrx = rs.getObject(5);
+        if (carrier == null || String.valueOf(carrier).trim().isEmpty()
+                || banda == null || String.valueOf(banda).trim().isEmpty()) return null;
         return new CeldaAuditoriaDTO(nombre.trim(), tecnologia,
                 carrier == null ? null : String.valueOf(carrier).trim(),
                 banda == null ? null : String.valueOf(banda).trim(),
@@ -152,6 +171,7 @@ public class AuditoriaRedRepository {
         if (crudo == null) return null;
         String texto = String.valueOf(crudo).trim();
         if (texto.endsWith("%")) texto = texto.substring(0, texto.length() - 1).trim();
+        if (texto.indexOf(',') >= 0 && texto.indexOf('.') < 0) texto = texto.replace(',', '.');
         if (texto.isEmpty()) return null;
         try {
             double v = Double.parseDouble(texto);
@@ -166,8 +186,12 @@ public class AuditoriaRedRepository {
      * y si no cuadran se envian en cero para que el motor use su respaldo (promedio de vecinas).
      */
     static double[] normalizarTA(double[] crudo) {
+        if (crudo == null || crudo.length != 8) return new double[8];
         double suma = 0;
-        for (double v : crudo) suma += v;
+        for (double v : crudo) {
+            if (!Double.isFinite(v) || v < 0) return new double[8];
+            suma += v;
+        }
         double factor;
         if (suma >= 0.5 && suma <= 1.5) factor = 1.0;
         else if (suma >= 50 && suma <= 150) factor = 0.01;

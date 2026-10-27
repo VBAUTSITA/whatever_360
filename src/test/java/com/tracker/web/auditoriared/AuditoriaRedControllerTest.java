@@ -94,7 +94,7 @@ public class AuditoriaRedControllerTest {
         assertTrue(html.contains("/tracker/js/leaflet/leaflet.js"));
         assertTrue(html.contains("/tracker/js/leaflet/leaflet.css"));
         assertTrue(html.contains("/tracker/js/auditoriared.js"));
-        assertTrue("Debe usar el encabezado comun de la app", html.contains("Auditoría de Red"));
+        assertTrue("Debe enlazar el panel del modulo", html.contains("/tracker/auditoria-red/dashboard"));
         Files.createDirectories(Paths.get("target/auditoriared-render"));
         Files.write(Paths.get("target/auditoriared-render/index.html"), html.getBytes(StandardCharsets.UTF_8));
     }
@@ -143,7 +143,7 @@ public class AuditoriaRedControllerTest {
                 .thenThrow(new IllegalStateException("El motor JS 'nashorn' no esta disponible en este JDK."));
         mvc(sinMotor).perform(post("/auditoria-red/api/ejecutar").contentType(MediaType.APPLICATION_JSON).content(JSON))
                 .andExpect(status().isServiceUnavailable())
-                .andExpect(jsonPath("$.error").value("El motor JS 'nashorn' no esta disponible en este JDK."));
+                .andExpect(jsonPath("$.error").value("No se pudo completar el calculo de auditoria. Revise el registro del servidor."));
     }
 
     @Test

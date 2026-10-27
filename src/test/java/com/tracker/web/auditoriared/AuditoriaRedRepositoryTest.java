@@ -66,4 +66,15 @@ public class AuditoriaRedRepositoryTest {
         assertNull(AuditoriaRedRepository.aCelda("4G", fila(null, "-12.09")));
         assertNull(AuditoriaRedRepository.aCelda("4G", fila("123", "sin dato")));
     }
+
+    @Test public void validaRangosYNumerosMalformados() throws SQLException {
+        for(Object pci : new Object[]{-1,504,100.5,"NaN","Infinity"}) assertNull(AuditoriaRedRepository.aCelda("4G",fila(pci,"-12")));
+        assertNull(AuditoriaRedRepository.aCelda("5G",fila(1008,"-12")));
+        assertNull(AuditoriaRedRepository.aCelda("5G",fila(100,"-91")));
+        ResultSet sinBanda=fila(100,"-12"); when(sinBanda.getObject(4)).thenReturn(null);
+        assertNull(AuditoriaRedRepository.aCelda("5G",sinBanda));
+        assertEquals(-12.09,AuditoriaRedRepository.numero("-12,09"),1e-9);
+        assertArrayEquals(new double[8],AuditoriaRedRepository.normalizarTA(new double[]{-1,2,0,0,0,0,0,0}),1e-9);
+        assertArrayEquals(new double[8],AuditoriaRedRepository.normalizarTA(new double[]{Double.NaN,0,0,0,0,0,0,0}),1e-9);
+    }
 }

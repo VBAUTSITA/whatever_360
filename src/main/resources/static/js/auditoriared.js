@@ -470,8 +470,7 @@
     // ---------- CSV ----------
 
     function csvCampo(v) {
-        var s = v === null || v === undefined ? '' : String(v);
-        return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+        return window.AuditoriaHttp.csv(v);
     }
 
     function exportarCsv() {
@@ -490,6 +489,7 @@
         document.body.appendChild(enlace);
         enlace.click();
         document.body.removeChild(enlace);
+        setTimeout(function () { URL.revokeObjectURL(enlace.href); }, 1000);
     }
 
     // ---------- busqueda de sitio ----------
@@ -538,14 +538,7 @@
     // ---------- auditoria ----------
 
     function leerRespuesta(resp) {
-        return resp.text().then(function (cuerpoTexto) {
-            var datos = null;
-            try { datos = cuerpoTexto ? JSON.parse(cuerpoTexto) : null; } catch (e) { datos = null; }
-            if (!resp.ok) {
-                throw new Error(datos && datos.error ? datos.error : 'Error ' + resp.status + ' del servidor');
-            }
-            return datos;
-        });
+        return window.AuditoriaHttp.read(resp);
     }
 
     function solicitud(refrescar) {
@@ -585,7 +578,7 @@
         mensaje('Auditando... puede tardar en zonas con muchas celdas.', false);
         fetch(URL_EJECUTAR, {
             method: 'POST', credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos)
+            headers: window.AuditoriaHttp.headers(true), body: JSON.stringify(datos)
         }).then(leerRespuesta).then(mostrar).catch(function (e) {
             mensaje(e.message, true);
         }).then(function () {
@@ -655,7 +648,7 @@
     // El enlace «Ver mapa» de la pantalla de asignación abre /auditoria-red/sitio?sitio=..&ids=..&pci=..
     // El servidor manda las celdas del sitio, sus 30 vecinas existentes por carrier y banda, y las que
     // chocan con ellas. Las celdas de un sitio se tapan entre sí: se elige una y el mapa deja solo su
-    // carrier y banda, que es donde el motor busca colisiones y confusión mod-3.
+    // carrier y banda, que es donde el motor busca colisiones y riesgo PSS (mod-3).
 
     var consulta = new URLSearchParams(location.search);
     var divCeldasSitio = $('ar-sitio-celdas');
@@ -718,7 +711,7 @@
         $('ar-titulo').textContent = ['Sitio', consulta.get('sitio'), 'con los PCI propuestos'].filter(Boolean).join(' ');
         $('ar-intro').textContent = 'Vista previa: no se guarda nada. Cada celda del sitio, con el PCI que tiene ahora la ' +
             'pantalla de asignación, se compara con la red existente con el mismo motor de la planificación (colisión PCI, ' +
-            'colisión RSI y confusión mod-3). Solo aparecen los hallazgos en que participa una celda del sitio.';
+            'colisión RSI y riesgo PSS (mod-3)). Solo aparecen los hallazgos en que participa una celda del sitio.';
         $('ar-sitio-panel').hidden = false;
         mensaje('Calculando la interferencia de las celdas del sitio...', false);
         fetch(URL_SITIO + location.search, { credentials: 'same-origin' }).then(leerRespuesta).then(function (r) {

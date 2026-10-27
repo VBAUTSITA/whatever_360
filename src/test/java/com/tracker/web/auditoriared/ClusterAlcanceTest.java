@@ -32,6 +32,19 @@ public class ClusterAlcanceTest {
         assertTrue(caja.contiene(-12.0, -77.0 - km / (111.32 * cosLat)));
     }
 
+    @Test public void noRecortaElBordeEsfericoNiElAntimeridianoNiElPolo() {
+        for (ClusterAlcance c : new ClusterAlcance[]{alcance,new ClusterAlcance(89.99,179.99,2,10.1),new ClusterAlcance(0,179.99,2,10.1)}) {
+            double lat=Math.toRadians(c.getLatitud()),lon=Math.toRadians(c.getLongitud());
+            double d=(c.getRadioKm()+c.getMargenKm()-0.000001)/6371.0088;
+            for(int az=0;az<360;az+=5) {
+                double b=Math.toRadians(az),y=Math.asin(Math.sin(lat)*Math.cos(d)+Math.cos(lat)*Math.sin(d)*Math.cos(b));
+                double x=lon+Math.atan2(Math.sin(b)*Math.sin(d)*Math.cos(lat),Math.cos(d)-Math.sin(lat)*Math.sin(y));
+                double latP=Math.toDegrees(y),lonP=((Math.toDegrees(x)+540)%360)-180;
+                assertTrue(c.contieneConMargen(latP,lonP)); assertTrue("Caja recorta rumbo "+az,c.cajaConMargen().contiene(latP,lonP));
+            }
+        }
+    }
+
     @Test
     public void laClaveIdentificaElArea() {
         assertEquals(alcance.clave(), new ClusterAlcance(-12.0, -77.0, 2, 10.1).clave());
