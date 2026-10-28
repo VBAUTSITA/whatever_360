@@ -250,3 +250,12 @@ Registro de trabajo del 2026-10-27 (America/Lima), destinado a integrarse al reg
 - Se conserva la rama remota feature/auditoria-red-dashboard en d2f10fa51ac3e78b6c15d067001628bc29b09a99 y main en 2b4dd40a9cd3c7ead545b21fefb35c3f229516a5. Sin merge ni force-push.
 - La copia autoritativa continúa en auditoria-red-publicacion, ahora con checkout y seguimiento de feature/auditoria-red-oracle-validada. La rama indicada en la evaluación inicial describe el punto de partida histórico.
 - Verificación: push inicial completado; publicación final cotejada mediante git ls-remote y HEAD. Las pruebas de D-006 corresponden al mismo código; este registro no cambia lógica ni recursos ejecutables.
+
+## D-008 — Publicación conjunta del dashboard y Recursos (2026-10-28)
+
+- Solicitud del usuario: publicar en GitHub el dashboard, Recursos y los Markdown de decisiones/validación.
+- Rama nueva: `feature/dashboard-recursos-5g`, derivada de `feature/auditoria-red-oracle-validada`, commit base `62461d712b0d5a837c8b1edda7eb0e8694a602c7`. Se prepara en un worktree separado y se conserva el host con su trabajo pendiente.
+- Contenido agregado: copia exacta de las 21 clases de Recursos, cuatro pantallas, layout del módulo y dos motores actuales; JPA como dependencia de compilación; guía publicable y checks sintéticos de Recursos. El manifiesto registra archivos y SHA-256.
+- Las reglas, plantillas y recursos ejecutables de Auditoría mantienen su versión de D-006. El cambio de dependencias se verifica ejecutando de nuevo sus 102 tests en esta rama.
+- Recursos se publica con los defectos reproducidos documentados en `VALIDACION-RECURSOS-5G.md`. El shim de compatibilidad sólo existe en el runner diagnóstico; no se aplica al motor principal. La validación Oracle de Recursos continúa pendiente y se distingue de Oracle de Auditoría.
+- No se incorporan reportes de red, libros del usuario, resultados individuales de la red, contraseñas, configuraciones de conexión ni cambios globales de seguridad del host. La copia publicable de la guía conserva metodología, conteos, resultados y límites.

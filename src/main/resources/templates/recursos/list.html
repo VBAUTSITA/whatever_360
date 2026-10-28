@@ -1,0 +1,151 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<body>
+<header th:replace="layouts/base_recursos::header"></header>
+
+<div class="main">
+	<div class="container">
+
+		<div class="title-main">
+			<h2>Lista de Recursos</h2>
+		</div>
+
+		<a class="btn btn-primary add_btn" href="#"
+			th:href="@{/recursos/add}" role="button">
+			&#43; Ingresar Nuevos Registros</a>
+			
+		<a class="btn btn-primary add_btn" href="#"
+			th:href="@{/recursos/modificar}" role="button">
+			&#9998; Modificar Recursos</a>	
+			
+
+		<a class="btn btn-primary add_btn" href="#"
+			th:href="@{/recursos/asignar}" role="button" style="background-color: red;">
+			&#9998; Asignar Recursos</a>
+			
+		<div class="toolbar-paste" >
+		&#9432;
+		Campo MOD incluir para 5G y massive mimo 4G
+		<span class="hint"></span>
+	</div>		
+	</div>
+	
+
+
+<div class="box-lista-interferencia">
+
+		<table id="lista_recursos" class="table table-striped table-bordered list_results" style="width:100%">
+			<thead>
+				<tr>
+					<!-- <th>SEMANA</th> -->
+					<th>USUARIO INGRESO</th>
+					<th>SITE NAME</th>
+					<th>CELL NAME</th>
+					<th>LONGITUD</th>
+					<th>LATITUD</th>
+					<th>TECNOLOGIA</th>
+					<th>PROYECTO</th>
+					<th>JEFATURA</th>
+					<th>PCI/PSC</th>
+					<th>RSI</th>
+					<th>MOD</th>
+					<th>FECHA ACTUALIZACION</th>
+					<th>FECHA ASIGNACION</th>
+				</tr>
+			</thead>
+			<tbody>
+				
+				<tr th:each="r : ${recursos}">
+					<!--<td th:text="${r.semana}"></td>  usuarioIngreso-->
+					<td th:text="${r.usuarioIngreso}"></td>
+					<td th:text="${r.siteName}"></td>
+					<td th:text="${r.cellName}"></td>
+					<td th:text="${r.longitud}"></td>
+					<td th:text="${r.latitud}"></td>
+					<td th:text="${r.tecnologia}"></td>
+					<td th:text="${r.proyecto}"></td>
+					<td th:text="${r.jefatura}"></td>
+					<td th:text="${r.pciPsc}"></td>
+					<td th:text="${r.rsi}"></td>
+					<td th:text="${r.mod}"></td>
+					<td th:text="${r.fechaActualizacion}"></td>
+					<td th:text="${r.fechaAsignacion}"></td>
+				</tr>
+			</tbody>
+			<tfoot style="display: none;">
+				<tr>
+					<!--<th scope="row">SEMANA</th>-->
+					<th scope="row">USUARIO INGRESO</th>
+					
+					<th scope="row">SITE NAME</th>
+					<th scope="row">CELL NAME</th>
+					<th scope="row">LONGITUD</th>
+					<th scope="row">LATITUD</th>
+					<th scope="row">TECNOLOGIA</th>
+					<th scope="row">PROYECTO</th>
+					<th scope="row">JEFATURA</th>
+					<th scope="row">PCI/PSC</th>
+					<th scope="row">RSI</th>
+					<th scope="row">MOD</th>
+					<th scope="row">FECHA ACTUALIZACION</th>
+					<th scope="row">FECHA ASIGNACION</th>
+				</tr>
+	        </tfoot>
+		</table>
+
+</div>
+
+</div>
+
+<div  th:replace="layouts/base::footer"></div>
+<script type="text/javascript" th:src="@{/js/jquery.dataTables.min.js}"></script>
+<!--  <script type="text/javascript" th:src="@{/js/dataTables.buttons.min.js}"></script>-->
+<script type="text/javascript" th:src="@{/js/buttons.flash.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.print.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/buttons.html5.min.js}"></script>
+
+<script>
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#lista_recursos tfoot th').each( function () {
+        var title = $(this).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+
+    // DataTable
+    var table = $('#lista_recursos').DataTable({
+    	"aaSorting": [],
+    	dom: 'Bfrtip',
+        buttons: ['copy','csv'],
+        scrollY:        "400px",
+        scrollX:        true,
+        scrollCollapse: true,
+        fixedColumns:  true
+    });
+
+    // Apply the search
+    table.columns().every( function () {
+        var that = this;
+
+        $( 'input', this.footer() ).on( 'keyup change clear', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+    } );
+} );
+</script>
+
+
+</body>
+</html>

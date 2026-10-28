@@ -8,3 +8,6 @@ Thumbs.db
 .env
 .env.*
 /application-local.properties
+/validacion/recursos-5g/resultados/
+/validacion/recursos-5g/datos/
+__pycache__/

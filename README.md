@@ -1,4 +1,14 @@
-# Auditoría de red y panel PCI
+# Dashboard de Auditoría Red y módulo Recursos
+
+Publicación conjunta en **`feature/dashboard-recursos-5g`**, 2026-10-28. Incluye el dashboard verificado de Auditoría Red, el código actual de Recursos y sus motores 4G/5G, pantallas y registro de validación 5G. Conserva Java 8 / Spring Boot 2.1.7.
+
+**Estado de Recursos: se publican los defectos reproducidos; no está aprobado para producción.** Su motor original falla en Nashorn por `Float64Array.fill`; también se reprodujeron problemas de asignaciones parciales, reservas, validación y acceso. El experimento con compatibilidad es una copia de diagnóstico y no está aplicado al motor principal. [Detalle y pasos para otra IA](VALIDACION-RECURSOS-5G.md), [integración de Recursos](RECURSOS-INTEGRACION.md).
+
+El dashboard y las decisiones de Auditoría están en [DECISIONES-AUDITORIA-RED.md](DECISIONES-AUDITORIA-RED.md). Las pruebas Oracle documentadas de Auditoría no acreditan Recursos: **Oracle de Recursos está pendiente de entrada local de credencial**, junto con la confirmación de frecuencia de las nuevas celdas. Los reportes de red privados, configuraciones y credenciales no forman parte de la publicación.
+
+Este repositorio distribuye módulos para el Web Tracker existente; el host aporta autenticación, Oracle, layout y assets compartidos. Su historia es independiente de `main`: integrar los archivos de los módulos por comparación, sin reemplazar el proyecto. La distribución Maven conserva su coordenada histórica `com.tracker:auditoria-red:1.0.0-SNAPSHOT`; esta rama agrega Recursos a su contenido.
+
+## Documentación histórica del dashboard
 
 Distribución exclusiva del módulo Auditoría Red de Web Tracker, Java 8 / Spring Boot 2.1.7. Rama `feature/auditoria-red-dashboard` destinada a `VBAUTSITA/whatever_360`. Es una rama independiente para distribuir el módulo: no incluye los demás módulos ni comparte el árbol completo de `main`. No debe fusionarse mediante una sustitución del proyecto.
 

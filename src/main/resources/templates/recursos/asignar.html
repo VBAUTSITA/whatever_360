@@ -1,0 +1,299 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head th:replace="layouts/base::head">
+</head>
+<link href="../static/css/jquery.dataTables.min.css" rel="stylesheet"
+		th:href="@{/css/jquery.dataTables.min.css}">
+<style>
+	.box-asignar { overflow-x: auto; }
+
+	#tabla_asignar input[type="text"],
+	#tabla_asignar input[type="date"] {
+		width: 100%;
+		min-width: 90px;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		padding: 4px 6px;
+		font-size: 13px;
+		outline: none;
+		transition: border-color .15s, background .15s;
+		margin-bottom: 0;
+	}
+	#tabla_asignar input:focus { border-color: #999; background: #fff; }
+	#tabla_asignar input.filled { background: #fafafa; }
+
+	.toolbar-paste {
+		display: flex; align-items: center; gap: 10px;
+		padding: 8px 12px; margin-bottom: 10px;
+		background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px;
+		font-size: 12px; color: #666;
+	}
+	.toolbar-paste kbd {
+		background: #fff; border: 1px solid #ccc; border-radius: 4px;
+		padding: 1px 6px; font-family: monospace; font-size: 11px;
+	}
+
+	.acciones-asignar { margin: 15px 0 30px 0; }
+
+	.auto-asignar-toolbar { margin-bottom: 12px; }
+	#tabla_asignar input.auto-computado {
+		background: #eaf6ff;
+		border-color: #3498db;
+	}
+	.badge-auto {
+		display: inline-block;
+		margin-left: 6px;
+		padding: 1px 6px;
+		font-size: 10px;
+		font-weight: 700;
+		letter-spacing: .03em;
+		color: #fff;
+		background: #3498db;
+		border-radius: 3px;
+		vertical-align: middle;
+	}
+	.auto-asignar-resumen {
+		font-size: 12px; color: #444;
+		background: #f4f8fb; border: 1px solid #d8e6f0; border-radius: 6px;
+		padding: 8px 12px; margin-bottom: 10px;
+	}
+	.auto-asignar-omitidos {
+		font-size: 12px; color: #7a4a00;
+		background: #fff8ec; border: 1px solid #f0d9a8; border-radius: 6px;
+		padding: 8px 12px; margin-bottom: 10px;
+	}
+	.auto-asignar-omitidos ul { margin: 4px 0 0 18px; padding: 0; }
+
+	.toast-paste {
+		position: fixed; bottom: 1.5rem; left: 50%;
+		transform: translateX(-50%) translateY(60px);
+		background: #1a1a1a; color: #fff; padding: 8px 18px;
+		border-radius: 6px; font-size: 13px; opacity: 0;
+		transition: all .25s; pointer-events: none; white-space: nowrap; z-index: 999;
+	}
+	.toast-paste.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+<body>
+<header th:replace="layouts/base_recursos::header"></header>
+
+<div class="main">
+	<div class="container">
+
+		<div class="title-main">
+			<h2>Asignar Recursos</h2>
+		</div>
+
+		<a class="btn btn-primary" href="#"
+			th:href="@{/recursos/list}" role="button">
+			Regresar</a>
+	</div>
+
+<div class="box-lista-interferencia">
+
+	<div class="toolbar-paste" >
+		&#9432;
+		Copia las columnas editables desde Excel (PCI/PSC &rarr; RSI &rarr; MOD &rarr; Fechas) &rarr; haz clic en la primera celda &rarr; <kbd>Ctrl+V</kbd>
+	</div>
+
+	<form th:action="@{/recursos/autoAsignar}" method="post" class="auto-asignar-toolbar">
+		<input type="hidden" name="ids" th:each="r : ${recursosForm.recursos}" th:if="${r.id != null}" th:value="${r.id}"/>
+		<button type="submit" class="btn btn-primary" style="background-color:#3498db;">
+			&#9889; Auto-asignar PCI/RSI
+		</button>
+		<span style="font-size:12px;color:#666;margin-left:8px;">
+			Calcula PCI/RSI (motor planner.js) solo para las filas sin valor. No sobreescribe lo que ya tiene PCI/RSI guardado. Revisa antes de hacer clic en "Asignar".
+		</span>
+	</form>
+
+	<div th:if="${totalExistentesRed != null}" class="auto-asignar-resumen">
+		<strong>Auto-asignaci&oacute;n:</strong>
+		comparado contra <strong th:text="${totalExistentesRed}"></strong> celda(s) existente(s)
+		(<span th:text="${conDatosTraficoRed}"></span> con datos de tr&aacute;fico).
+		<span th:if="${totalExistentesRed == 0}" style="color:#c0392b;font-weight:bold;">
+			&#9888; 0 celdas existentes encontradas: revisar la clave de uni&oacute;n antes de confiar en estos valores.
+		</span>
+	</div>
+
+	<div th:if="${omitidosAutoAsignacion != null and !omitidosAutoAsignacion.isEmpty()}" class="auto-asignar-omitidos">
+		<strong>No se auto-asignaron (<span th:text="${omitidosAutoAsignacion.size()}"></span>):</strong>
+		<ul>
+			<li th:each="motivo : ${omitidosAutoAsignacion}" th:text="${motivo}"></li>
+		</ul>
+	</div>
+
+	<form th:action="@{/recursos/asignar}" th:object="${recursosForm}" method="post">
+	<div class="box-asignar">
+		<table id="tabla_asignar" class="table table-striped table-bordered list_results" style="width:100%">
+			<thead>
+				<tr>
+				<!--  
+					<th>SEMANA</th>-->
+					<th>SITE NAME</th>
+					<th>CELL NAME</th>
+					<th>PCI/PSC</th>
+					<th>RSI</th>
+					<th>MOD</th>
+					<!-- 
+					<th>FECHA ACTUALIZACION</th>
+					<th>FECHA ASIGNACION</th> -->
+				</tr>
+			</thead>
+			<tbody id="tbody-asignar">
+				<tr th:each="r, iterStat : *{recursos}">
+
+					<td>
+						<input type="hidden" th:field="*{recursos[__${iterStat.index}__].id}"/>
+						
+						<!-- <span th:text="${r.semana}"></span> -->
+						<!--<td th:text="${r.siteName}"></td>  -->
+						<span th:text="${r.siteName}"></span>
+					</td>
+					
+					<td>
+						<span th:text="${r.cellName}"></span>
+						<span class="badge-auto"
+							  th:if="${autoComputadosIds != null and autoComputadosIds.contains(r.id)}"
+							  title="Calculado por el motor PCI/RSI - revisar antes de Asignar">AUTO</span>
+					</td>
+
+					<td><input type="text"
+							th:field="*{recursos[__${iterStat.index}__].pciPsc}"
+							th:classappend="${autoComputadosIds != null and autoComputadosIds.contains(r.id)} ? 'auto-computado' : ''"
+							th:data-row="${iterStat.index}" data-col="0"
+							autocomplete="off" spellcheck="false"/></td>
+
+					<td><input type="text"
+							th:field="*{recursos[__${iterStat.index}__].rsi}"
+							th:classappend="${autoComputadosIds != null and autoComputadosIds.contains(r.id)} ? 'auto-computado' : ''"
+							th:data-row="${iterStat.index}" data-col="1"
+							autocomplete="off" spellcheck="false"/></td>
+
+					<td><input type="text"
+							th:field="*{recursos[__${iterStat.index}__].mod}"
+							th:data-row="${iterStat.index}" data-col="2"
+							autocomplete="off" spellcheck="false"/></td>
+
+					<!-- fechaActualizacion / fechaAsignacion son String "yyyy-MM-dd",
+					     input type=date las entiende directo. NO usar #dates.format (solo sirve para java.util.Date) -->
+					<!-- 
+					<td><input type="date"
+							th:field="*{recursos[__${iterStat.index}__].fechaActualizacion}"
+							th:data-row="${iterStat.index}" data-col="3"/></td>
+
+					<td><input type="date"
+							th:field="*{recursos[__${iterStat.index}__].fechaAsignacion}"
+							th:data-row="${iterStat.index}" data-col="4"/></td>
+					 -->
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="acciones-asignar">
+		<button type="submit" class="btn btn-primary">&#128190; Asignar</button>
+		<a th:href="@{/recursos/list}" class="btn">Cancelar</a>
+	</div>
+	</form>
+
+</div>
+
+</div>
+
+<div class="toast-paste" id="toast"></div>
+
+<div  th:replace="layouts/base::footer"></div>
+
+<script>
+(function() {
+
+	// ── Smart paste ──────────────────────────────────────────────────────────
+	// Igual que en add.html: el texto de Excel viene con \t entre columnas
+	// y \n entre filas. Se distribuye a partir de la celda donde se pegó.
+	// Columnas editables: 0=pciPsc, 1=rsi, 2=mod, 3=fechaActualizacion, 4=fechaAsignacion
+
+	var TOTAL_COLS = 5;
+	var DATE_COLS  = [3, 4];
+
+	// Normaliza fechas de Excel (dd/mm/yyyy o dd-mm-yyyy) a yyyy-MM-dd
+	// para que el input type=date las acepte.
+	function normalizeDate(val) {
+		var m = val.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+		if (m) {
+			return m[3] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[1]).slice(-2);
+		}
+		return val; // ya está en yyyy-MM-dd u otro formato
+	}
+
+	document.getElementById('tbody-asignar').addEventListener('paste', function(e) {
+		if (e.target.tagName !== 'INPUT' || e.target.dataset.row === undefined) return;
+		e.preventDefault();
+
+		var text = e.clipboardData.getData('text/plain');
+		if (!text.trim()) return;
+
+		var startRow = parseInt(e.target.dataset.row);
+		var startCol = parseInt(e.target.dataset.col);
+		var totalRows = document.querySelectorAll('#tbody-asignar tr').length;
+
+		var pastedRows = text.replace(/\r/g, '').split('\n');
+		// quita la última fila vacía que Excel agrega
+		if (pastedRows.length && pastedRows[pastedRows.length - 1] === '') pastedRows.pop();
+
+		var filled = 0;
+
+		pastedRows.forEach(function(rowStr, ri) {
+			var r = startRow + ri;
+			if (r >= totalRows) return;
+
+			var cols = rowStr.split('\t');
+			cols.forEach(function(val, ci) {
+				var c = startCol + ci;
+				if (c >= TOTAL_COLS) return;
+
+				var inp = document.querySelector(
+					'#tbody-asignar input[data-row="' + r + '"][data-col="' + c + '"]'
+				);
+				if (!inp) return;
+
+				var v = val.trim();
+				if (DATE_COLS.indexOf(c) !== -1) v = normalizeDate(v);
+
+				inp.value = v;
+				v ? inp.classList.add('filled') : inp.classList.remove('filled');
+				filled++;
+			});
+		});
+
+		if (filled > 0) showToast(filled + ' celda' + (filled > 1 ? 's' : '') + ' pegada' + (filled > 1 ? 's' : ''));
+	});
+
+	// ── Highlight on focus ───────────────────────────────────────────────────
+	document.getElementById('tbody-asignar').addEventListener('focusin', function(e) {
+		if (e.target.tagName === 'INPUT') e.target.style.outline = '2px dashed #3498db';
+	});
+	document.getElementById('tbody-asignar').addEventListener('focusout', function(e) {
+		if (e.target.tagName === 'INPUT') {
+			e.target.style.outline = '';
+			e.target.value.trim()
+				? e.target.classList.add('filled')
+				: e.target.classList.remove('filled');
+		}
+	});
+
+	// ── Toast ────────────────────────────────────────────────────────────────
+	function showToast(msg) {
+		var t = document.getElementById('toast');
+		t.textContent = msg;
+		t.classList.add('show');
+		setTimeout(function() { t.classList.remove('show'); }, 2200);
+	}
+
+})();
+</script>
+
+</body>
+</html>
