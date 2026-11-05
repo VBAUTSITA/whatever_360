@@ -1,10 +1,12 @@
 package com.tracker.web.auditoriared.dashboard;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import com.tracker.web.auditoriared.ClusterRedDTO;
 import com.tracker.web.auditoriared.SeguridadAuditoria;
 
 @Controller
@@ -21,6 +23,11 @@ public class DashboardAuditoriaController {
     }
     @GetMapping("/api/filtros") @ResponseBody
     public List<Map<String, Object>> filtros() { SeguridadAuditoria.exigirLectura(); return service.definiciones(); }
+    @GetMapping("/api/clusters") @ResponseBody
+    public List<ClusterRedDTO> clusters(@RequestParam(value = "tecnologias", required = false) List<String> tecnologias) {
+        SeguridadAuditoria.exigirLectura();
+        return service.getAuditoria().clusters(tecnologias == null ? Arrays.asList("4G", "5G") : tecnologias);
+    }
     @PostMapping("/api/consultar") @ResponseBody
     public Map<String, Object> consultar(@RequestBody SolicitudDashboard solicitud) {
         SeguridadAuditoria.exigirLectura(); return service.consultar(solicitud);

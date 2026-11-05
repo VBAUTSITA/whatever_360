@@ -32,4 +32,15 @@ Ejemplo de consulta:
 
 La celda objetivo debe pertenecer al área consultada. La lista de vecinas no se filtra mediante los filtros de hallazgos. Una banda o un texto que oculta una fila no puede alterar las reglas del motor. Con ambos canales radio explícitos se exige igualdad de canal; sin ambos, carrier/banda delimita sólo el grupo candidato. El SQL actual no aporta canal RF. El filtro de calidad informa geometría no disponible cuando radio=null, incluso si el TA es válido pero P80 cae en el intervalo abierto.
 
-Para soportar polígonos de clúster, implemente otro `Alcance`, con pertenencia exacta, caja con margen y clave de caché que incluya la geometría completa. Después añada el DTO de solicitud y un selector respaldado por una fuente de clústeres. La versión actual usa `ClusterAlcance` circular y no ofrece un selector de clústeres ficticio.
+## Cluster de red (2026-11-05)
+
+Además del círculo (`ClusterAlcance`), el paso 1 admite un **cluster de red**: las celdas con un mismo `CLUSTER_NAME` en `TM_CONF_ACTUAL_CELDA_4G/5G` (`ClusterRedAlcance`, tipo `CLUSTER_RED`). La solicitud lleva `"cluster": "<nombre>"` en lugar de latitud, longitud y radio. El selector se llena con `GET /auditoria-red/dashboard/api/clusters`, que devuelve cada cluster con sus celdas distintas por tecnología.
+
+- Área visible: celdas cuyo `CLUSTER_NAME` coincide (sin distinguir mayúsculas). Margen: celdas de cualquier cluster a menos del radio de reuso (+0,1 km) de alguna celda del cluster, para conservar los pares del borde.
+- La pertenencia la decide `Alcance.incluye(celda)`, que por defecto es geométrica; otro tipo de alcance puede sobrescribirla.
+- El conteo del selector incluye celdas que luego se descartan por datos incompletos, por ejemplo sin azimut. La auditoría solo usa las completas.
+- La consulta a 4G asume la columna `CLUSTER_NAME` en la tabla de producción; el fixture Oracle de prueba la incorpora.
+
+Las coordenadas de la consulta SQL aceptan cualquier cantidad de decimales y un `+` inicial: la red exporta latitudes con 16 decimales, que antes quedaban fuera sin aviso.
+
+Para soportar polígonos geográficos, implemente otro `Alcance` con pertenencia exacta, caja con margen y clave de caché que incluya la geometría completa.

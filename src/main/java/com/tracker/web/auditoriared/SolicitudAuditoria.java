@@ -10,6 +10,8 @@ public class SolicitudAuditoria {
     /** Opcional: si falta se usa el de configuracion (10 km). Define tambien el margen. */
     private Double radioReusoKm;
     private List<String> tecnologias;
+    /** Opcional: CLUSTER_NAME de la red. Si llega, reemplaza al circulo (latitud/longitud/radio). */
+    private String cluster;
     /** True = ignorar la cache y recalcular. */
     private boolean refrescar;
 
@@ -25,6 +27,8 @@ public class SolicitudAuditoria {
     public void setRadioReusoKm(Double radioReusoKm) { this.radioReusoKm = radioReusoKm; }
     public List<String> getTecnologias() { return tecnologias; }
     public void setTecnologias(List<String> tecnologias) { this.tecnologias = tecnologias; }
+    public String getCluster() { return cluster; }
+    public void setCluster(String cluster) { this.cluster = cluster; }
     public boolean isRefrescar() { return refrescar; }
     public void setRefrescar(boolean refrescar) { this.refrescar = refrescar; }
 }

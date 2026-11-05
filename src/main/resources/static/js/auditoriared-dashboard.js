@@ -233,12 +233,19 @@
             if (number(r.taOverflow) !== null) node('div', 'TA en intervalo abierto: ' + r.taOverflow + ' · Sin radio utilizable: ' + r.geometriaSinRadio, section);
         });
         areaLayer.clearLayers();
-        L.circle([result.alcance.latitud, result.alcance.longitud], { radius: result.alcance.radioKm * 1000, color: '#0073b7', fill: false, weight: 1 }).addTo(areaLayer);
-        if (!selectedPair) map.fitBounds(L.latLng(result.alcance.latitud, result.alcance.longitud).toBounds(result.alcance.radioKm * 2000), { maxZoom: 14 });
+        var porCluster = result.alcance.tipo === 'CLUSTER_RED';
+        if (porCluster) {
+            result.celdas.forEach(function (cell) { L.circleMarker([cell.latitud, cell.longitud], { radius: 2, color: '#0073b7', weight: 1, fillOpacity: 0.5 }).addTo(areaLayer); });
+            if (!selectedPair && result.celdas.length) map.fitBounds(L.featureGroup(areaLayer.getLayers()).getBounds(), { padding: [22, 22], maxZoom: 14 });
+        } else {
+            L.circle([result.alcance.latitud, result.alcance.longitud], { radius: result.alcance.radioKm * 1000, color: '#0073b7', fill: false, weight: 1 }).addTo(areaLayer);
+            if (!selectedPair) map.fitBounds(L.latLng(result.alcance.latitud, result.alcance.longitud).toBounds(result.alcance.radioKm * 2000), { maxZoom: 14 });
+        }
         showContext();
         status('Cálculo ' + generatedAt(result.generadoEn) + (result.desdeCache ? ' · Resultado en caché' : ' · Datos recalculados')
             + (number(result.edadSegundos) !== null ? ' · Antigüedad del cálculo: ' + metric(result.edadSegundos, 0) + ' s' : '')
-            + ' · Área ' + metric(result.alcance.radioKm, 1) + ' km + margen ' + metric(result.alcance.margenKm, 1) + ' km');
+            + (porCluster ? ' · Cluster ' + result.alcance.cluster + ' (' + metric(result.celdas.length, 0) + ' celdas) + margen ' + metric(result.alcance.margenKm, 1) + ' km'
+                : ' · Área ' + metric(result.alcance.radioKm, 1) + ' km + margen ' + metric(result.alcance.margenKm, 1) + ' km'));
     }
     function query(refresh) {
         if (!state.base) return;
@@ -274,11 +281,39 @@
         if (!$('ad-form').reportValidity()) return;
         var lat = number($('ad-lat').value), lon = number($('ad-lon').value), radius = number($('ad-radius').value), reuse = number($('ad-reuse').value);
         var technologies = []; if ($('ad-4g').checked) technologies.push('4G'); if ($('ad-5g').checked) technologies.push('5G');
-        if (lat === null || lon === null || Math.abs(lat) > 90 || Math.abs(lon) > 180 || !(radius > 0) || radius > maxRadius || !(reuse >= 0.5) || reuse > maxReuse || !technologies.length) { status('Revise el centro, los radios y las tecnologías seleccionadas.', true); return; }
+        var cluster = $('ad-cluster').value;
+        if (cluster) {
+            if (!(reuse >= 0.5) || reuse > maxReuse || !technologies.length) { status('Revise el reuso y las tecnologías seleccionadas.', true); return; }
+        } else if (lat === null || lon === null || Math.abs(lat) > 90 || Math.abs(lon) > 180 || !(radius > 0) || radius > maxRadius || !(reuse >= 0.5) || reuse > maxReuse || !technologies.length) { status('Revise el centro, los radios y las tecnologías seleccionadas.', true); return; }
         state.version++; state.page = 1; state.target = ''; clearPair();
-        state.base = { sitio: $('ad-site').value || null, latitud: lat, longitud: lon, radioKm: radius, radioReusoKm: reuse, tecnologias: technologies };
+        state.base = cluster ? { cluster: cluster, radioReusoKm: reuse, tecnologias: technologies }
+            : { sitio: $('ad-site').value || null, latitud: lat, longitud: lon, radioKm: radius, radioReusoKm: reuse, tecnologias: technologies };
         query(refresh);
     }
+    // Cluster de red: reemplaza al círculo; el conteo depende de las tecnologías marcadas.
+    var clusters = [];
+    function clusterCount(c) { return ($('ad-4g').checked ? c.celdas4G : 0) + ($('ad-5g').checked ? c.celdas5G : 0); }
+    function fillClusters() {
+        var select = $('ad-cluster'), current = select.value;
+        while (select.options.length > 1) select.remove(1);
+        clusters.forEach(function (c) {
+            var count = clusterCount(c);
+            if (count > 0) { var op = node('option', c.nombre + ' · ' + count + ' celdas', select); op.value = c.nombre; }
+        });
+        select.value = current;
+        if (select.value !== current) select.value = '';
+        clusterMode();
+    }
+    function clusterMode() {
+        var byCluster = !!$('ad-cluster').value;
+        ['ad-site', 'ad-lat', 'ad-lon', 'ad-radius'].forEach(function (id) { $(id).disabled = byCluster; });
+        $('ad-run').textContent = byCluster ? 'Consultar cluster' : 'Consultar área';
+    }
+    $('ad-cluster').addEventListener('change', function () { clusterMode(); invalidate(); });
+    ['ad-4g', 'ad-5g'].forEach(function (id) { $(id).addEventListener('change', fillClusters); });
+    fetch(root.dataset.clustersUrl + '?tecnologias=4G&tecnologias=5G', { credentials: 'same-origin', headers: http.headers(false) }).then(http.read)
+        .then(function (list) { clusters = list; fillClusters(); })
+        .catch(function (error) { $('ad-cluster-note').textContent = 'No se pudo cargar la lista de clusters: ' + error.message; });
     $('ad-form').addEventListener('submit', function (event) { event.preventDefault(); submit(false); });
     $('ad-refresh').addEventListener('click', function () { submit(true); });
     ['ad-lat', 'ad-lon', 'ad-radius', 'ad-reuse', 'ad-4g', 'ad-5g'].forEach(function (id) { $(id).addEventListener('change', invalidate); });

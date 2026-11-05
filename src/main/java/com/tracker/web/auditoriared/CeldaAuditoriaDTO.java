@@ -22,6 +22,8 @@ public class CeldaAuditoriaDTO {
     private String carrier;
     private String banda;
     private String canalRadio;
+    /** CLUSTER_NAME de la red; null si la fuente no lo informa. */
+    private String cluster;
     private String fuenteFrecuencia = "CARRIER_BANDA_SIN_CANAL";
     private String estadoTa;
     private String fuenteTa = "NO_IDENTIFICADA";
@@ -72,6 +74,10 @@ public class CeldaAuditoriaDTO {
     public void setCanalRadio(String canal) {
         this.canalRadio = canal == null || canal.trim().isEmpty() ? null : canal.trim().toUpperCase(java.util.Locale.ROOT);
         this.fuenteFrecuencia = this.canalRadio == null ? "CARRIER_BANDA_SIN_CANAL" : "CANAL_EXPLICITO";
+    }
+    public String getCluster() { return cluster; }
+    public void setCluster(String cluster) {
+        this.cluster = cluster == null || cluster.trim().isEmpty() ? null : cluster.trim();
     }
     public String getFuenteFrecuencia() { return fuenteFrecuencia; }
     public void setFuenteFrecuencia(String fuente) { this.fuenteFrecuencia = fuente; }
@@ -129,7 +135,7 @@ public class CeldaAuditoriaDTO {
                 longitud, azimuth, pci, txrxmode, ta);
         c.dentroArea = dentroArea; c.conHallazgo = conHallazgo; c.planificada = planificada;
         c.azimuthEfectivo = azimuthEfectivo; c.hbeam = hbeam; c.radioM = radioM; c.sinTa = sinTa;
-        c.canalRadio = canalRadio; c.fuenteFrecuencia = fuenteFrecuencia;
+        c.canalRadio = canalRadio; c.fuenteFrecuencia = fuenteFrecuencia; c.cluster = cluster;
         c.estadoTa = estadoTa; c.fuenteTa = fuenteTa; c.fuenteRadio = fuenteRadio; c.vecinasRespaldo = vecinasRespaldo;
         return c;
     }

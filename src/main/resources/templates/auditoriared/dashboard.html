@@ -4,12 +4,15 @@
 <body>
 <header th:replace="layouts/base_auditoriared::header"></header>
 <main class="ad-main" id="ad-panel"
-      th:attr="data-query-url=@{/auditoria-red/dashboard/api/consultar},data-search-url=@{/auditoria-red/api/sitios},data-filters-url=@{/auditoria-red/dashboard/api/filtros},data-radio-max=${radioMaxKm},data-reuso-max=${radioReusoKm}">
+      th:attr="data-query-url=@{/auditoria-red/dashboard/api/consultar},data-search-url=@{/auditoria-red/api/sitios},data-filters-url=@{/auditoria-red/dashboard/api/filtros},data-clusters-url=@{/auditoria-red/dashboard/api/clusters},data-radio-max=${radioMaxKm},data-reuso-max=${radioReusoKm}">
   <div class="ad-title"><div><h1>Panel de planificación PCI</h1><p>Consulte un área, seleccione un hallazgo y revise la evidencia del par.</p></div><span class="ad-readonly">Solo lectura · 4G / 5G</span></div>
   <div class="ad-workspace">
     <aside class="ad-sidebar">
       <form id="ad-form" autocomplete="off">
         <h2>1. Área de análisis</h2>
+        <label for="ad-cluster">Cluster de red</label>
+        <select id="ad-cluster" aria-describedby="ad-cluster-note"><option value="">Ninguno: usar sitio o coordenadas</option></select>
+        <p class="ad-hint" id="ad-cluster-note">Audita todas las celdas del cluster. El número indica celdas de las tecnologías marcadas.</p>
         <label for="ad-site">Sitio o celda</label>
         <div class="ad-search"><input id="ad-site" type="search" placeholder="Buscar por nombre" maxlength="60" role="combobox" aria-expanded="false" aria-controls="ad-suggestions" aria-autocomplete="list"><div id="ad-suggestions" role="listbox" hidden></div></div>
         <p class="ad-hint">Seleccione un resultado o escriba las coordenadas.</p>

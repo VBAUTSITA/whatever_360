@@ -113,10 +113,25 @@ public class AuditoriaRedService {
         return repositorio.buscarSitios(t, LIMITE_SITIOS);
     }
 
+    /** Clusters de red de las tecnologias pedidas, ordenados por nombre, con sus celdas por tecnologia. */
+    public List<ClusterRedDTO> clusters(List<String> pedidas) {
+        SolicitudAuditoria s = new SolicitudAuditoria();
+        s.setTecnologias(pedidas);
+        Map<String, ClusterRedDTO> porNombre = new java.util.TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        for (String tecnologia : tecnologias(s)) {
+            for (Map.Entry<String, Integer> e : repositorio.clusters(tecnologia).entrySet()) {
+                ClusterRedDTO c = porNombre.get(e.getKey());
+                if (c == null) porNombre.put(e.getKey(), c = new ClusterRedDTO(e.getKey()));
+                c.sumar(tecnologia, e.getValue());
+            }
+        }
+        return new ArrayList<>(porNombre.values());
+    }
+
     public ResultadoAuditoria auditar(SolicitudAuditoria solicitud) {
         double radioReusoKm = radioReuso(solicitud);
-        Alcance alcance = construirAlcance(solicitud, margenPara(radioReusoKm));
         List<String> tecnologias = tecnologias(solicitud);
+        Alcance alcance = construirAlcance(solicitud, margenPara(radioReusoKm), tecnologias);
         int radioReusoM = (int) Math.round(radioReusoKm * 1000);
         String clave = alcance.clave() + "|" + String.join(",", tecnologias) + "|" + radioReusoM;
 
@@ -224,7 +239,7 @@ public class AuditoriaRedService {
                 }
                 continue;
             }
-            celda.setDentroArea(planificadas.isEmpty() && alcance.contiene(celda.getLatitud(), celda.getLongitud()));
+            celda.setDentroArea(planificadas.isEmpty() && alcance.incluye(celda));
             celda.setConHallazgo(false);
             if (celda.isDentroArea()) enArea++;
             porNombre.put(nombre, celda);
@@ -355,7 +370,18 @@ public class AuditoriaRedService {
         return km;
     }
 
-    private Alcance construirAlcance(SolicitudAuditoria s, double margenKm) {
+    private Alcance construirAlcance(SolicitudAuditoria s, double margenKm, List<String> tecnologias) {
+        if (s != null && s.getCluster() != null && !s.getCluster().trim().isEmpty()) {
+            String cluster = s.getCluster().trim();
+            if (cluster.length() > 100) throw new IllegalArgumentException("El nombre del cluster es demasiado largo");
+            List<double[]> puntos = new ArrayList<>();
+            for (String tecnologia : tecnologias) puntos.addAll(repositorio.puntosCluster(tecnologia, cluster));
+            if (puntos.isEmpty()) {
+                throw new IllegalArgumentException("El cluster " + cluster + " no tiene celdas " + String.join("/", tecnologias)
+                        + " con coordenadas");
+            }
+            return new ClusterRedAlcance(cluster, puntos, margenKm);
+        }
         if (s == null || s.getLatitud() == null || s.getLongitud() == null) {
             throw new IllegalArgumentException("Indique el centro del cluster (sitio o punto en el mapa)");
         }

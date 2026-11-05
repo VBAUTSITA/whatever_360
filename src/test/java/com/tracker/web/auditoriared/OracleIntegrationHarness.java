@@ -122,6 +122,19 @@ public final class OracleIntegrationHarness {
             }
             System.out.println("CREATED " + object);
         }
+        // Fixture del 27/10 creado sin CLUSTER_NAME: se agrega la columna (vacia) solo a las tablas marcadas.
+        for (String object : Arrays.asList("TM_CONF_ACTUAL_CELDA_4G", "TM_CONF_ACTUAL_CELDA_5G")) {
+            requireOwned(c, object);
+            try (PreparedStatement st = c.prepareStatement("SELECT COUNT(*) FROM USER_TAB_COLUMNS WHERE TABLE_NAME=? AND COLUMN_NAME='CLUSTER_NAME'")) {
+                st.setString(1, object);
+                try (ResultSet rs = st.executeQuery()) {
+                    rs.next();
+                    if (rs.getInt(1) > 0) continue;
+                }
+            }
+            try (Statement st = c.createStatement()) { st.execute("ALTER TABLE " + object + " ADD (CLUSTER_NAME VARCHAR2(60))"); }
+            System.out.println("ADDED CLUSTER_NAME " + object);
+        }
         validateSchema(c);
         // Seed inserts are idempotent by fixture ID and never update an existing row.
         c.setAutoCommit(false);

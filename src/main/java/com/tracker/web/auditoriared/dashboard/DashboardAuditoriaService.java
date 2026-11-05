@@ -43,6 +43,10 @@ public class DashboardAuditoriaService {
         avisos.add("Fecha y edad corresponden a esta extracción/cálculo; las consultas no aportan fecha de actualización de la configuración de red ni de sus histogramas TA.");
         avisos.add("Azimut efectivo y ancho de haz son supuestos del planner por nombre/TXRX; por ejemplo, 5G usa 100° por defecto. No se consulta patrón de antena ni beamforming real.");
         avisos.add("Filas con coordenadas no convertibles quedan fuera de la consulta geográfica antes del conteo leído; no se puede ubicarlas ni cuantificarlas para esta área.");
+        if (r.getAlcance() instanceof ClusterRedAlcance) {
+            avisos.add("Cluster " + ((ClusterRedAlcance) r.getAlcance()).getCluster() + ": el área son sus celdas (CLUSTER_NAME); el margen de "
+                    + r.getAlcance().getMargenKm() + " km incluye celdas de otros clusters para no perder conflictos de borde.");
+        }
         if (r.isCapped()) avisos.add("Resultado incompleto: se alcanzo el limite de hallazgos. Reduzca el area antes de decidir.");
         int invalidas = r.getResumen().stream().mapToInt(ResumenTecnologia::getDescartadasSinDatos).sum();
         if (invalidas > 0) avisos.add(invalidas + " filas fueron excluidas por datos incompletos o invalidos.");

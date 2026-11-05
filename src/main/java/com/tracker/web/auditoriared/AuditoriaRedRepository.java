@@ -21,12 +21,13 @@ import org.springframework.beans.factory.annotation.Value;
 public class AuditoriaRedRepository {
 
     // Orden posicional comun a 4G y 5G: 1 nombre, 2 carrier, 3 pci, 4 banda, 5 txrx,
-    // 6 latitud, 7 longitud, 8 azimuth, 9..16 TA.
+    // 6 latitud, 7 longitud, 8 azimuth, 9..16 TA, 17 cluster de red.
     static final String SQL_4G =
             "SELECT r.cellname, r.carrier, r.phycellid, to_char(r.freqband) freq_band, r.txrxmode, "
             + "       r.latitud, r.longitud, r.azimuth, "
             + "       m.ta_0_234_mts, m.ta_234_546_mts, m.ta_546_1014_mts, m.ta_1014_1950_mts, "
-            + "       m.ta_1950_3510_mts, m.ta_3510_6630_mts, m.ta_6630_14430_mts, m.ta_mayor_14430_mts "
+            + "       m.ta_1950_3510_mts, m.ta_3510_6630_mts, m.ta_6630_14430_mts, m.ta_mayor_14430_mts, "
+            + "       r.cluster_name "
             + "FROM tm_conf_actual_celda_4g r "
             + "LEFT JOIN PLAN_MAP_SECT_CRIT_4GWEEK m ON r.sector_name = m.sector_name "
             + "WHERE " + coordenadaSql("r.latitud") + " BETWEEN ? AND ? "
@@ -38,7 +39,8 @@ public class AuditoriaRedRepository {
             + "       b.ta_0_117_mts_porc, b.ta_117_507_mts_porc, "
             + "       b.ta_507_975_mts_porc, b.ta_975_1775_mts_porc, "
             + "       b.ta_1775_3315_mts_porc, b.ta_3315_7215_mts_porc, "
-            + "       b.ta_7215_15015_mts_porc, b.ta_mayor_a_15015_mts_porc "
+            + "       b.ta_7215_15015_mts_porc, b.ta_mayor_a_15015_mts_porc, "
+            + "       a.cluster_name "
             + "FROM tm_conf_actual_celda_5g a "
             + "LEFT JOIN vw_plani_recursos_5g_ta_diario b ON UPPER(a.cellname) = UPPER(b.cellname) "
             + "WHERE " + coordenadaSql("a.latitud") + " BETWEEN ? AND ? "
@@ -59,16 +61,38 @@ public class AuditoriaRedRepository {
             + "  AND a.latitud IS NOT NULL AND a.longitud IS NOT NULL "
             + "GROUP BY a.latitud, a.longitud ORDER BY MIN(a.cellname)) WHERE ROWNUM <= ?";
 
+    // Clusters de red: celdas distintas por nombre, sin contar filas repetidas.
+    static final String SQL_CLUSTERS_4G =
+            "SELECT TRIM(r.cluster_name) cluster_name, COUNT(DISTINCT UPPER(TRIM(r.cellname))) celdas "
+            + "FROM tm_conf_actual_celda_4g r WHERE TRIM(r.cluster_name) IS NOT NULL GROUP BY TRIM(r.cluster_name)";
+
+    static final String SQL_CLUSTERS_5G =
+            "SELECT TRIM(a.cluster_name) cluster_name, COUNT(DISTINCT UPPER(TRIM(a.cellname))) celdas "
+            + "FROM tm_conf_actual_celda_5g a WHERE TRIM(a.cluster_name) IS NOT NULL GROUP BY TRIM(a.cluster_name)";
+
+    static final String SQL_PUNTOS_CLUSTER_4G =
+            "SELECT " + coordenadaSql("r.latitud") + " lat, " + coordenadaSql("r.longitud") + " lon "
+            + "FROM tm_conf_actual_celda_4g r WHERE UPPER(TRIM(r.cluster_name)) = UPPER(TRIM(?))";
+
+    static final String SQL_PUNTOS_CLUSTER_5G =
+            "SELECT " + coordenadaSql("a.latitud") + " lat, " + coordenadaSql("a.longitud") + " lon "
+            + "FROM tm_conf_actual_celda_5g a WHERE UPPER(TRIM(a.cluster_name)) = UPPER(TRIM(?))";
+
     private final JdbcTemplate jdbc;
     @Value("${auditoriared.max-filas-leidas:100000}")
     private int maxFilasLeidas = 100000;
 
-    /** CASE short-circuits conversion: a dirty VARCHAR2 coordinate cannot abort the entire query. */
+    /**
+     * CASE short-circuits conversion: a dirty VARCHAR2 coordinate cannot abort the entire query.
+     * The network exports 17 significant digits (-8.3682219999999994 has 16 decimals): any number of
+     * decimals is accepted and only the value used by the box filter is cut to 15. A leading '+' is
+     * dropped because TO_NUMBER with this mask raises ORA-01722 on it.
+     */
     private static String coordenadaSql(String columna) {
         String texto = "REPLACE(TRIM(CAST(" + columna + " AS VARCHAR2(4000))), ',', '.')";
-        return "(CASE WHEN REGEXP_LIKE(" + texto + ", '^[+-]?[0-9]{1,3}([.][0-9]{1,15})?$') "
-                + "THEN TO_NUMBER(" + texto + ", '999999999999999D999999999999999', "
-                + "'NLS_NUMERIC_CHARACTERS=''.,''') END)";
+        return "(CASE WHEN REGEXP_LIKE(" + texto + ", '^[+-]?([0-9]{1,3}([.][0-9]*)?|[.][0-9]+)$') "
+                + "THEN TO_NUMBER(REGEXP_SUBSTR(LTRIM(" + texto + ", '+'), '^-?[0-9]{0,3}([.][0-9]{0,15})?'), "
+                + "'999999999999999D999999999999999', 'NLS_NUMERIC_CHARACTERS=''.,''') END)";
     }
 
     public AuditoriaRedRepository(JdbcTemplate jdbc) { this.jdbc = jdbc; }
@@ -109,6 +133,41 @@ public class AuditoriaRedRepository {
                     }
                 });
         return new Lectura(celdas, contadores[0], contadores[1]);
+    }
+
+    /** Clusters de red con su numero de celdas distintas; un cluster vacio o nulo no se lista. */
+    public Map<String, Integer> clusters(String tecnologia) {
+        String sql = "4G".equals(tecnologia) ? SQL_CLUSTERS_4G : "5G".equals(tecnologia) ? SQL_CLUSTERS_5G : null;
+        if (sql == null) throw new IllegalArgumentException("Tecnologia no soportada: " + tecnologia);
+        final Map<String, Integer> salida = new LinkedHashMap<>();
+        jdbc.query(sql, new Object[0], new RowCallbackHandler() {
+            @Override
+            public void processRow(ResultSet rs) throws SQLException {
+                salida.put(rs.getString(1), rs.getInt(2));
+            }
+        });
+        return salida;
+    }
+
+    /** Ubicaciones [lat, lon] de las celdas del cluster; las coordenadas no convertibles se omiten. */
+    public List<double[]> puntosCluster(String tecnologia, String cluster) {
+        String sql = "4G".equals(tecnologia) ? SQL_PUNTOS_CLUSTER_4G : "5G".equals(tecnologia) ? SQL_PUNTOS_CLUSTER_5G : null;
+        if (sql == null) throw new IllegalArgumentException("Tecnologia no soportada: " + tecnologia);
+        final List<double[]> puntos = new ArrayList<>();
+        jdbc.query(sql, new Object[] {cluster}, new RowCallbackHandler() {
+            @Override
+            public void processRow(ResultSet rs) throws SQLException {
+                if (maxFilasLeidas < 1 || puntos.size() >= maxFilasLeidas) {
+                    throw new IllegalArgumentException("El cluster excede el limite de filas leidas");
+                }
+                Double lat = numero(rs.getObject(1));
+                Double lon = numero(rs.getObject(2));
+                if (lat != null && lon != null && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+                    puntos.add(new double[] {lat, lon});
+                }
+            }
+        });
+        return puntos;
     }
 
     public List<SitioDTO> buscarSitios(String texto, int limite) {
@@ -167,6 +226,8 @@ public class AuditoriaRedRepository {
         celda.setEstadoTa(lecturaTa.estado);
         celda.setFuenteTa("4G".equals(tecnologia) ? "PLAN_MAP_SECT_CRIT_4GWEEK:SECTOR_NAME" :
                 "VW_PLANI_RECURSOS_5G_TA_DIARIO:CELLNAME");
+        Object cluster = rs.getObject(17);
+        celda.setCluster(cluster == null ? null : String.valueOf(cluster));
         return celda;
     }
 
